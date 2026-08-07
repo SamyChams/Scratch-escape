@@ -42,7 +42,15 @@ et un point d'appui pour parler de bulles algorithmiques en éducation aux médi
 
 Chaque réglage réparé donne **un chiffre** du code de vérification à deux chiffres qui
 déverrouille l'étape suivante. À la fin, l'élève obtient une **attestation imprimable**
-avec son temps, ses étoiles et le parcours qu'il a suivi.
+avec son temps, ses étoiles, son mode et le parcours qu'il a suivi.
+
+### Le profil que Nova construit
+
+À chaque choix, Nova note une étiquette sur l'élève — « préfère se débrouiller seul »,
+« défend les autres avant lui-même »… — sans jamais le lui demander. À la fin, elle affiche
+le portrait qu'elle a constitué, et explique que c'est exactement ce que fait un algorithme
+de recommandation, à ceci près qu'il ne montre jamais la fiche. C'est le moment le plus
+directement exploitable en éducation aux médias.
 
 ## Les personnages
 
@@ -66,9 +74,33 @@ défiler, le chat de groupe, le live et ses commentaires — parce qu'ils sont i
 reconnaissables et qu'ils ne se démodent pas, contrairement à une tendance nommée qui
 serait périmée en trois mois.
 
+## Trois modes de jeu
+
+Le mode ne change **ni les exercices ni les notions** : seulement la pression. On en change à tout
+moment depuis la barre du haut, sans rien perdre.
+
+| Mode | Ce qui change |
+|---|---|
+| 🌙 **Tranquille** (défaut) | aucune limite, aucun chrono. Recommandé pour une première séance. |
+| ⚡ **Défi chrono** | un temps cible de 5 minutes par étape. Le dépasser ne bloque rien : on perd juste l'éclair. |
+| 🎯 **Sans faute** | 3 erreurs maximum par étape pour débloquer la suivante. |
+
+**Le mode exigeant ne piège jamais un élève.** Au moment où le quota est atteint, le jeu n'affiche
+pas un échec : Kaya propose de basculer en mode tranquille — auquel cas tout ce qui est déjà réparé
+est conservé — ou de recommencer l'étape. C'est ce garde-fou qui rend le mode utilisable en classe.
+
+## Le filet de sécurité
+
+Après **deux échecs sur la même énigme**, Kaya propose une *version plus simple* : une question courte
+sur la même notion, qui rapporte **le même chiffre**. L'élève n'est jamais coincé et repart avec la
+notion travaillée, même par un chemin plus court. Il y a une remédiation par notion, soit cinq en tout.
+
+En parallèle, **Nova réagit** à la deuxième erreur — une pique, jamais sur l'élève, toujours sur la
+situation. L'antagoniste existe aussi pendant le travail, pas seulement entre les étapes.
+
 ### Pensé pour la classe
 
-- **Aucun échec possible** : pas de compte à rebours, on peut se tromper autant de fois qu'on veut.
+- **Aucun échec possible** en mode tranquille : on se trompe autant de fois qu'on veut.
 - **Deux indices progressifs** par énigme, donnés par Kaya, plus un accès permanent au cahier de cours.
 - **Feedback pédagogique** : chaque mauvaise réponse explique *pourquoi* elle est fausse.
 - **Sauvegarde automatique** dans le navigateur : on peut reprendre à la séance suivante.
@@ -114,20 +146,21 @@ css/style.css       Habillage général
 css/appli.css       L'habillage de LOOP (écran, messages, choix)
 css/blocs.css       Rendu des blocs façon Scratch 3
 
-js/parcours.js      Le scénario : 5 étapes, 10 branches, 20 énigmes
+js/parcours.js      Le scénario : 5 étapes, 10 branches, 20 énigmes,
+                    5 remédiations, 3 modes de jeu
 js/jeu.js           Moteur : parcours de l'arbre, récit, codes
 js/enigmes.js       Les six types d'énigmes jouables
 js/blocs.js         Fabrique de blocs Scratch en HTML
-js/illustrations.js Personnages et décors, dessinés en SVG
+js/illustrations.js Personnages et décors des 5 étapes, dessinés en SVG
 js/recit.js         Dialogues qui s'écrivent lettre après lettre
 js/cours.js         Contenu des 6 fiches de cours
 js/memo.js          Affichage des fiches
-js/progression.js   Sauvegarde, branches suivies, chronomètre, étoiles
+js/progression.js   Sauvegarde, branches, mode, quota, chronomètre, étoiles
 js/audio.js         Bruitages synthétisés (aucun fichier son)
 js/coffre.js        Chiffrement/déchiffrement du corrigé
 js/corrige-chiffre.js  Le corrigé, chiffré (aucune réponse en clair)
 
-tests/              Trois tests automatisés (Playwright, facultatifs)
+tests/              Quatre tests automatisés (Playwright, facultatifs)
 ```
 
 HTML/CSS/JavaScript pur : aucune bibliothèque, aucune dépendance, aucune étape de
@@ -215,15 +248,16 @@ que la séance cherche à évaluer.
 
 ## Tests
 
-Trois tests automatisés :
+Quatre tests automatisés :
 
 ```bash
 npm install playwright
 python3 -m http.server 8765 &
 
-node tests/parcours-complet.js   # résout réellement les 20 énigmes, les deux branches
-node tests/embranchements.js     # vérifie que deux élèves n'ont aucun exercice commun
-node tests/corrige-chiffre.js    # vérifie la protection du corrigé
+node tests/parcours-complet.js       # résout réellement les 20 énigmes, les deux branches
+node tests/embranchements.js         # vérifie que deux élèves n'ont aucun exercice commun
+node tests/modes-et-remediation.js   # quota, porte de sortie, version simple, profil
+node tests/corrige-chiffre.js        # vérifie la protection du corrigé
 ```
 
 ---

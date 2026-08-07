@@ -264,3 +264,57 @@
   .msg__avatar { width: 42px; height: 42px; }
   .verif__case { width: 54px; height: 68px; font-size: 1.8rem; }
 }
+
+/* ---------------------------------------------------------
+   Rappel du mode de jeu, au-dessus des énigmes
+   --------------------------------------------------------- */
+.mode-rappel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: .88rem;
+  background: rgba(0, 0, 0, .3);
+  border: 2px solid var(--bord);
+}
+.mode-rappel--chrono { border-color: #ffc61a; }
+.mode-rappel--expert { border-color: #ff6b8b; }
+.mode-rappel__valeur {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+.mode-rappel__valeur--depasse { color: var(--rouge); }
+.mode-rappel__changer {
+  font-family: inherit;
+  font-size: .8rem;
+  color: var(--texte-doux);
+  background: transparent;
+  border: 1px solid var(--bord);
+  border-radius: 999px;
+  padding: 3px 12px;
+  cursor: pointer;
+}
+.mode-rappel__changer:hover { border-color: var(--accent); color: var(--texte); }
+
+/* Cartes de choix du mode, sur la page d'accueil */
+.modes { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.carte-mode {
+  font-family: inherit;
+  text-align: left;
+  color: var(--texte);
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .15s;
+}
+.carte-mode:hover { transform: translateY(-3px); border-color: var(--accent); }
+.carte-mode--choisi { border-color: var(--jaune); background: rgba(255, 198, 26, .12); }
+.carte-mode__icone { font-size: 1.8rem; }
+.carte-mode__nom { font-weight: 800; margin: 4px 0 2px; }

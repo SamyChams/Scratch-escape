@@ -110,17 +110,16 @@ async function jouerBranche(page, branche, erreurs) {
   await page.click('#btn-jouer');
 
   const passerRecit = async () => {
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 40; i++) {
+      // on sort dès que l'écran suivant est là
+      if (await page.locator('.bifurcation, .taches, .diplome').count()) return;
       const b = page.locator('.recit__pied .recit__passer');
-      if (!(await b.count())) break;
-      await b.waitFor({ state: 'visible', timeout: 15000 });
+      if (!(await b.count())) { await page.waitForTimeout(200); continue; }
       await b.click();
-      // le bouton de suite n'apparaît qu'une fois toutes les répliques écrites
       const suite = page.locator('#scene .actions button').last();
       await suite.waitFor({ state: 'visible', timeout: 15000 });
       await suite.click();
       await page.waitForTimeout(250);
-      if (await page.locator('.bifurcation, .taches, .diplome').count()) break;
     }
   };
 

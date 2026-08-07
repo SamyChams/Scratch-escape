@@ -10,7 +10,12 @@ const Progression = (() => {
 
   const vide = () => ({
     pseudo: '',
+    mode: 'chill',        // chill | chrono | expert
     etape: 0,             // index de l'étape en cours
+    profil: [],           // étiquettes tirées des choix, pour le portrait final
+    erreursEtape: {},     // idEtape -> erreurs commises (quota du mode « sans faute »)
+    departEtape: {},      // idEtape -> horodatage d'entrée (mode chrono)
+    medailles: {},        // idEtape -> true si le temps cible est tenu
     branches: {},         // idEtape -> branche choisie ('a' ou 'b')
     resolues: [],         // identifiants des énigmes réussies
     fragments: {},        // idEnigme -> chiffre obtenu
@@ -69,10 +74,53 @@ const Progression = (() => {
     },
 
     /** Mémorise la branche choisie : elle décide des énigmes rencontrées. */
-    choisirBranche(idEtape, branche) {
+    choisirBranche(idEtape, branche, profil) {
       etat.branches[idEtape] = branche;
+      if (profil && !etat.profil.includes(profil)) etat.profil.push(profil);
       sauver();
     },
+
+    /* --- mode de jeu ------------------------------------------------ */
+    get mode() { return MODES[etat.mode] ? etat.mode : 'chill'; },
+    changerMode(id) {
+      if (MODES[id]) { etat.mode = id; sauver(); }
+    },
+    reglesMode() { return MODES[this.mode]; },
+
+    /* --- quota d'erreurs, par étape --------------------------------- */
+    erreursDe(idEtape) { return etat.erreursEtape[idEtape] || 0; },
+    quotaDepasse(idEtape) {
+      const max = this.reglesMode().erreursMax;
+      return max !== null && this.erreursDe(idEtape) >= max;
+    },
+    /** Remet une étape à zéro : quota, chrono et énigmes à refaire. */
+    reprendreEtape(idEtape, idsEnigmes = []) {
+      etat.erreursEtape[idEtape] = 0;
+      delete etat.departEtape[idEtape];
+      idsEnigmes.forEach((id) => {
+        etat.resolues = etat.resolues.filter((x) => x !== id);
+        delete etat.fragments[id];
+      });
+      sauver();
+    },
+
+    /* --- chronomètre par étape -------------------------------------- */
+    entrerEtape(idEtape) {
+      if (!etat.departEtape[idEtape]) { etat.departEtape[idEtape] = Date.now(); sauver(); }
+    },
+    secondesEtape(idEtape) {
+      const d = etat.departEtape[idEtape];
+      return d ? Math.floor((Date.now() - d) / 1000) : 0;
+    },
+    /** Le temps cible est-il tenu ? Renvoie null hors mode chrono. */
+    fermerEtape(idEtape) {
+      if (!this.reglesMode().chrono) return null;
+      const tenu = this.secondesEtape(idEtape) <= this.reglesMode().objectif;
+      etat.medailles[idEtape] = tenu;
+      sauver();
+      return tenu;
+    },
+    medaillesGagnees() { return Object.values(etat.medailles).filter(Boolean).length; },
     brancheDe(idEtape) { return etat.branches[idEtape] || null; },
 
     marquerPrologue() { etat.prologueVu = true; sauver(); },
@@ -83,7 +131,13 @@ const Progression = (() => {
     },
 
     compterIndice() { etat.indices++; sauver(); },
-    compterErreur() { etat.erreurs++; sauver(); },
+    /** Compte une erreur, globalement et pour l'étape en cours. */
+    compterErreur(idEtape) {
+      etat.erreurs++;
+      if (idEtape) etat.erreursEtape[idEtape] = (etat.erreursEtape[idEtape] || 0) + 1;
+      sauver();
+      return idEtape ? etat.erreursEtape[idEtape] : etat.erreurs;
+    },
 
     terminer() {
       etat.duree = this.secondes();   // à calculer AVANT de marquer la partie finie

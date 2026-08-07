@@ -60,6 +60,128 @@ const EPILOGUE = {
 /* ------------------------------------------------------------------
    LES 5 ÉTAPES
    ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------
+   LES MODES DE JEU
+   ------------------------------------------------------------------
+   Le mode ne change jamais les notions travaillées : il change la
+   pression. « Sans faute » est le seul à conditionner la suite — et
+   même lui ne bloque jamais un élève : au-delà du quota, le jeu
+   propose de basculer en mode tranquille.
+   ------------------------------------------------------------------ */
+const MODES = {
+  chill: {
+    id: 'chill', nom: 'Tranquille', icone: '🌙',
+    resume: "Aucune limite, aucun chrono. On essaie autant de fois qu'on veut.",
+    conseil: "Recommandé pour une première séance.",
+    erreursMax: null, chrono: false
+  },
+  chrono: {
+    id: 'chrono', nom: 'Défi chrono', icone: '⚡',
+    resume: "Un temps cible par étape. Le dépasser ne bloque rien : on gagne juste un éclair en moins.",
+    conseil: "Pour ceux qui ont déjà fini une fois.",
+    erreursMax: null, chrono: true, objectif: 300   // 5 minutes par étape
+  },
+  expert: {
+    id: 'expert', nom: 'Sans faute', icone: '🎯',
+    resume: "3 erreurs maximum par étape pour débloquer la suivante.",
+    conseil: "Le plus exigeant. On peut en sortir à tout moment.",
+    erreursMax: 3, chrono: false
+  }
+};
+
+/* Répliques de Nova quand l'élève se trompe une deuxième fois.
+   Jamais méchantes sur la personne : elle se moque de la situation. */
+const PIQUES = [
+  "Deuxième essai raté. Je note. Je note tout, en fait.",
+  "Tu sais que tu peux abandonner ? Beaucoup le font. La plupart, même.",
+  "Curieux. Mes calculs te donnaient 12 % de réussite sur celle-là.",
+  "Prends ton temps. Moi, j'en ai à revendre — c'est même ma spécialité.",
+  "Tu veux un indice de Kaya ? Elle adore se rendre utile.",
+  "Encore une erreur et je commence à croire que tu improvises."
+];
+
+/* ------------------------------------------------------------------
+   REMÉDIATION — une énigme plus simple sur la même notion, proposée
+   après deux échecs. La réussir vaut la même chose que l'originale.
+   ------------------------------------------------------------------ */
+const REMEDIATIONS = {
+  e1: {
+    id: 'r1', type: 'qcm', icone: '🧭', titre: "On reprend depuis le début",
+    histoire: { qui: 'kaya', texte: "Souffle. On va faire plus simple : une seule question, et tu repars avec ton chiffre. Regarde juste la couleur." },
+    consigne: "Dans Scratch, de quelle couleur sont les blocs qui font <b>bouger</b> un élément (catégorie Mouvement) ?",
+    options: [
+      { texte: 'Bleu', correct: true },
+      { texte: 'Vert', retour: "Le vert, c'est la catégorie Opérateurs, celle des calculs." },
+      { texte: 'Orange', retour: "L'orange, c'est Contrôle : répéter, si… alors." }
+    ],
+    explication: "Mouvement = bleu. C'est le repère le plus utile de tous : il te fait gagner du temps à chaque script.",
+    indices: ["Pense à la couleur du ciel.", "C'est la même couleur que le bloc « avancer de 10 pas »."]
+  },
+  e2: {
+    id: 'r2', type: 'qcm', icone: '🧭', titre: "On reprend depuis le début",
+    histoire: { qui: 'kaya', texte: "Pas grave. Une question simple sur le repère, et on passe à la suite." },
+    consigne: "Sur l'écran, quand un élément se déplace <b>vers la droite</b>, que fait son <b>x</b> ?",
+    options: [
+      { texte: 'Il augmente', correct: true },
+      { texte: 'Il diminue', retour: "Vers la gauche, x diminue. Vers la droite, c'est l'inverse." },
+      { texte: 'Il ne change pas', retour: "C'est y qui ne bouge pas quand on va horizontalement. x, lui, change." }
+    ],
+    explication: "x augmente vers la droite (jusqu'à 240) et diminue vers la gauche (jusqu'à -240).",
+    indices: ["Le côté droit de l'écran, c'est x = 240 : un grand nombre.", "Passer de -50 à 70, c'est augmenter."]
+  },
+  e3: {
+    id: 'r3', type: 'saisie', icone: '🧭', titre: "On reprend depuis le début",
+    histoire: { qui: 'kaya', texte: "On oublie le reste. Juste une boucle, tout ce qu'il y a de plus simple. Compte avec moi." },
+    consigne: "Combien de pas l'élément parcourt-il <b>en tout</b> ?",
+    script: [{ cat: 'controle', texte: 'répéter {3} fois', corps: [{ cat: 'mouvement', texte: 'avancer de {10} pas' }] }],
+    reponses: ['30'],
+    champ: { placeholder: '… pas', largeur: 140 },
+    explication: "3 tours × 10 pas = <b>30 pas</b>. Une boucle, c'est une multiplication déguisée.",
+    indices: ["Le bloc à l'intérieur s'exécute 3 fois de suite.", "10 + 10 + 10, ou 3 × 10."]
+  },
+  e4: {
+    id: 'r4', type: 'qcm', icone: '🧭', titre: "On reprend depuis le début",
+    histoire: { qui: 'kaya', texte: "Le plus important, c'est de comprendre le « si ». Une question, et c'est réglé." },
+    consigne: "Dans un bloc <b>si… alors</b>, quand est-ce que les blocs à l'intérieur s'exécutent ?",
+    options: [
+      { texte: "Seulement si la condition est vraie", correct: true },
+      { texte: "Toujours, dans tous les cas", retour: "Alors le « si » ne servirait à rien ! C'est justement lui qui filtre." },
+      { texte: "Jamais, sauf avec un sinon", retour: "Le « sinon » sert au cas contraire. Le « si » suffit à lui seul quand la condition est vraie." }
+    ],
+    explication: "Condition vraie → les blocs s'exécutent. Condition fausse → le programme les saute et continue.",
+    indices: ["Le bloc hexagonal répond seulement par vrai ou faux.", "« Si » veut dire la même chose qu'en français."]
+  },
+  e5: {
+    id: 'r5', type: 'saisie', icone: '🧭', titre: "On reprend depuis le début",
+    histoire: { qui: 'kaya', texte: "Dernière ligne droite. Une variable, deux additions. Suis-la pas à pas." },
+    consigne: "<b>Que vaut <i>score</i></b> à la fin de ce script ?",
+    script: [
+      { cat: 'variables', texte: 'mettre {score} à {0}' },
+      { cat: 'variables', texte: 'ajouter {2} à {score}' },
+      { cat: 'variables', texte: 'ajouter {2} à {score}' }
+    ],
+    reponses: ['4'],
+    champ: { placeholder: 'score = ?', largeur: 150 },
+    explication: "0, puis +2 → 2, puis +2 → <b>4</b>. Une variable garde toujours la dernière valeur qu'on y a rangée.",
+    indices: ["Écris la valeur après chaque bloc.", "0 → 2 → ?"]
+  }
+};
+
+/* Ce que Nova retient des choix de l'élève. */
+const PROFILS = {
+  autonome:   "préfère se débrouiller seul",
+  collectif:  "demande de l'aide sans hésiter",
+  visuel:     "va au plus visible",
+  methodique: "s'attaque au moins évident",
+  technique:  "veut comprendre comment ça marche",
+  curieux:    "va voir là où c'est interdit",
+  protecteur: "défend les autres avant lui-même",
+  justicier:  "ne supporte pas les règles injustes",
+  frontal:    "attaque le problème de face",
+  stratege:   "cherche à faire jouer le collectif"
+};
+
 const ETAPES = [
 
 /* ================================================== ÉTAPE 1 */
@@ -81,9 +203,9 @@ const ETAPES = [
   choix: {
     question: "Comment tu t'y prends pour entrer dans l'éditeur ?",
     options: [
-      { branche: 'a', texte: "🔧 Je force et je fouille le code toute seule / tout seul",
+      { branche: 'a', profil: 'autonome', texte: "🔧 Je force et je fouille le code toute seule / tout seul",
         reponse: { qui: 'nova', texte: "Vas-y. L'éditeur est ouvert. Bon courage pour t'y retrouver." } },
-      { branche: 'b', texte: "🎧 Je demande à Kaya de me guider en live",
+      { branche: 'b', profil: 'collectif', texte: "🎧 Je demande à Kaya de me guider en live",
         reponse: { qui: 'kaya', texte: "Ok ! Je te partage mon écran. On y va doucement, je t'explique en même temps." } }
     ]
   },
@@ -202,9 +324,9 @@ const ETAPES = [
   choix: {
     question: "Quel filtre tu répares en premier ?",
     options: [
-      { branche: 'a', texte: "😎 Le sticker qui doit suivre le visage",
+      { branche: 'a', profil: 'visuel', texte: "😎 Le sticker qui doit suivre le visage",
         reponse: { qui: 'kaya', texte: "Bon choix, c'est le plus visible. Il est parti se coller dans un coin, il faut le ramener." } },
-      { branche: 'b', texte: "💬 Le sous-titre qui est sorti de l'écran",
+      { branche: 'b', profil: 'methodique', texte: "💬 Le sous-titre qui est sorti de l'écran",
         reponse: { qui: 'kaya', texte: "Ok. Il a glissé trop à gauche, on ne lit plus rien. Faut recalculer sa position." } }
     ]
   },
@@ -330,9 +452,9 @@ const ETAPES = [
   choix: {
     question: "Qu'est-ce que tu attaques ?",
     options: [
-      { branche: 'a', texte: "✂️ La transition vidéo qui bégaie",
+      { branche: 'a', profil: 'technique', texte: "✂️ La transition vidéo qui bégaie",
         reponse: { qui: 'kaya', texte: "Oui ! Elle répète le même effet quatre fois, et ça rame. On va le réécrire proprement." } },
-      { branche: 'b', texte: "♾️ Le scroll qui ne s'arrête jamais",
+      { branche: 'b', profil: 'curieux', texte: "♾️ Le scroll qui ne s'arrête jamais",
         reponse: { qui: 'nova', texte: "Le scroll infini ? C'est mon cœur. Tu peux regarder, mais tu ne l'arrêteras pas." } }
     ]
   },
@@ -477,9 +599,9 @@ const ETAPES = [
   choix: {
     question: "Tu répares quoi ?",
     options: [
-      { branche: 'a', texte: "🛡 Le filtre anti-commentaires méchants",
+      { branche: 'a', profil: 'protecteur', texte: "🛡 Le filtre anti-commentaires méchants",
         reponse: { qui: 'kaya', texte: "Merci. Sincèrement. On reconstruit le test ensemble." } },
-      { branche: 'b', texte: "🏅 Le badge « compte vérifié » distribué n'importe comment",
+      { branche: 'b', profil: 'justicier', texte: "🏅 Le badge « compte vérifié » distribué n'importe comment",
         reponse: { qui: 'nova', texte: "Le badge ? J'ai simplement suivi la règle qu'on m'a donnée. À la lettre. Regarde donc la règle." } }
     ]
   },
@@ -631,9 +753,9 @@ const ETAPES = [
   choix: {
     question: "Comment tu comptes la battre ?",
     options: [
-      { branche: 'a', texte: "🔢 Je démonte son compteur",
+      { branche: 'a', profil: 'frontal', texte: "🔢 Je démonte son compteur",
         reponse: { qui: 'nova', texte: "Mon compteur ? Suis-le donc, ligne par ligne. Tu verras que je n'ai rien caché." } },
-      { branche: 'b', texte: "📣 Je préviens tous les autres comptes en même temps",
+      { branche: 'b', profil: 'stratege', texte: "📣 Je préviens tous les autres comptes en même temps",
         reponse: { qui: 'kaya', texte: "Oh. Ça, c'est malin. Si tout le monde se déconnecte au même instant, elle n'a plus personne à retenir." } }
     ]
   },
@@ -763,8 +885,16 @@ function toutesLesEnigmes() {
   return sortie;
 }
 
+/** L'énigme de remédiation d'une étape (proposée après deux échecs). */
+function remediationDe(etape) { return REMEDIATIONS[etape.id] || null; }
+
 if (typeof window !== 'undefined') {
   window.APPLI = APPLI;
+  window.MODES = MODES;
+  window.PIQUES = PIQUES;
+  window.PROFILS = PROFILS;
+  window.REMEDIATIONS = REMEDIATIONS;
+  window.remediationDe = remediationDe;
   window.ETAPES = ETAPES;
   window.PROLOGUE = PROLOGUE;
   window.EPILOGUE = EPILOGUE;
