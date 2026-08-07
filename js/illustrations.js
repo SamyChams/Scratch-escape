@@ -79,7 +79,7 @@ const Illus = (() => {
   </svg>`;
 
 
-  /** Nova, l'algorithme de LOOP : un œil géométrique qui te regarde. */
+  /** Nova, l'algorithme de TokTik : un œil géométrique qui te regarde. */
   const nova = (taille = 90) => `
   <svg viewBox="0 0 100 110" width="${taille}" height="${taille * 1.1}" role="img" aria-label="Nova, l'algorithme">
     <defs>

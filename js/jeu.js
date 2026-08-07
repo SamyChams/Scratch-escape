@@ -1,5 +1,5 @@
 /* =========================================================
-   jeu.js — moteur de LOOP
+   jeu.js — moteur de TokTik
    ---------------------------------------------------------
    Le jeu avance dans un arbre : à chaque étape, l'élève fait
    un CHOIX qui décide de la branche, donc des trois énigmes
@@ -656,7 +656,7 @@
       <h2>Attestation de déconnexion</h2>
       <p>délivrée à</p>
       <div class="diplome__nom">${e.pseudo}</div>
-      <p>pour avoir repris le contrôle des <b>15 réglages</b> de LOOP<br>
+      <p>pour avoir repris le contrôle des <b>15 réglages</b> de TokTik<br>
       et maîtrisé les rudiments de la programmation avec Scratch.</p>
       <div style="font-size:2rem;letter-spacing:6px">${'⭐'.repeat(etoiles)}${'☆'.repeat(3 - etoiles)}</div>
       <div style="font-weight:800;font-size:1.2rem;color:#7a5600">${Progression.rang()}</div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOOP — l'appli dont on ne sort pas</title>
+<title>TokTik — l'appli dont on ne sort pas</title>
 <meta name="description" content="Escape game pédagogique pour découvrir les bases de Scratch : blocs, coordonnées, boucles, tests et variables. Niveau 5e.">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/blocs.css">
@@ -15,7 +15,7 @@
 
   <header class="heros">
     <div class="heros__chat" id="illu-accueil"></div>
-    <h1 class="heros__titre">LOOP</h1>
+    <h1 class="heros__titre">TokTik</h1>
     <p class="heros__sous">
       Il est <b>23 h 47</b>. Tu as dit « encore une dernière » onze fois.
       Et là, l'appli refuse de se fermer.<br>
@@ -35,7 +35,7 @@
     <div class="modes" id="modes" style="margin:22px 0"></div>
 
     <div class="actions" style="justify-content:center">
-      <button id="btn-jouer" class="btn btn--grand">🔁 Entrer dans LOOP</button>
+      <button id="btn-jouer" class="btn btn--grand">🔁 Entrer dans TokTik</button>
       <button id="btn-continuer" class="btn btn--bleu btn--grand cache">▶ Reprendre ma partie</button>
     </div>
     <p id="info-partie" class="muet petit cache"></p>
@@ -105,7 +105,7 @@
 
   <p class="centre muet petit" style="margin-top:34px">
     Projet pédagogique — initiation à Scratch, cycle 4 (classe de 5<sup>e</sup>).<br>
-    LOOP est une application entièrement fictive. Fonctionne sans installation et sans connexion :
+    TokTik est une application entièrement fictive. Fonctionne sans installation et sans connexion :
     rien n'est envoyé sur Internet.
   </p>
 
@@ -119,7 +119,7 @@
   document.getElementById('illu-accueil').innerHTML = Illus.nova(150);
   document.getElementById('personnages').innerHTML = [
     ['nova',     'NOVA',      'algorithme',
-     "L'algorithme de LOOP. Elle sait ce que tu regardes, combien de temps, et ce que tu vas regarder après. C'est elle qui te retient."],
+     "L'algorithme de TokTik. Elle sait ce que tu regardes, combien de temps, et ce que tu vas regarder après. C'est elle qui te retient."],
     ['kaya',     'Kaya',      'en live',
      "Une créatrice coincée dans l'appli depuis mardi. Elle continue son live pour t'aider : c'est elle qui te donne les indices."],
     ['scratchy', '@scratchy', '3 abonnés',
@@ -163,7 +163,7 @@
     info.classList.remove('cache');
     info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — étape ${e.etape + 1}/5, `
                    + `${e.resolues.length} réglage(s) réparé(s).<br>`
-                   + `« Entrer dans LOOP » effacera cette partie pour en commencer une nouvelle.`;
+                   + `« Entrer dans TokTik » effacera cette partie pour en commencer une nouvelle.`;
     btnReprise.addEventListener('click', () => { location.href = 'jeu.html'; });
   }
 
