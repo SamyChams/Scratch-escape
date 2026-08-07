@@ -2,7 +2,7 @@
    jeu.js — moteur de LOOP
    ---------------------------------------------------------
    Le jeu avance dans un arbre : à chaque étape, l'élève fait
-   un CHOIX qui décide de la branche, donc des deux énigmes
+   un CHOIX qui décide de la branche, donc des trois énigmes
    qu'il va rencontrer. Deux élèves n'ont pas le même parcours.
 
    Les six types d'énigmes sont fabriqués par js/enigmes.js ;
@@ -74,8 +74,8 @@
   }
 
   function majProgression() {
-    // 2 énigmes par étape sur l'ensemble du parcours
-    const total = ETAPES.length * 2;
+    // 3 énigmes par étape sur l'ensemble du parcours
+    const total = ETAPES.length * 3;
     const faits = Progression.etat.resolues.length;
     elJauge.style.width = Math.min(100, Math.round((faits / total) * 100)) + '%';
     elEtape.textContent = `${Math.min(etapeCourante + 1, ETAPES.length)}/${ETAPES.length}`;
@@ -220,7 +220,7 @@
     contenu.appendChild(bloc);
   }
 
-  /* ---------------------------------------------- les deux énigmes */
+  /* ---------------------------------------------- les énigmes de l'étape */
   function afficherTaches(etape, branche) {
     vider(scene);
     window.scrollTo(0, 0);
@@ -243,7 +243,7 @@
 
     const { ecran, contenu } = ecranAppli(etape.soustitre);
     contenu.appendChild(el('p', 'centre muet petit',
-      `Section « ${etape.branches[branche].titre} » — deux réglages à réparer.`));
+      `Section « ${etape.branches[branche].titre} » — trois réglages à réparer.`));
     contenu.appendChild(bandeauMode(etape));
     scene.appendChild(ecran);
 
@@ -382,7 +382,7 @@
     carte.appendChild(el('div', 'verif__titre', '🔐 Code de vérification'));
     carte.appendChild(el('div', 'verif__sous',
       tout ? "Compose les deux chiffres obtenus, dans l'ordre des réglages."
-           : "Répare les deux réglages : chacun te donne un chiffre du code."));
+           : "Répare les trois réglages : chacun te donne un chiffre du code."));
 
     if (!tout) {
       const apercu = el('div', 'verif__cases');
@@ -444,7 +444,7 @@
         void carte.offsetWidth;
         carte.classList.add('verif--secoue');
         zoneRetour.appendChild(el('div', 'retour retour--erreur',
-          "❌ Code refusé. Vérifie les deux chiffres et surtout leur <b>ordre</b> : celui du premier réglage d'abord."));
+          "❌ Code refusé. Vérifie les chiffres et surtout leur <b>ordre</b> : celui du premier réglage d'abord."));
       }
     }
 
@@ -656,7 +656,7 @@
       <h2>Attestation de déconnexion</h2>
       <p>délivrée à</p>
       <div class="diplome__nom">${e.pseudo}</div>
-      <p>pour avoir repris le contrôle des <b>5 réglages</b> de LOOP<br>
+      <p>pour avoir repris le contrôle des <b>15 réglages</b> de LOOP<br>
       et maîtrisé les rudiments de la programmation avec Scratch.</p>
       <div style="font-size:2rem;letter-spacing:6px">${'⭐'.repeat(etoiles)}${'☆'.repeat(3 - etoiles)}</div>
       <div style="font-weight:800;font-size:1.2rem;color:#7a5600">${Progression.rang()}</div>
@@ -697,7 +697,7 @@
     note.style.marginTop = '20px';
     note.innerHTML = `<p class="muet">Ton voisin n'a pas fait les mêmes exercices que toi :
       à chaque étape, ton choix décidait de la suite. Rejoue en choisissant l'autre chemin
-      pour découvrir les <b>10 énigmes</b> que tu n'as pas vues.</p>`;
+      pour découvrir les <b>15 énigmes</b> que tu n'as pas vues.</p>`;
     scene.appendChild(note);
 
     const actions = el('div', 'actions no-print');

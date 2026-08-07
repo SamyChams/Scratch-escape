@@ -19,6 +19,16 @@ const BASE = 'http://127.0.0.1:8765';
 /* Solution attendue pour chacune des 20 énigmes écrites. */
 const SOLUTIONS = {
   e1a1: { type: 'assoc' },
+  e1a3: { type: 'qcm' },
+  e1b3: { type: 'assoc' },
+  e2a3: { type: 'assoc' },
+  e2b3: { type: 'qcm' },
+  e3a3: { type: 'saisie', valeur: '90' },
+  e3b3: { type: 'trous', nombres: ['6'] },
+  e4a3: { type: 'assoc' },
+  e4b3: { type: 'qcm' },
+  e5a3: { type: 'qcm' },
+  e5b3: { type: 'ordre' },
   e1a2: { type: 'ordre' },
   e1b1: { type: 'qcm' },
   e1b2: { type: 'ordre' },
@@ -58,8 +68,8 @@ async function resoudre(page, id, sol) {
         for (const x of e.branches[c].enigmes) if (x.id === eid) return x.paires;
     }, id);
     for (const p of paires) {
-      await page.locator('.assoc__colonne').first().locator('.jeton', { hasText: p.g }).click();
-      await page.locator('.assoc__colonne').last().locator('.jeton', { hasText: new RegExp('^' + p.d + '$') }).click();
+      await page.locator('.assoc__colonne').first().locator('.jeton', { hasText: p.g }).first().click();
+      await page.locator('.assoc__colonne').last().locator('.jeton', { hasText: p.d }).first().click();
     }
 
   } else if (sol.type === 'ordre') {
@@ -102,6 +112,8 @@ async function resoudre(page, id, sol) {
   await page.locator('.modale').waitFor({ state: 'detached' });
 }
 
+let total = 0;
+
 async function jouerBranche(page, branche, erreurs) {
   await page.goto(BASE + '/index.html');
   await page.evaluate(() => localStorage.clear());
@@ -136,9 +148,11 @@ async function jouerBranche(page, branche, erreurs) {
     });
 
     for (let i = 0; i < ids.length; i++) {
+      if (!SOLUTIONS[ids[i]]) throw new Error('aucune solution connue pour ' + ids[i]);
       await page.locator('.tache').nth(i).click();
       await resoudre(page, ids[i], SOLUTIONS[ids[i]]);
       console.log('   ✓', ids[i]);
+      total++;
     }
 
     const code = await page.evaluate(() => {
@@ -163,12 +177,16 @@ async function jouerBranche(page, branche, erreurs) {
     page.on('pageerror', e => erreurs.push(br + ': ' + e.message));
     page.on('console', m => { if (m.type() === 'error') erreurs.push(br + ' console: ' + m.text()); });
     console.log('— branche ' + br.toUpperCase());
+    total = 0;
     await jouerBranche(page, br, erreurs);
-    console.log('✓ branche ' + br.toUpperCase() + ' : 10 énigmes réellement résolues, attestation atteinte');
+    console.log(`✓ branche ${br.toUpperCase()} : ${total} énigmes réellement résolues, attestation atteinte`);
     if (br === 'b') await page.screenshot({ path: 'loop-fin.png' });
     await page.close();
   }
   await nav.close();
-  console.log(erreurs.length ? '\n❌ ERREURS:\n' + erreurs.join('\n') : '\n✅ Les 20 énigmes sont solubles, aucune erreur JS.');
+  const ecrites = Object.keys(SOLUTIONS).length;
+  console.log(erreurs.length
+    ? '\n❌ ERREURS:\n' + erreurs.join('\n')
+    : `\n✅ Les ${ecrites} énigmes écrites sont solubles, aucune erreur JS.`);
   process.exit(erreurs.length ? 1 : 0);
 })().catch(e => { console.error('ÉCHEC:', e.message); process.exit(1); });
