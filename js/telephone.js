@@ -246,6 +246,66 @@ const Telephone = (() => {
     }
   };
 
+
+  /* ------------------------------------------------------------------
+     Le fil qui défile — utilisé dans le prologue.
+     Au départ il défile tout seul sous le pouce ; passé en mode
+     « bloqué », le défilement se fige et le pouce continue dans le vide.
+     ------------------------------------------------------------------ */
+  function fil() {
+    const carte = (y, teinte, i) => `
+      <g transform="translate(0 ${y})">
+        <rect x="16" y="0" width="118" height="86" rx="8" fill="${teinte}"/>
+        ${minois(52, 40, 17)}
+        <rect x="76" y="26" width="46" height="6" rx="3" fill="#fff" opacity=".55"/>
+        <rect x="76" y="38" width="34" height="6" rx="3" fill="#fff" opacity=".35"/>
+        <circle cx="82" cy="62" r="5" fill="#ff3b5c"/>
+        <rect x="92" y="59" width="${18 + i * 5}" height="6" rx="3" fill="#fff" opacity=".4"/>
+      </g>`;
+
+    // Six cartes, deux teintes en alternance : le motif se répète toutes
+    // les deux cartes, ce qui rend la boucle de défilement invisible.
+    const teintes = ['#2a2150', '#1e2a56'];
+    const cartes = [0, 1, 2, 3, 4, 5]
+      .map((i) => carte(28 + i * 94, teintes[i % 2], i)).join('');
+
+    return `<svg viewBox="0 0 150 300" class="tel tel-fil" role="img"
+                 aria-label="Un téléphone dont le fil de vidéos défile sans fin sous un pouce.">
+      <defs><clipPath id="fil-fenetre"><rect x="9" y="22" width="132" height="258" rx="9"/></clipPath></defs>
+
+      <rect x="1" y="1" width="148" height="298" rx="20"
+            fill="var(--tel-coque)" stroke="var(--tel-bord)" stroke-width="2"/>
+      <rect x="9" y="22" width="132" height="258" rx="9" fill="var(--tel-ecran)"/>
+      <rect x="58" y="8" width="34" height="6" rx="3" fill="var(--tel-bord)"/>
+
+      <g clip-path="url(#fil-fenetre)">
+        <g class="tel-fil__defile">${cartes}</g>
+
+        <!-- le pouce qui balaie vers le haut -->
+        <g class="tel-fil__pouce">
+          <circle cx="104" cy="0" r="13" fill="#fff" opacity=".16"/>
+          <circle cx="104" cy="0" r="7" fill="#fff" opacity=".5"/>
+        </g>
+
+        <!-- ce qui apparaît une fois l'appli bloquée -->
+        <g class="tel-fil__bloc">
+          <rect x="9" y="22" width="132" height="258" fill="#0a0e24" opacity=".82"/>
+          <g transform="translate(75 132)">
+            <circle r="21" fill="none" stroke="#ff6b8b" stroke-width="3"/>
+            <path d="M-11 -11 l22 22" stroke="#ff6b8b" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <text x="75" y="182" font-size="9.5" text-anchor="middle"
+                fill="#ff8fa3" font-family="monospace">impossible</text>
+          <text x="75" y="196" font-size="9.5" text-anchor="middle"
+                fill="#ff8fa3" font-family="monospace">de fermer</text>
+        </g>
+      </g>
+
+      <rect x="9" y="22" width="132" height="258" rx="9" fill="none"
+            stroke="var(--tel-bord)" stroke-width="1" opacity=".6"/>
+    </svg>`;
+  }
+
   /**
    * Fabrique l'aperçu d'une étape.
    * `reparees` est un tableau de trois booléens, dans l'ordre des énigmes.
@@ -267,7 +327,7 @@ const Telephone = (() => {
     return (scenes[idEtape] || {}).titres || [];
   }
 
-  return { ecran, titres };
+  return { ecran, titres, fil };
 })();
 
 if (typeof window !== 'undefined') window.Telephone = Telephone;

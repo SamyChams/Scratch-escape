@@ -89,6 +89,15 @@ moment depuis la barre du haut, sans rien perdre.
 pas un échec : Kaya propose de basculer en mode tranquille — auquel cas tout ce qui est déjà réparé
 est conservé — ou de recommencer l'étape. C'est ce garde-fou qui rend le mode utilisable en classe.
 
+## Le prologue montre l'enfermement
+
+Avant la première réplique, un téléphone posé à côté du récit **fait défiler le fil tout seul**,
+sous un pouce qui balaie en boucle. Au bout de quelques secondes, le défilement se **fige** : un
+panneau d'interdiction apparaît, la légende passe de « ton écran, il y a deux heures » à « ton
+écran, maintenant », et le pouce continue de balayer dans le vide.
+
+L'élève voit qu'il est coincé avant qu'on le lui dise.
+
 ## Voir la réparation se produire
 
 À côté des trois réglages, un **téléphone montre l'état réel de TokTik**. Au début de chaque
@@ -163,7 +172,7 @@ js/jeu.js           Moteur : parcours de l'arbre, récit, codes
 js/enigmes.js       Les six types d'énigmes jouables
 js/blocs.js         Fabrique de blocs Scratch en HTML
 js/illustrations.js Personnages et décors des 5 étapes, dessinés en SVG
-js/telephone.js     L'aperçu de TokTik qui se répare énigme après énigme
+js/telephone.js     Le fil du prologue, et l'aperçu qui se répare énigme après énigme
 js/recit.js         Dialogues qui s'écrivent lettre après lettre
 js/cours.js         Contenu des 6 fiches de cours
 js/memo.js          Affichage des fiches

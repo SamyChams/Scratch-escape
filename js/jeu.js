@@ -55,7 +55,7 @@
       jouerRecit(PROLOGUE.scenes, PROLOGUE.titre, '▶ Essayer de se déconnecter', () => {
         Progression.marquerPrologue();
         afficherEtape(etapeCourante);
-      });
+      }, null, true);
     } else {
       afficherEtape(etapeCourante);
     }
@@ -134,13 +134,36 @@
 
   /* ================================================== RÉCIT */
   /** Joue une suite de répliques, puis appelle `suite`. */
-  function jouerRecit(scenes, titre, libelleBouton, suite, sousTitre) {
+  function jouerRecit(scenes, titre, libelleBouton, suite, sousTitre, avecFil) {
     vider(scene);
     window.scrollTo(0, 0);
 
     const { ecran, contenu } = ecranAppli(sousTitre);
     if (titre) contenu.appendChild(el('h1', 'centre', titre));
-    scene.appendChild(ecran);
+
+    if (avecFil) {
+      // Le prologue montre le fil défiler tout seul, puis se figer :
+      // l'élève voit qu'il est coincé avant qu'on le lui dise.
+      const cadre = el('div', 'prologue');
+      const cote = el('div', 'prologue__tel');
+      cote.innerHTML = Telephone.fil();
+      cote.appendChild(el('div', 'prologue__legende', 'ton écran, il y a deux heures'));
+      cadre.appendChild(cote);
+      cadre.appendChild(ecran);
+      scene.appendChild(cadre);
+
+      const svg = cote.querySelector('.tel-fil');
+      const legende = cote.querySelector('.prologue__legende');
+      setTimeout(() => {
+        // l'élève a pu passer le prologue entre-temps : on ne joue rien
+        if (!document.body.contains(svg)) return;
+        svg.classList.add('tel-fil--bloque');
+        legende.textContent = "ton écran, maintenant";
+        Son.cogne();
+      }, 7000);
+    } else {
+      scene.appendChild(ecran);
+    }
 
     const apres = el('div', 'actions');
     apres.style.justifyContent = 'center';
