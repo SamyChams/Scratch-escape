@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Évasion du Labo 404 — la mission</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/blocs.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐈</text></svg>">
+</head>
+<body>
+
+<header class="hud">
+  <span class="hud__logo">🐈 Labo 404</span>
+  <span class="hud__info">🕵 <span id="pseudo">…</span></span>
+  <span class="hud__info">⏱ <span id="chrono">00:00</span></span>
+  <span class="hud__info" id="num-salle">Salle 1/5</span>
+  <div class="barre-progression" title="Progression totale">
+    <div class="barre-progression__jauge" id="jauge"></div>
+  </div>
+  <span class="hud__espace"></span>
+  <button class="btn btn--fantome" id="btn-memo">📘 Cours</button>
+  <button class="btn btn--fantome" id="btn-son" aria-label="Couper le son">🔊</button>
+  <button class="btn btn--fantome" id="btn-quitter">🚪 Accueil</button>
+</header>
+
+<main class="page conteneur" id="scene"></main>
+
+<div id="modale-hote"></div>
+
+<script src="js/blocs.js"></script>
+<script src="js/cours.js"></script>
+<script src="js/memo.js"></script>
+<script src="js/salles.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/jeu.js"></script>
+</body>
+</html>

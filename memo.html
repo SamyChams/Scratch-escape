@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cahier de cours — les bases de Scratch</title>
+<meta name="description" content="Fiches de rappel : interface de Scratch, coordonnées, boucles, tests, variables et événements.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/blocs.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+</head>
+<body>
+<div class="page conteneur">
+
+  <header class="centre" style="padding:20px 0">
+    <div style="font-size:3.4rem">📘</div>
+    <h1>Le cahier de cours</h1>
+    <p class="muet">Six fiches pour tout revoir : l'écran de Scratch, les déplacements, les boucles,
+      les tests, les variables et les événements.</p>
+    <div class="actions no-print" style="justify-content:center">
+      <a class="btn" href="jeu.html">🎮 Retour au jeu</a>
+      <a class="btn btn--fantome" href="index.html">🏠 Accueil</a>
+      <button class="btn btn--fantome" onclick="window.print()">🖨 Imprimer</button>
+    </div>
+  </header>
+
+  <main id="fiches"></main>
+
+  <p class="centre muet petit" style="margin-top:30px">
+    Les couleurs et les formes des blocs correspondent à celles de Scratch 3.
+  </p>
+
+</div>
+
+<script src="js/blocs.js"></script>
+<script src="js/cours.js"></script>
+<script src="js/memo.js"></script>
+<script>
+  Memo.tout(document.getElementById('fiches'));
+</script>
+</body>
+</html>
