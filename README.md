@@ -89,6 +89,17 @@ moment depuis la barre du haut, sans rien perdre.
 pas un échec : Kaya propose de basculer en mode tranquille — auquel cas tout ce qui est déjà réparé
 est conservé — ou de recommencer l'étape. C'est ce garde-fou qui rend le mode utilisable en classe.
 
+## Voir la réparation se produire
+
+À côté des trois réglages, un **téléphone montre l'état réel de TokTik**. Au début de chaque
+étape, l'application est visiblement en panne : la palette est grise, le script est barré de rouge,
+les commentaires méchants passent, le compteur de temps s'emballe. Chaque énigme résolue répare
+une pièce précise, **sous les yeux de l'élève** : la couleur revient, le filtre s'allume, le compteur
+retombe à zéro.
+
+C'est ce qui donne un sens concret au mot « réparer ». Sans cet aperçu, résoudre une énigme ne
+produisait qu'un chiffre ; avec lui, l'élève voit ce qu'il vient de corriger dans l'application.
+
 ## Le filet de sécurité
 
 Après **deux échecs sur la même énigme**, Kaya propose une *version plus simple* : une question courte
@@ -152,6 +163,7 @@ js/jeu.js           Moteur : parcours de l'arbre, récit, codes
 js/enigmes.js       Les six types d'énigmes jouables
 js/blocs.js         Fabrique de blocs Scratch en HTML
 js/illustrations.js Personnages et décors des 5 étapes, dessinés en SVG
+js/telephone.js     L'aperçu de TokTik qui se répare énigme après énigme
 js/recit.js         Dialogues qui s'écrivent lettre après lettre
 js/cours.js         Contenu des 6 fiches de cours
 js/memo.js          Affichage des fiches
