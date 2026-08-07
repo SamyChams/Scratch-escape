@@ -13,7 +13,7 @@
 <div class="page conteneur">
 
   <header class="heros">
-    <div class="heros__chat">🐈</div>
+    <div class="heros__chat" id="chat-accueil"></div>
     <h1 class="heros__titre">L'Évasion du Labo&nbsp;404</h1>
     <p class="heros__sous">
       Scratchy, le chat de Scratch, est prisonnier d'un vieux serveur infecté par un virus.
@@ -21,6 +21,12 @@
       apprendre à programmer.
     </p>
   </header>
+
+  <!-- ------------------------------------------------ Personnages -->
+  <section class="carte" style="margin-bottom:26px">
+    <h2 class="centre">🎭 Les personnages</h2>
+    <div class="grille-cartes" id="personnages" style="margin-bottom:0"></div>
+  </section>
 
   <!-- ------------------------------------------------ Départ -->
   <section class="carte centre" style="margin-bottom:26px">
@@ -98,9 +104,22 @@
 
 </div>
 
+<script src="js/illustrations.js"></script>
 <script src="js/progression.js"></script>
 <script>
 (() => {
+  document.getElementById('chat-accueil').innerHTML = Illus.scratchy(150);
+  document.getElementById('personnages').innerHTML = [
+    ['scratchy', 'Scratchy', "Le chat de Scratch. Enfermé tout au fond du serveur, il compte sur toi. Il ne dit qu'un mot, mais il le dit souvent."],
+    ['pixel',    'Pixel',    "Un petit drone de maintenance. Il connaît le labo par cœur mais ne sait pas programmer : c'est lui qui te donne les indices."],
+    ['bug',      'Le Bug',   "Le virus qui a pris le contrôle du Labo 404. Il adore les énigmes, les pièges… et se moquer de ceux qui abandonnent."]
+  ].map(([id, nom, texte]) => `
+    <div class="centre">
+      <div style="display:flex;justify-content:center">${Illus[id](110)}</div>
+      <h3>${nom}</h3>
+      <p class="petit muet">${texte}</p>
+    </div>`).join('');
+
   const champ      = document.getElementById('pseudo');
   const btnJouer   = document.getElementById('btn-jouer');
   const btnReprise = document.getElementById('btn-continuer');

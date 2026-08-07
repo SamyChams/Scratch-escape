@@ -8,7 +8,42 @@
      saisie      → écrire une réponse (nombre ou mot)
      grille      → construire un programme et le faire tourner
      trous       → compléter un script (nombres ou blocs à choisir)
+
+   Personnages utilisables dans les dialogues :
+     'pixel'    → le drone allié, celui qui souffle les indices
+     'bug'      → le virus, l'antagoniste
+     'scratchy' → le chat prisonnier
+
+   NOTE : les corrigés ne sont volontairement PAS dans ce fichier.
+   Ils vivent chiffrés dans js/corrige-chiffre.js (voir outils.html).
+   Le code de chaque cadenas n'est pas stocké non plus : il est
+   reconstitué à partir des chiffres (« fragment ») des énigmes.
    ========================================================= */
+
+/* ------------------------------------------------------------------
+   PROLOGUE — joué une seule fois, avant la première salle
+   ------------------------------------------------------------------ */
+const PROLOGUE = {
+  titre: "8 h 47 — salle informatique",
+  scenes: [
+    { texte: "Ce matin, le vieux serveur du fond de la salle s'est mis à clignoter tout seul. Sur l'écran, trois lettres et trois chiffres : <b>LABO 404</b>. Puis une petite silhouette est apparue, en vol stationnaire…" },
+    { qui: 'pixel', texte: "Enfin quelqu'un ! Je suis <b>Pixel</b>, drone de maintenance. Un virus a pris le contrôle du serveur et il a enfermé <b>Scratchy</b> tout au fond, dans le Cœur du Serveur. Moi, je sais réparer des câbles… mais je ne sais pas programmer." },
+    { qui: 'bug', texte: "Un humain ? Vraiment ? Cinq salles, cinq cadenas, et pas un seul d'entre vous capable d'aligner trois blocs dans le bon ordre. Va-t'en pendant qu'il en est encore temps." },
+    { qui: 'pixel', texte: "Ne l'écoute pas. Chaque salle cache <b>trois énigmes</b>, et chaque énigme résolue te donne <b>un chiffre</b> du cadenas de la porte. Je reste avec toi : si tu bloques, demande-moi un indice, j'en ai deux en réserve à chaque fois. Prêt ?" },
+    { qui: 'scratchy', texte: "Miaou… (Traduction de Pixel : « dépêche-toi, il fait froid ici. »)" }
+  ]
+};
+
+/* ------------------------------------------------------------------
+   ÉPILOGUE — après la dernière salle
+   ------------------------------------------------------------------ */
+const EPILOGUE = {
+  scenes: [
+    { qui: 'bug', texte: "Non… NON ! Tu n'étais qu'un élève de cinquième ! Comment as-tu pu… les boucles… les variables… tout ça en une heure ?!" },
+    { qui: 'pixel', texte: "Parce qu'il ou elle a fait ce que tu n'as jamais su faire : <b>lire le cours</b>, <b>tester</b>, et <b>recommencer quand ça ne marchait pas</b>. C'est ça, programmer." },
+    { qui: 'scratchy', texte: "MIAOU ! (Traduction : « merci, tu m'as sauvé. Maintenant, on va coder pour de vrai ? »)" }
+  ]
+};
 
 const SALLES = [
 
@@ -20,9 +55,15 @@ const SALLES = [
   icone: '🧱',
   couleur: '#4c97ff',
   memo: ['m1'],
-  code: '491',
-  entree: "La porte du Labo 404 claque derrière toi. Devant : un hall immense, tapissé de briques colorées qui flottent dans le vide. Une voix grésille dans un haut-parleur : « <b>Bip… Système corrompu… Le chat Scratchy est enfermé au cœur du serveur.</b> » Sur la porte du fond, un cadenas à <b>3 molettes</b>. Trois énigmes, trois chiffres. À toi de jouer.",
-  sortie: "Clac ! Le cadenas s'ouvre. Les briques s'écartent et laissent apparaître un long couloir quadrillé…",
+
+  entree: "La porte du Labo 404 claque derrière toi. Devant : un hall immense, tapissé de briques colorées qui flottent dans le vide. Sur la porte du fond, un cadenas à <b>trois molettes</b>.",
+  dialogues: [
+    { qui: 'pixel', texte: "Bienvenue dans le hall d'entrée. Avant de courir, il faut savoir <b>où on met les pieds</b> : ici, tout est rangé par couleur, comme dans le vrai Scratch. Trois énigmes, trois chiffres, et la porte s'ouvre." }
+  ],
+  sortie: "Clac ! Les trois molettes s'alignent. Les briques s'écartent en grinçant et laissent apparaître un long couloir quadrillé.",
+  dialoguesSortie: [
+    { qui: 'bug', texte: "Un coup de chance. La suite sera moins drôle : sans coordonnées, tu tourneras en rond jusqu'à la nuit." }
+  ],
 
   enigmes: [
 
@@ -31,6 +72,7 @@ const SALLES = [
       type: 'association',
       icone: '🎨',
       titre: "Le tableau des couleurs",
+      histoire: { qui: 'pixel', texte: "Regarde ce mur : cinq casiers, un par catégorie de blocs. Le virus a arraché toutes les étiquettes de couleur et les a jetées par terre. Remets chaque couleur à sa place et le premier chiffre s'affichera." },
       consigne: "Dans Scratch, chaque catégorie de blocs a <b>sa</b> couleur. Clique sur une catégorie à gauche, puis sur sa couleur à droite pour les relier.",
       paires: [
         { g: 'Mouvement',  d: 'Bleu',        couleur: '#4c97ff' },
@@ -44,8 +86,7 @@ const SALLES = [
       indices: [
         "Les blocs qui font <b>bouger</b> le lutin sont de la même couleur que le ciel.",
         "Contrôle (répéter, si… alors) est <b>orange</b>, Événements (le drapeau vert) est <b>jaune</b>. Ce sont les deux plus faciles à confondre."
-      ],
-      solution: "Mouvement→Bleu, Apparence→Violet, Événements→Jaune, Contrôle→Orange, Opérateurs→Vert."
+      ]
     },
 
     {
@@ -53,6 +94,7 @@ const SALLES = [
       type: 'qcm',
       icone: '🏳',
       titre: "Qui démarre le script ?",
+      histoire: { texte: "Au centre du hall, un pupitre de commande. Quatre blocs y sont posés, mais un seul accepte de se brancher sur la prise du haut — celle marquée d'un drapeau vert." },
       consigne: "Un script doit se lancer <b>quand on clique sur le drapeau vert</b>. Quel bloc faut-il placer tout en haut ?",
       options: [
         { bloc: { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' }, correct: true },
@@ -65,8 +107,7 @@ const SALLES = [
       indices: [
         "Cherche le bloc qui a une forme différente des autres : arrondi sur le dessus.",
         "Il est <b>jaune</b> : c'est la couleur de la catégorie Événements."
-      ],
-      solution: "Le bloc chapeau « quand 🏳 est cliqué » (Événements, jaune)."
+      ]
     },
 
     {
@@ -74,6 +115,7 @@ const SALLES = [
       type: 'ordre',
       icone: '🔢',
       titre: "Le script mélangé",
+      histoire: { qui: 'bug', texte: "Ce petit script d'accueil ? Je l'ai secoué comme une boîte de Lego. Les blocs sont tous là, bien sûr… mais dans le désordre. Amuse-toi bien." },
       consigne: "Le virus a mélangé ce script ! Remets les blocs dans l'ordre pour que Scratchy se place au centre, dise « Bonjour ! », puis avance.",
       blocs: [
         { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' },
@@ -86,8 +128,7 @@ const SALLES = [
       indices: [
         "Quel bloc a une forme de chapeau ? Il ne peut aller qu'à une seule place : tout en haut.",
         "Relis la consigne dans l'ordre : se placer au centre, puis parler, puis avancer."
-      ],
-      solution: "quand 🏳 est cliqué → aller à x:0 y:0 → dire « Bonjour ! » pendant 2 s → avancer de 100 pas."
+      ]
     }
   ]
 },
@@ -100,9 +141,15 @@ const SALLES = [
   icone: '🧭',
   couleur: '#5cb1d6',
   memo: ['m2'],
-  code: '270',
-  entree: "Le sol du couloir est un immense quadrillage lumineux. Au plafond, deux règles graduées : l'une horizontale marquée <b>x</b>, l'autre verticale marquée <b>y</b>. Un panneau clignote : « <b>Ici, on ne marche pas au hasard : on donne des coordonnées.</b> »",
-  sortie: "Le quadrillage s'éteint case par case. Au bout du couloir, une salle tapissée de miroirs qui répètent ton reflet à l'infini…",
+
+  entree: "Le sol du couloir est un immense quadrillage lumineux. Au plafond, deux règles graduées : l'une horizontale marquée <b>x</b>, l'autre verticale marquée <b>y</b>.",
+  dialogues: [
+    { qui: 'pixel', texte: "Attention où tu marches : les dalles éteintes sont des trous. Ici, on ne se déplace pas « un peu vers la droite », on donne des <b>coordonnées précises</b>. Exactement comme sur la scène de Scratch." }
+  ],
+  sortie: "Le quadrillage s'éteint dalle après dalle derrière toi. Au bout du couloir, une salle tapissée de miroirs qui répètent ton reflet à l'infini.",
+  dialoguesSortie: [
+    { qui: 'pixel', texte: "Bien joué ! Tu viens de faire ce que fait un lutin à chaque bloc « avancer » : regarder dans quelle direction il est tourné, <b>puis</b> bouger." }
+  ],
 
   enigmes: [
 
@@ -111,6 +158,7 @@ const SALLES = [
       type: 'qcm',
       icone: '🎯',
       titre: "Le point zéro",
+      histoire: { texte: "Au milieu du couloir, une dalle plus brillante que les autres pulse doucement. Gravé dessus : « <i>Je suis le point d'où tout part. Sais-tu me nommer ?</i> »" },
       consigne: "Quelles sont les coordonnées du <b>centre exact</b> de la scène de Scratch ?",
       options: [
         { texte: 'x = 0 et y = 0', correct: true },
@@ -123,8 +171,7 @@ const SALLES = [
       indices: [
         "Pense au repère vu en mathématiques : où se croisent les deux axes ?",
         "x va de -240 à +240. Quelle valeur est pile au milieu ?"
-      ],
-      solution: "(0 ; 0)."
+      ]
     },
 
     {
@@ -132,6 +179,7 @@ const SALLES = [
       type: 'saisie',
       icone: '➕',
       titre: "Le calcul du gardien",
+      histoire: { qui: 'bug', texte: "Un petit calcul avant de passer. Ton chat était en x = -50 quand je l'ai attrapé, et je l'ai poussé avec ce bloc. Où a-t-il atterri ? Réponds… ou reste ici." },
       consigne: "Scratchy se trouve en <b>x = -50</b>. On exécute le bloc ci-dessous. Quelle est sa <b>nouvelle</b> abscisse x ?",
       script: [
         { cat: 'mouvement', texte: 'ajouter {120} à x' }
@@ -143,8 +191,7 @@ const SALLES = [
       indices: [
         "Le bloc <b>ajoute</b> : il faut calculer -50 + 120.",
         "Sur une droite graduée, pars de -50 et avance de 120 vers la droite. Tu passes par 0 après 50 pas… il en reste 70."
-      ],
-      solution: "70 (car -50 + 120 = 70)."
+      ]
     },
 
     {
@@ -152,6 +199,7 @@ const SALLES = [
       type: 'grille',
       icone: '🐈',
       titre: "Le labyrinthe du couloir",
+      histoire: { qui: 'pixel', texte: "Voilà le vrai passage : des dalles, des murs, et une porte tout au fond. Je peux téléguider ce petit Scratchy de secours, mais <b>uniquement avec des blocs</b>. Construis-lui le programme, et surtout : n'oublie pas qu'il avance là où il <i>regarde</i>." },
       consigne: "Construis un programme pour amener Scratchy jusqu'à la porte 🚪. Clique sur les blocs de la palette pour les ajouter, puis lance le programme.",
       grille: {
         largeur: 5, hauteur: 4,
@@ -170,8 +218,7 @@ const SALLES = [
       indices: [
         "Scratchy regarde vers la <b>droite</b> au départ. Un mur bloque la colonne du milieu : il faut passer par le <b>haut</b>.",
         "Une solution : avancer 1 fois, tourner ↺ (vers le haut), avancer 3 fois, tourner ↻ (vers la droite), avancer 3 fois."
-      ],
-      solution: "avancer ×1, tourner ↺, avancer ×3, tourner ↻, avancer ×3 (d'autres chemins fonctionnent aussi)."
+      ]
     }
   ]
 },
@@ -184,9 +231,15 @@ const SALLES = [
   icone: '🔁',
   couleur: '#ffab19',
   memo: ['m3'],
-  code: '365',
-  entree: "Mille miroirs répètent ton image encore et encore. Gravé dans l'un d'eux : « <b>Pourquoi écrire cent fois la même chose quand on peut la répéter ?</b> » Le sol tremble : la salle n'ouvrira que si tu maîtrises les <b>boucles</b>.",
-  sortie: "Les miroirs se figent, puis explosent en pixels. Une porte blindée apparaît, couverte d'interrupteurs « SI » et « SINON »…",
+
+  entree: "Mille miroirs répètent ton image encore et encore, jusqu'à l'infini. Gravé dans l'un d'eux, en lettres tremblantes : « <i>Pourquoi écrire cent fois la même chose quand on peut la répéter ?</i> »",
+  dialogues: [
+    { qui: 'bug', texte: "Ma salle préférée. Ici, les paresseux gagnent : celui qui recopie cent fois le même bloc reste coincé, celui qui trouve la <b>boucle</b> passe. Tu es plutôt du genre à recopier, non ?" }
+  ],
+  sortie: "Les miroirs se figent, puis explosent en une pluie de pixels colorés. Derrière eux : une porte blindée, couverte d'interrupteurs marqués « SI » et « SINON ».",
+  dialoguesSortie: [
+    { qui: 'pixel', texte: "Trois blocs au lieu de vingt. Tu viens de comprendre pourquoi tous les programmeurs adorent les boucles !" }
+  ],
 
   enigmes: [
 
@@ -195,6 +248,7 @@ const SALLES = [
       type: 'qcm',
       icone: '♻',
       titre: "Le reflet identique",
+      histoire: { texte: "Devant toi, deux miroirs. Le premier affiche un script tout en longueur. Le second est vide, et attend son <b>reflet exact</b> — en plus court." },
       consigne: "Voici un script du virus :",
       script: [
         { cat: 'mouvement', texte: 'avancer de {10} pas' },
@@ -214,8 +268,7 @@ const SALLES = [
       indices: [
         "Compte combien de fois le bloc est écrit dans le script du virus.",
         "Le nombre de répétitions va dans le bloc « répéter … fois », pas dans « avancer de … pas »."
-      ],
-      solution: "répéter 4 fois { avancer de 10 pas }."
+      ]
     },
 
     {
@@ -223,6 +276,7 @@ const SALLES = [
       type: 'saisie',
       icone: '⭐',
       titre: "L'angle du pentagone",
+      histoire: { qui: 'pixel', texte: "Au sol, une étoile à cinq branches est en train de se dessiner toute seule… mais elle s'arrête à chaque virage et attend un angle. Sans le bon nombre de degrés, la figure ne se refermera jamais." },
       consigne: "Pour tracer un <b>pentagone</b> (5 côtés), on répète 5 fois : avancer, puis tourner. De combien de <b>degrés</b> faut-il tourner à chaque fois ?",
       script: [
         { cat: 'controle', texte: 'répéter {5} fois', corps: [
@@ -237,8 +291,7 @@ const SALLES = [
       indices: [
         "En faisant le tour complet de la figure, le lutin tourne en tout de <b>360°</b>.",
         "Ces 360° sont partagés en 5 virages identiques : calcule 360 ÷ 5."
-      ],
-      solution: "72° (360 ÷ 5)."
+      ]
     },
 
     {
@@ -246,6 +299,7 @@ const SALLES = [
       type: 'trous',
       icone: '🔧',
       titre: "Le script à trous",
+      histoire: { qui: 'bug', texte: "J'ai gardé le programme de sortie, mais j'ai effacé les deux nombres des boucles. Bonne chance pour deviner : il y a mille combinaisons possibles… ou une seule, si tu sais compter les cases." },
       consigne: "Complète les deux nombres manquants pour que Scratchy atteigne la porte 🚪, puis lance le programme pour vérifier.",
       script: [
         { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' },
@@ -273,8 +327,7 @@ const SALLES = [
       indices: [
         "Compte les cases : combien y en a-t-il entre Scratchy et le bord droit ? Puis entre ce coin et la porte ?",
         "Le lutin part vers la droite. Il doit avancer de <b>4</b> cases, tourner vers le haut, puis avancer encore de <b>4</b> cases."
-      ],
-      solution: "répéter 4 fois, puis répéter 4 fois."
+      ]
     }
   ]
 },
@@ -287,9 +340,16 @@ const SALLES = [
   icone: '🔀',
   couleur: '#59c059',
   memo: ['m4'],
-  code: '814',
-  entree: "Deux couloirs, deux portes, un panneau d'aiguillage géant en forme d'hexagone. Un écran affiche : « <b>SI tu réponds juste ALORS tu passes… SINON tu recommences.</b> » Le virus adore les tests. Montre-lui que toi aussi.",
-  sortie: "L'aiguillage bascule dans un grand fracas métallique. Devant toi : un escalier qui descend vers le cœur du serveur. La dernière salle.",
+
+  entree: "Deux couloirs, deux portes — une verte, une rouge — et entre les deux, un panneau d'aiguillage géant en forme d'hexagone qui clignote.",
+  dialogues: [
+    { qui: 'pixel', texte: "Ici, plus rien n'est automatique : le labo <b>pose une question</b> avant chaque passage, et t'envoie à gauche ou à droite selon la réponse. C'est exactement ce que fait le bloc <b>si… alors… sinon</b>." },
+    { qui: 'bug', texte: "SI tu réponds juste, ALORS tu passes. SINON… tu recommences. Encore. Et encore." }
+  ],
+  sortie: "L'aiguillage bascule dans un grand fracas métallique et la porte verte s'ouvre. Derrière : un escalier qui descend vers le cœur du serveur. La dernière salle.",
+  dialoguesSortie: [
+    { qui: 'pixel', texte: "Descends doucement… il est juste en dessous. Et cette fois, il ne rigolera plus." }
+  ],
 
   enigmes: [
 
@@ -298,6 +358,7 @@ const SALLES = [
       type: 'qcm',
       icone: '⌨',
       titre: "Et si on n'appuie sur rien ?",
+      histoire: { texte: "Une trappe est encastrée dans le plafond. À côté, un clavier avec une seule touche géante : ESPACE. Un écran affiche le script qui la contrôle." },
       consigne: "Observe ce script :",
       script: [
         { cat: 'controle', texte: 'si {#} alors',
@@ -316,8 +377,7 @@ const SALLES = [
       indices: [
         "Regarde bien : y a-t-il un bloc « sinon » dans ce script ?",
         "Les blocs placés à l'intérieur du C ne se déclenchent que lorsque l'hexagone répond « vrai »."
-      ],
-      solution: "Rien ne se passe : les blocs du « si » sont ignorés."
+      ]
     },
 
     {
@@ -325,6 +385,7 @@ const SALLES = [
       type: 'qcm',
       icone: '⚖',
       titre: "Le piège du gardien",
+      histoire: { qui: 'bug', texte: "Approche, approche. Un simple test, un seul. Ton score est de 10 — pile 10, pas un de plus. Alors dis-moi : ce petit programme va-t-il te féliciter… ou se moquer de toi ?" },
       consigne: "La variable <b>score</b> vaut exactement <b>10</b>. On exécute :",
       script: [
         { cat: 'controle', texte: 'si {#} alors',
@@ -344,8 +405,7 @@ const SALLES = [
       indices: [
         "Pose-toi la question : est-ce que 10 est <b>strictement</b> plus grand que 10 ?",
         "La condition est fausse. Dans un « si… sinon », que fait le programme quand la condition est fausse ?"
-      ],
-      solution: "« Perdu… » (10 > 10 est faux, on passe par le sinon)."
+      ]
     },
 
     {
@@ -353,6 +413,7 @@ const SALLES = [
       type: 'trous',
       icone: '🎮',
       titre: "Le pilotage de Scratchy",
+      histoire: { qui: 'pixel', texte: "La porte verte s'ouvre à distance, avec cette manette. Sauf que le virus a arraché deux blocs du programme de pilotage : celui qui <b>écoute le clavier</b> et celui qui <b>fait bouger</b>. Répare-le et on sort d'ici." },
       consigne: "Complète ce script pour que Scratchy se déplace <b>vers la droite</b> tant qu'on appuie sur la flèche droite. Clique sur un emplacement en pointillés, puis choisis le bon bloc.",
       script: [
         { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' },
@@ -377,8 +438,7 @@ const SALLES = [
       indices: [
         "L'hexagone doit tester la <b>flèche droite</b> : c'est un bloc bleu clair de la catégorie Capteurs.",
         "Aller vers la droite, c'est <b>augmenter x</b>. Ajouter 10 déplace vers la droite, ajouter -10 vers la gauche."
-      ],
-      solution: "si ⟨touche flèche droite pressée ?⟩ alors { ajouter 10 à x }."
+      ]
     }
   ]
 },
@@ -391,9 +451,15 @@ const SALLES = [
   icone: '💾',
   couleur: '#ff8c1a',
   memo: ['m5', 'm6'],
-  code: '526',
-  entree: "Tu y es. Des câbles pulsent comme des veines et, au centre, une cage de lumière : <b>Scratchy</b> ! Le Bug apparaît, énorme, clignotant : « <b>Tu ne connais pas mes variables, petit humain. Tu ne sortiras jamais d'ici !</b> » Dernier cadenas. Dernière chance.",
-  sortie: "Le Bug se disloque en mille pixels. La cage s'ouvre… et Scratchy bondit dans tes bras en miaulant : « Miaou ! Merci ! »",
+
+  entree: "Tu y es. Des câbles pulsent comme des veines le long des murs et, au centre de la pièce, une cage de lumière jaune. À l'intérieur : <b>Scratchy</b>.",
+  dialogues: [
+    { qui: 'scratchy', texte: "Miaou !! (Traduction de Pixel : « JE SAVAIS que tu viendrais ! »)" },
+    { qui: 'bug', texte: "Assez ! Tu ne connais pas mes <b>variables</b>, petit humain. Trois dernières énigmes, et je te garantis que tu resteras coincé sur la première." },
+    { qui: 'pixel', texte: "Une variable, c'est juste une boîte avec une étiquette. Garde ça en tête et suis la valeur pas à pas. On y est presque !" }
+  ],
+  sortie: "Le Bug se disloque en mille pixels qui retombent en pluie. La cage de lumière s'éteint… et Scratchy bondit dans tes bras en ronronnant.",
+  dialoguesSortie: [],
 
   enigmes: [
 
@@ -402,6 +468,7 @@ const SALLES = [
       type: 'saisie',
       icone: '📦',
       titre: "La boîte du Bug",
+      histoire: { qui: 'bug', texte: "Voici la serrure de la cage : une variable que je remplis moi-même. Dis-moi combien elle vaut à la fin, sans te tromper d'une seule unité. Et attention où tu regardes : tout n'est pas dans la boucle." },
       consigne: "Le Bug exécute ce script. <b>Que vaut la variable <i>énergie</i></b> à la fin ?",
       script: [
         { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' },
@@ -416,8 +483,7 @@ const SALLES = [
       indices: [
         "Écris la valeur de la variable étape par étape, comme un tableau : 0, puis…",
         "Attention : le dernier « ajouter 1 » est <b>sous</b> la boucle, pas dedans. Il ne compte qu'une fois : 15 + 1."
-      ],
-      solution: "16 (0 + 5 + 5 + 5 puis + 1)."
+      ]
     },
 
     {
@@ -425,6 +491,7 @@ const SALLES = [
       type: 'qcm',
       icone: '📡',
       titre: "Le signal de libération",
+      histoire: { qui: 'pixel', texte: "Trois lutins-gardiens bloquent la cage. Si tu les écartes un par un, les autres se remettent en place aussitôt : il faut qu'ils bougent <b>tous les trois en même temps</b>. Il existe un bloc exactement pour ça." },
       consigne: "Scratchy est enfermé par trois lutins-gardiens qui doivent tous s'écarter <b>en même temps</b>. Quel bloc permet de leur donner le signal ?",
       options: [
         { bloc: { cat: 'evenements', texte: 'envoyer à tous {=libération}' }, correct: true },
@@ -437,8 +504,7 @@ const SALLES = [
       indices: [
         "Cherche un bloc <b>jaune</b> : la communication, c'est la catégorie Événements.",
         "Le bloc qui reçoit s'appelle « quand je reçois … ». Comment s'appelle celui qui envoie ?"
-      ],
-      solution: "« envoyer à tous : libération » (Événements)."
+      ]
     },
 
     {
@@ -446,6 +512,7 @@ const SALLES = [
       type: 'ordre',
       icone: '🔓',
       titre: "Le programme de délivrance",
+      histoire: { qui: 'pixel', texte: "Dernière ligne droite ! J'ai récupéré les cinq blocs du programme de libération dans les décombres, mais ils sont en vrac. Remets-les dans l'ordre et Scratchy est libre." },
       consigne: "Voici le programme qui libère Scratchy. Remets-le dans l'ordre : préparer le compteur, le remplir, donner le signal, puis fêter ça !",
       blocs: [
         { cat: 'evenements', chapeau: true, texte: 'quand 🏳 est cliqué' },
@@ -459,12 +526,21 @@ const SALLES = [
       indices: [
         "Le chapeau jaune arrondi va toujours tout en haut.",
         "On met la variable à 0 <b>avant</b> de la remplir, sinon on compterait par-dessus l'ancienne partie."
-      ],
-      solution: "quand 🏳 est cliqué → mettre énergie à 0 → répéter 10 fois { ajouter 10 à énergie } → envoyer à tous : libération → dire « Je suis libre ! »."
+      ]
     }
   ]
 }
 
 ];
 
-if (typeof window !== 'undefined') window.SALLES = SALLES;
+/** Le code d'un cadenas est la suite des chiffres de ses énigmes. */
+function codeSalle(salle) {
+  return salle.enigmes.map((e) => e.fragment).join('');
+}
+
+if (typeof window !== 'undefined') {
+  window.SALLES = SALLES;
+  window.PROLOGUE = PROLOGUE;
+  window.EPILOGUE = EPILOGUE;
+  window.codeSalle = codeSalle;
+}

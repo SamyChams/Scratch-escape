@@ -9,6 +9,10 @@ les tests et les variables.
 
 👉 **[Jouer](index.html)** · **[Cahier de cours](memo.html)** · **[Espace enseignant](professeur.html)**
 
+> ⚠️ **À faire avant la première séance :** le corrigé enseignant est protégé par le mot de passe
+> `labo404`, qui est public puisqu'il est écrit ici. Change-le sur la page **[Outils](outils.html)**
+> avant de mettre le site à disposition des élèves.
+
 ---
 
 ## Ce que le jeu contient
@@ -24,13 +28,29 @@ les tests et les variables.
 Chaque énigme résolue donne **un chiffre** du code de la porte. À la fin,
 l'élève obtient un **diplôme d'évasion imprimable** avec son temps et ses étoiles.
 
+### Une histoire, pas une liste d'exercices
+
+Le parcours est mis en scène de bout en bout : un **prologue**, une **transition** après chaque
+porte franchie, un **épilogue**, et trois personnages qui accompagnent l'élève.
+
+| | Personnage | Rôle |
+|---|---|---|
+| 🐈 | **Scratchy** | le chat prisonnier, l'enjeu de la partie |
+| 🤖 | **Pixel** | le drone allié : c'est lui qui donne les indices |
+| 👾 | **Le Bug** | le virus : il lance les défis et se moque des abandons |
+
+Chaque énigme est introduite par une **mise en scène** qui explique ce que l'élève est en train
+de faire dans l'histoire (réparer une manette, éclairer un couloir, ouvrir une cage), plutôt que
+de poser une question hors-sol. Chaque salle a son **décor illustré** et sa propre couleur, qui
+teinte toute l'interface.
+
 ### Pensé pour la classe
 
 - **Aucun échec possible** : pas de compte à rebours, on peut se tromper autant de fois qu'on veut.
 - **Deux indices progressifs** par énigme, plus un accès permanent au cahier de cours.
 - **Feedback pédagogique** : chaque mauvaise réponse explique *pourquoi* elle est fausse.
 - **Sauvegarde automatique** dans le navigateur : on peut reprendre à la séance suivante.
-- **Corrigé complet** pour l'enseignant sur `professeur.html`.
+- **Corrigé chiffré** pour l'enseignant sur `professeur.html` (voir plus bas).
 
 ---
 
@@ -60,23 +80,28 @@ python3 -m http.server 8000
 ## Structure du projet
 
 ```
-index.html          Accueil : scénario, nom de code, reprise de partie
-jeu.html            Le jeu (salles, énigmes, cadenas, diplôme)
+index.html          Accueil : scénario, personnages, reprise de partie
+jeu.html            Le jeu (récits, salles, énigmes, cadenas, diplôme)
 memo.html           Le cahier de cours : 6 fiches, imprimables
-professeur.html     Fiche pédagogique + corrigé complet
+professeur.html     Fiche pédagogique (libre) + corrigé (protégé)
+outils.html         Changer le mot de passe / modifier le corrigé
 
 css/style.css       Habillage général (thème « laboratoire »)
 css/blocs.css       Rendu des blocs façon Scratch 3
 
 js/blocs.js         Fabrique de blocs Scratch en HTML
+js/illustrations.js Décors et personnages, dessinés en SVG
 js/cours.js         Contenu des 6 fiches de cours
-js/salles.js        Scénario, 5 salles, 15 énigmes, corrigés
+js/salles.js        Scénario, 5 salles, 15 énigmes, dialogues
 js/jeu.js           Moteur du jeu et des 6 types d'énigmes
 js/memo.js          Affichage des fiches
 js/progression.js   Sauvegarde, chronomètre, étoiles
 js/audio.js         Bruitages synthétisés (aucun fichier son)
+js/coffre.js        Chiffrement/déchiffrement du corrigé
+js/corrige-chiffre.js  Le corrigé, chiffré (aucune réponse en clair)
 
 tests/parcours-complet.js   Test automatisé du parcours (Playwright, facultatif)
+tests/corrige-chiffre.js    Test automatisé de la protection du corrigé
 ```
 
 Le projet est en **HTML/CSS/JavaScript pur** : aucune bibliothèque, aucune
@@ -123,20 +148,56 @@ Exemple minimal d'une énigme à ajouter dans le tableau `enigmes` d'une salle :
 }
 ```
 
-Penser à ajuster le `code` de la salle si le nombre d'énigmes change :
-il correspond aux `fragment` mis bout à bout, dans l'ordre des énigmes.
+Le code du cadenas n'est écrit nulle part : il est **reconstitué** à partir des `fragment`
+des énigmes de la salle, dans l'ordre. Ajouter ou retirer une énigme allonge ou raccourcit
+donc automatiquement le code, sans rien d'autre à modifier.
+
+Pour la **mise en scène** d'une énigme, ajouter un champ `histoire` :
+
+```js
+histoire: { qui: 'pixel', texte: "Ce que Pixel dit à l'élève avant l'énigme." }
+// ou, pour une description sans personnage :
+histoire: { texte: "Ce que l'élève voit dans la salle." }
+```
+
+---
+
+## Le corrigé enseignant et sa protection
+
+Le corrigé **n'existe nulle part en clair** dans les fichiers du site. Il vit dans
+`js/corrige-chiffre.js`, chiffré en **AES-256-GCM** avec une clé dérivée du mot de passe
+enseignant (PBKDF2-SHA256, 250 000 itérations). Sans le mot de passe, le fichier est
+inexploitable — y compris pour un élève qui ouvrirait le code source de la page.
+
+**Changer le mot de passe** (à faire avant la première séance) : ouvrir `outils.html`,
+saisir le mot de passe actuel (`labo404`), choisir le nouveau, cliquer sur
+« Générer le fichier chiffré », puis remplacer `js/corrige-chiffre.js` par le fichier
+téléchargé. La même page permet de relire et de modifier les solutions.
+
+### Ce que cette protection ne couvre pas
+
+Un site sans serveur envoie forcément au navigateur tout ce dont le jeu a besoin pour
+fonctionner. Un élève qui sait ouvrir les outils de développement peut donc, en cherchant,
+retrouver dans `js/salles.js` quelle réponse est marquée comme correcte. Ce qui est protégé,
+c'est le **corrigé rédigé** — celui qu'on projette au tableau ou qu'on imprime.
+
+Un verrouillage complet demanderait un site avec serveur, qui garderait les réponses de son
+côté. En pratique, un élève capable de fouiller le code a de toute façon dépassé ce que la
+séance cherche à évaluer.
 
 ---
 
 ## Tests
 
-Un parcours automatisé résout les 15 énigmes, ouvre les 5 cadenas et vérifie
-qu'aucune erreur JavaScript n'apparaît :
+Deux tests automatisés : le premier résout les 15 énigmes et ouvre les 5 cadenas en vérifiant
+qu'aucune erreur JavaScript n'apparaît ; le second vérifie que le corrigé reste invisible sans
+mot de passe et que la rotation du mot de passe fonctionne.
 
 ```bash
 npm install playwright
 python3 -m http.server 8765 &
 node tests/parcours-complet.js
+node tests/corrige-chiffre.js
 ```
 
 ---

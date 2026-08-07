@@ -4,20 +4,21 @@
    ========================================================= */
 
 :root {
-  --fond:        #10152b;
-  --fond-2:      #171e3c;
-  --panneau:     #1e2750;
-  --panneau-2:   #263268;
-  --bord:        #3a4788;
-  --texte:       #eaf0ff;
-  --texte-doux:  #a9b6e8;
+  --fond:        #1a2150;
+  --fond-2:      #232c68;
+  --panneau:     #2c3781;
+  --panneau-2:   #3a4699;
+  --bord:        #5a6ad0;
+  --texte:       #f4f6ff;
+  --texte-doux:  #bcc7fb;
   --bleu:        #4c97ff;
-  --violet:      #9966ff;
-  --jaune:       #ffbf00;
+  --violet:      #a678ff;
+  --jaune:       #ffc61a;
   --orange:      #ffab19;
-  --vert:        #59c059;
-  --rouge:       #ff6680;
+  --vert:        #5ecf5e;
+  --rouge:       #ff6b8b;
   --cyan:        #5cb1d6;
+  --accent:      #4c97ff;   /* couleur de la salle en cours */
 
   --rayon:       16px;
   --rayon-s:     10px;
@@ -37,10 +38,12 @@ body {
   font-family: var(--police);
   color: var(--texte);
   background:
-    radial-gradient(900px 600px at 15% -10%, #2a3a7a 0%, transparent 60%),
-    radial-gradient(800px 500px at 95% 10%, #4a2a6a 0%, transparent 55%),
+    radial-gradient(1000px 650px at 12% -12%, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 62%),
+    radial-gradient(900px 560px at 96% 6%, #7a3fc0 0%, transparent 58%),
+    radial-gradient(700px 500px at 60% 105%, #2b6fd6 0%, transparent 60%),
     var(--fond);
   background-attachment: fixed;
+  transition: background .6s ease;
   font-size: clamp(16px, 1.05vw + 13px, 19px);
   line-height: 1.55;
 }
@@ -277,8 +280,20 @@ a  { color: var(--bleu); }
   cursor: pointer;
   transition: transform .12s ease, box-shadow .18s ease, border-color .18s;
 }
-.tuile:hover { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(0,0,0,.5); border-color: var(--bleu); }
-.tuile__icone { font-size: 2.2rem; }
+.tuile::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 6px;
+  background: var(--accent);
+}
+.tuile:hover { transform: translateY(-4px) rotate(-.6deg); box-shadow: 0 14px 30px rgba(0,0,0,.5); border-color: var(--accent); }
+.tuile__icone {
+  font-size: 2rem;
+  width: 54px; height: 54px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
 .tuile__titre { font-weight: 800; margin: 6px 0 4px; font-size: 1.1rem; }
 .tuile__etat { font-size: .88rem; color: var(--texte-doux); }
 .tuile--ok { border-color: var(--vert); background: linear-gradient(180deg, #23503a, #1a3b2c); }
@@ -389,6 +404,8 @@ a  { color: var(--bleu); }
 .retour--ok      { background: rgba(89,192,89,.16); border-color: var(--vert); }
 .retour--erreur  { background: rgba(255,102,128,.14); border-color: var(--rouge); }
 .retour--indice  { background: rgba(255,191,0,.14); border-color: var(--jaune); }
+/* Quand l'indice est donné par un personnage, sa bulle suffit. */
+.retour--indice:has(.dialogue) { background: none; border: none; padding: 0; }
 
 /* ---------------------------------------------------------
    Énigmes : QCM
@@ -585,6 +602,101 @@ a  { color: var(--bleu); }
 }
 @keyframes tombe {
   to { transform: translateY(105vh) rotate(720deg); opacity: .1; }
+}
+
+/* ---------------------------------------------------------
+   Décors et personnages
+   --------------------------------------------------------- */
+.bandeau {
+  position: relative;
+  border-radius: var(--rayon);
+  overflow: hidden;
+  border: 2px solid var(--bord);
+  margin-bottom: 20px;
+  background: #141a3d;
+  box-shadow: var(--ombre);
+}
+.bandeau .decor { display: block; width: 100%; height: clamp(120px, 17vw, 190px); }
+.bandeau__voile {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px clamp(16px, 3vw, 30px);
+  background: linear-gradient(180deg, rgba(10,14,38,.55), rgba(10,14,38,.92));
+  border-top: 2px solid var(--accent);
+}
+.bandeau__titre { margin: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+.bandeau__icone {
+  font-size: 2.2rem; flex: 0 0 auto;
+  width: 62px; height: 62px;
+  display: grid; place-items: center;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  border: 2px solid var(--accent);
+}
+.bandeau__num {
+  color: var(--jaune); text-transform: uppercase;
+  letter-spacing: 2.5px; font-size: .8rem; font-weight: 800;
+}
+
+/* Bulles de dialogue */
+.dialogue {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0 0 16px;
+}
+.dialogue__avatar { flex: 0 0 auto; width: 74px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.45)); }
+.dialogue__avatar svg { display: block; width: 100%; height: auto; }
+.dialogue__bulle {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(180deg, var(--panneau-2), var(--panneau));
+  border: 2px solid var(--bord);
+  border-radius: 18px;
+  padding: 13px 18px;
+}
+.dialogue__bulle::before {
+  content: "";
+  position: absolute;
+  left: -11px; top: 26px;
+  width: 0; height: 0;
+  border: 11px solid transparent;
+  border-right-color: var(--bord);
+  border-left: 0;
+}
+.dialogue__nom {
+  font-size: .74rem; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.dialogue--pixel    .dialogue__bulle { border-color: #3fc4e8; }
+.dialogue--pixel    .dialogue__bulle::before { border-right-color: #3fc4e8; }
+.dialogue--pixel    .dialogue__nom { color: #7fe3ff; }
+.dialogue--bug      .dialogue__bulle { border-color: #a35cf0; background: linear-gradient(180deg, #3d2569, #2a1a4a); }
+.dialogue--bug      .dialogue__bulle::before { border-right-color: #a35cf0; }
+.dialogue--bug      .dialogue__nom { color: #d6a8ff; }
+.dialogue--bug      .dialogue__texte { font-style: italic; }
+.dialogue--scratchy .dialogue__bulle { border-color: #ff9a26; }
+.dialogue--scratchy .dialogue__bulle::before { border-right-color: #ff9a26; }
+.dialogue--scratchy .dialogue__nom { color: #ffb14d; }
+
+/* Mise en scène d'une énigme */
+.mise-en-scene {
+  background: rgba(0, 0, 0, .28);
+  border: 2px dashed var(--bord);
+  border-left: 6px solid var(--jaune);
+  border-radius: var(--rayon-s);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+/* Écrans de récit (prologue, transitions, épilogue) */
+.recit { max-width: 760px; margin-inline: auto; }
+.recit .dialogue { margin-bottom: 20px; }
+
+@media (max-width: 560px) {
+  .dialogue__avatar { width: 56px; }
+  .bandeau__voile { background: linear-gradient(180deg, rgba(16,20,48,.35) 0%, rgba(16,20,48,.9) 100%); }
 }
 
 @media print {

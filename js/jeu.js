@@ -43,8 +43,40 @@
     elChrono.textContent = Progression.chrono();
 
     salleCourante = Math.min(Progression.etat.salle, SALLES.length - 1);
-    if (Progression.etat.termine) afficherVictoire();
-    else afficherSalle(salleCourante);
+    if (Progression.etat.termine) {
+      afficherVictoire();
+    } else if (!Progression.etat.prologueVu) {
+      afficherRecit(PROLOGUE.scenes, PROLOGUE.titre, '▶ Entrer dans le Labo 404', () => {
+        Progression.marquerPrologue();
+        afficherSalle(salleCourante);
+      });
+    } else {
+      afficherSalle(salleCourante);
+    }
+  }
+
+  /* ---------------------------------------------- écran de récit */
+  function afficherRecit(scenes, titre, libelleBouton, suite) {
+    vider(scene);
+    window.scrollTo(0, 0);
+    const carte = el('div', 'carte recit');
+    carte.appendChild(el('h1', 'centre', titre));
+
+    scenes.forEach((s) => {
+      carte.appendChild(s.qui
+        ? el('div', null, Illus.dialogue(s.qui, s.texte))
+        : el('div', 'narration', s.texte));
+    });
+
+    const actions = el('div', 'actions');
+    actions.style.justifyContent = 'center';
+    const btn = el('button', 'btn btn--grand', libelleBouton);
+    btn.addEventListener('click', () => { Son.clic(); suite(); });
+    actions.appendChild(btn);
+    carte.appendChild(actions);
+    scene.appendChild(carte);
+    // focus sans faire défiler : le récit doit se lire depuis le début
+    btn.focus({ preventScroll: true });
   }
 
   function majSon() {
@@ -75,16 +107,24 @@
     window.scrollTo(0, 0);
 
     const salle = SALLES[indice];
+    document.documentElement.style.setProperty('--accent', salle.couleur);
 
-    const entete = el('div', 'salle__entete');
-    entete.appendChild(el('div', 'salle__badge', salle.icone));
-    const bloc = el('div');
-    bloc.appendChild(el('div', 'salle__num', `Salle ${salle.numero} sur ${SALLES.length}`));
-    bloc.appendChild(el('h1', null, salle.titre));
-    entete.appendChild(bloc);
-    scene.appendChild(entete);
+    // Bandeau illustré
+    const bandeau = el('div', 'bandeau');
+    bandeau.innerHTML = Illus.decor(salle.id) + `
+      <div class="bandeau__voile">
+        <div class="bandeau__icone">${salle.icone}</div>
+        <div>
+          <div class="bandeau__num">Salle ${salle.numero} sur ${SALLES.length}</div>
+          <h1 class="bandeau__titre">${salle.titre}</h1>
+        </div>
+      </div>`;
+    scene.appendChild(bandeau);
 
     scene.appendChild(el('div', 'narration', salle.entree));
+    (salle.dialogues || []).forEach((d) => {
+      scene.appendChild(el('div', null, Illus.dialogue(d.qui, d.texte)));
+    });
 
     /* --- les trois énigmes ------------------------------------- */
     const grille = el('div', 'grille-enigmes');
@@ -137,9 +177,10 @@
 
     carte.appendChild(el('p', null, 'Compose le code dans le bon ordre (énigme 1, puis 2, puis 3) :'));
 
+    const code = codeSalle(salle);
     const molettes = el('div', 'cadenas__molettes');
     const champs = [];
-    for (let i = 0; i < salle.code.length; i++) {
+    for (let i = 0; i < code.length; i++) {
       const inp = el('input', 'molette');
       inp.type = 'text';
       inp.inputMode = 'numeric';
@@ -170,7 +211,7 @@
     function tenter() {
       const saisi = champs.map((c) => c.value.trim()).join('');
       vider(zoneRetour);
-      if (saisi === salle.code) {
+      if (saisi === code) {
         Son.deverrouille();
         porteOuverte(salle);
       } else {
@@ -190,19 +231,28 @@
   function porteOuverte(salle) {
     vider(scene);
     window.scrollTo(0, 0);
-    const carte = el('div', 'carte centre');
-    carte.appendChild(el('div', null, '<div style="font-size:4rem">🚪✨</div>'));
-    carte.appendChild(el('h2', null, `Porte ${salle.numero} ouverte !`));
+    const carte = el('div', 'carte recit');
+    carte.appendChild(el('div', 'centre', '<div style="font-size:4rem">🚪✨</div>'));
+    carte.appendChild(el('h1', 'centre', `Porte ${salle.numero} ouverte !`));
     carte.appendChild(el('div', 'narration', salle.sortie));
+    (salle.dialoguesSortie || []).forEach((d) => {
+      carte.appendChild(el('div', null, Illus.dialogue(d.qui, d.texte)));
+    });
 
     const actions = el('div', 'actions');
     actions.style.justifyContent = 'center';
     const suivante = salle.numero < SALLES.length;
-    const btn = el('button', 'btn btn--grand', suivante ? '➡ Entrer dans la salle suivante' : '🏆 Voir le résultat');
+    const btn = el('button', 'btn btn--grand', suivante ? '➡ Entrer dans la salle suivante' : '✨ Voir la fin');
     btn.addEventListener('click', () => {
       Son.clic();
-      if (suivante) afficherSalle(salle.numero);
-      else { Progression.terminer(); afficherVictoire(); }
+      if (suivante) {
+        afficherSalle(salle.numero);
+      } else {
+        afficherRecit(EPILOGUE.scenes, 'Le Bug est vaincu', '🏆 Recevoir mon diplôme', () => {
+          Progression.terminer();
+          afficherVictoire();
+        });
+      }
     });
     actions.appendChild(btn);
     carte.appendChild(actions);
@@ -245,6 +295,13 @@
     indicesAffiches = 0;
     const boite = ouvrirModale(enigme.titre, enigme.icone);
 
+    // Mise en scène : ce que l'élève « voit » dans la salle
+    if (enigme.histoire) {
+      boite.appendChild(enigme.histoire.qui
+        ? el('div', null, Illus.dialogue(enigme.histoire.qui, enigme.histoire.texte))
+        : el('div', 'mise-en-scene', enigme.histoire.texte));
+    }
+
     boite.appendChild(el('div', 'consigne', enigme.consigne));
 
     // Script d'illustration éventuel
@@ -271,7 +328,7 @@
       Son.indice();
       Progression.compterIndice();
       zoneRetour.appendChild(el('div', 'retour retour--indice',
-        `💡 <b>Indice ${indicesAffiches + 1} :</b> ${enigme.indices[indicesAffiches]}`));
+        Illus.dialogue('pixel', `<b>Indice ${indicesAffiches + 1} :</b> ${enigme.indices[indicesAffiches]}`)));
       indicesAffiches++;
       if (indicesAffiches >= enigme.indices.length) btnIndice.disabled = true;
     });
@@ -852,7 +909,7 @@
 
     const intro = el('div', 'carte centre no-print');
     intro.innerHTML = `
-      <div style="font-size:5rem">🐈✨</div>
+      <div style="display:flex;justify-content:center">${Illus.scratchy(150)}</div>
       <h1>Scratchy est libre !</h1>
       <p>Le Labo 404 s'éteint doucement derrière toi. Le Bug est vaincu… et tu connais
       maintenant les bases de Scratch : les blocs, les coordonnées, les boucles,

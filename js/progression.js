@@ -17,6 +17,7 @@ const Progression = (() => {
     erreurs: 0,           // nombre de réponses fausses
     debut: null,          // horodatage de départ
     duree: 0,             // durée totale en secondes (à la victoire)
+    prologueVu: false,    // le récit d'introduction a déjà été joué
     termine: false
   });
 
@@ -64,6 +65,8 @@ const Progression = (() => {
       if (indice > etat.salle) etat.salle = indice;
       sauver();
     },
+
+    marquerPrologue() { etat.prologueVu = true; sauver(); },
 
     compterIndice() { etat.indices++; sauver(); },
     compterErreur() { etat.erreurs++; sauver(); },

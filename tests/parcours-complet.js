@@ -24,6 +24,8 @@ const erreurs = [];
   await page.fill('#pseudo', 'Camille');
   await page.click('#btn-jouer');
   await page.waitForURL('**/jeu.html');
+  // prologue : récit d'introduction
+  await page.locator('button', { hasText: 'Entrer dans le Labo 404' }).click();
   await page.waitForSelector('.grille-enigmes .tuile');
   console.log('✓ accueil → jeu, pseudo =', await page.textContent('#pseudo'));
 
@@ -74,7 +76,9 @@ const erreurs = [];
   const passerPorte = async (code) => {
     for (let i = 0; i < code.length; i++) await page.locator('.molette').nth(i).fill(code[i]);
     await page.locator('.cadenas button', { hasText: 'Ouvrir la porte' }).click();
-    await page.locator('button', { hasText: /salle suivante|Voir le résultat/i }).click();
+    await page.locator('button', { hasText: /salle suivante|Voir la fin/i }).click();
+    const fin = page.locator('button', { hasText: 'Recevoir mon diplôme' });
+    if (await fin.count()) await fin.click();
     console.log('  ✓ cadenas', code, 'ouvert');
   };
   await passerPorte('491');
