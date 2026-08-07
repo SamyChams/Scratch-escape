@@ -1,0 +1,46 @@
+# Publie automatiquement le site sur GitHub Pages à chaque
+# modification de la branche principale.
+#
+# Le site est statique : il n'y a rien à compiler, on envoie
+# simplement le contenu du dépôt tel quel.
+
+name: Publier le site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # permet aussi de relancer la publication à la main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication à la fois, sans annuler celle en cours
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - name: Récupérer les fichiers
+        uses: actions/checkout@v4
+
+      - name: Préparer GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true    # active Pages automatiquement au premier passage
+
+      - name: Empaqueter le site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Mettre en ligne
+        id: deploiement
+        uses: actions/deploy-pages@v4
