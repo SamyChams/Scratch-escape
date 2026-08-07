@@ -8,9 +8,9 @@ Pour se déconnecter, il va falloir apprendre à lire le code de l'appli.
 
 👉 **[Jouer](index.html)** · **[Cahier de cours](memo.html)** · **[Espace enseignant](professeur.html)**
 
-> ⚠️ **À faire avant la première séance :** le corrigé enseignant est protégé par le mot de passe
-> `labo404`, qui est public puisqu'il est écrit ici. Change-le sur la page **[Outils](outils.html)**
-> avant de mettre le site à disposition des élèves.
+> 🔐 Le corrigé enseignant est **chiffré** et protégé par un mot de passe choisi par l'enseignant.
+> Il ne figure nulle part dans ce dépôt. Pour le modifier ou en changer, voir la page
+> **[Outils](outils.html)**.
 
 ---
 
@@ -249,10 +249,13 @@ Le corrigé **n'existe nulle part en clair** dans les fichiers du site. Il vit d
 enseignant (PBKDF2-SHA256, 250 000 itérations). Sans le mot de passe, le fichier est
 inexploitable — y compris pour un élève qui ouvrirait le code source de la page.
 
-**Changer le mot de passe** (à faire avant la première séance) : ouvrir `outils.html`,
-saisir le mot de passe actuel (`labo404`), choisir le nouveau, cliquer sur
-« Générer le fichier chiffré », puis remplacer `js/corrige-chiffre.js` par le fichier
-téléchargé. La même page permet de relire et de modifier les solutions.
+**Changer le mot de passe** : ouvrir `outils.html`, saisir le mot de passe actuel, choisir le
+nouveau, cliquer sur « Générer le fichier chiffré », puis remplacer `js/corrige-chiffre.js` par
+le fichier téléchargé. La même page permet de relire et de modifier les solutions.
+
+Le mot de passe n'est écrit nulle part : si tu le perds, le corrigé n'est plus récupérable et il
+faut le ressaisir depuis zéro dans `outils.html`. Les solutions restent, elles, dans l'historique
+des versions de ce dépôt.
 
 ### Ce que cette protection ne couvre pas
 
