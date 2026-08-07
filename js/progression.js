@@ -6,7 +6,7 @@
    ========================================================= */
 
 const Progression = (() => {
-  const CLE = 'loop-partie-v1';
+  const CLE = 'toktik-partie-v1';
 
   const vide = () => ({
     pseudo: '',

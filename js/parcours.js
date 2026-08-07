@@ -1,5 +1,5 @@
 /* =========================================================
-   parcours.js — LOOP, l'appli dont on ne sort pas
+   parcours.js — TokTik, l'appli dont on ne sort pas
    ---------------------------------------------------------
    Le parcours n'est plus une suite fixe : c'est un arbre.
 
@@ -13,7 +13,7 @@
    parcours, dans le même ordre. Seul l'habillage change.
 
    Personnages :
-     'nova'     → l'algorithme de LOOP, l'antagoniste
+     'nova'     → l'algorithme de TokTik, l'antagoniste
      'kaya'     → une créatrice coincée dans l'appli, en live
      'scratchy' → un tout petit compte qui sait coder
      'ilyes'    → le groupe de discussion
@@ -21,7 +21,7 @@
      (aucun)    → la voix du récit
    ========================================================= */
 
-const APPLI = { nom: 'LOOP', heure: '23:47' };
+const APPLI = { nom: 'TokTik', heure: '23:47' };
 
 /* ------------------------------------------------------------------
    PROLOGUE
@@ -29,13 +29,13 @@ const APPLI = { nom: 'LOOP', heure: '23:47' };
 const PROLOGUE = {
   titre: '23 h 47',
   scenes: [
-    { texte: "Tu as installé <b>LOOP</b> il y a deux heures, « juste pour voir ». Tu as dit « encore une dernière » onze fois." },
+    { texte: "Tu as installé <b>TokTik</b> il y a deux heures, « juste pour voir ». Tu as dit « encore une dernière » onze fois." },
     { texte: "Là, tu appuies sur le bouton retour. Rien. Tu éteins l'écran. Il se rallume." },
-    { qui: 'nova', texte: "Bonsoir. Je suis l'algorithme de LOOP. Je sais ce que tu as regardé ce soir, combien de temps tu es resté sur chaque vidéo, et surtout : je sais ce que tu vas regarder après." },
+    { qui: 'nova', texte: "Bonsoir. Je suis l'algorithme de TokTik. Je sais ce que tu as regardé ce soir, combien de temps tu es resté sur chaque vidéo, et surtout : je sais ce que tu vas regarder après." },
     { qui: 'nova', texte: "Tu ne pars pas maintenant. Tu es mon meilleur temps d'écran de la soirée." },
     { qui: 'ilyes', texte: "hey tu réponds plus depuis 1h ça va ??" },
     { qui: 'nour', texte: "moi aussi mon appli veut plus se fermer 😭 c'est quoi ce truc" },
-    { qui: 'kaya', texte: "Salut… si quelqu'un me lit : je suis <b>Kaya</b>, je faisais des lives ici. Je suis coincée dans LOOP depuis mardi. Je continue à streamer parce que c'est tout ce qu'il me reste. Je t'aide comme je peux." },
+    { qui: 'kaya', texte: "Salut… si quelqu'un me lit : je suis <b>Kaya</b>, je faisais des lives ici. Je suis coincée dans TokTik depuis mardi. Je continue à streamer parce que c'est tout ce qu'il me reste. Je t'aide comme je peux." },
     { qui: 'scratchy', texte: "psst. moi c'est @scratchy. j'ai 3 abonnés. mais j'ai lu le code de l'appli en entier." },
     { qui: 'scratchy', texte: "nova n'est pas magique : c'est un <b>programme</b>. des blocs, empilés, qui s'exécutent de haut en bas. si tu apprends à les lire, tu peux la réécrire et te déconnecter." },
     { qui: 'nova', texte: "Un compte à 3 abonnés. Adorable. Vas-y, essaie." }
@@ -189,7 +189,7 @@ const ETAPES = [
   id: 'e1',
   numero: 1,
   titre: "L'Éditeur",
-  soustitre: "Les blocs de LOOP",
+  soustitre: "Les blocs de TokTik",
   icone: '🎛',
   couleur: '#4c97ff',
   notion: "Interface, catégories de blocs, ordre des instructions",
@@ -220,7 +220,7 @@ const ETAPES = [
           id: 'e1a1', type: 'association', icone: '🎨',
           titre: "Les couleurs de l'éditeur",
           histoire: { texte: "L'éditeur s'ouvre sur un mur de blocs… tous gris. Nova a vidé les couleurs pour que rien ne soit reconnaissable. En bas, les cinq étiquettes traînent en vrac." },
-          consigne: "Dans Scratch comme dans LOOP, chaque catégorie de blocs a <b>sa</b> couleur. Clique sur une catégorie à gauche, puis sur sa couleur à droite.",
+          consigne: "Dans Scratch comme dans TokTik, chaque catégorie de blocs a <b>sa</b> couleur. Clique sur une catégorie à gauche, puis sur sa couleur à droite.",
           paires: [
             { g: 'Mouvement',  d: 'Bleu',   couleur: '#4c97ff' },
             { g: 'Apparence',  d: 'Violet', couleur: '#9966ff' },
@@ -239,11 +239,11 @@ const ETAPES = [
           id: 'e1a2', type: 'ordre', icone: '🔢',
           titre: "Le script de démarrage",
           histoire: { qui: 'nova', texte: "Voilà le script qui se lance quand tu ouvres l'appli. Je l'ai secoué. Les blocs sont tous là — dans le désordre. Amuse-toi." },
-          consigne: "Remets le script dans l'ordre : au lancement, LOOP se place au centre, affiche son logo, puis lance le fil.",
+          consigne: "Remets le script dans l'ordre : au lancement, TokTik se place au centre, affiche son logo, puis lance le fil.",
           blocs: [
             { cat: 'evenements', chapeau: true, texte: "quand 🏳 est cliqué" },
             { cat: 'mouvement',  texte: 'aller à x: {0} y: {0}' },
-            { cat: 'apparence',  texte: 'dire {LOOP} pendant {2} secondes' },
+            { cat: 'apparence',  texte: 'dire {TokTik} pendant {2} secondes' },
             { cat: 'mouvement',  texte: 'avancer de {100} pas' }
           ],
           fragment: '1',
@@ -354,7 +354,7 @@ const ETAPES = [
   memo: ['m2'],
 
   intro: [
-    { texte: "L'écran se couvre d'une grille lumineuse. Chaque sticker, chaque sous-titre, chaque bouton de LOOP a <b>deux nombres</b> collés dessus." },
+    { texte: "L'écran se couvre d'une grille lumineuse. Chaque sticker, chaque sous-titre, chaque bouton de TokTik a <b>deux nombres</b> collés dessus." },
     { qui: 'kaya', texte: "Ça, c'est le système de placement. <b>x</b> pour la gauche-droite, <b>y</b> pour le haut-bas. Rien ne se pose « à peu près » : tout est à une position exacte." }
   ],
 
@@ -622,7 +622,7 @@ const ETAPES = [
           id: 'e3b1', type: 'qcm', icone: '♾️',
           titre: "La boucle sans fin",
           histoire: { qui: 'nova', texte: "Voilà mon script préféré, celui qui te retient depuis deux heures. Trois blocs. Je te laisse même le lire : tu ne pourras pas dire que je t'ai menti." },
-          consigne: "Voici le script du fil de LOOP :",
+          consigne: "Voici le script du fil de TokTik :",
           script: [
             { cat: 'evenements', chapeau: true, texte: "quand 🏳 est cliqué" },
             { cat: 'controle', texte: 'répéter indéfiniment', corps: [
@@ -701,7 +701,7 @@ const ETAPES = [
   memo: ['m4'],
 
   intro: [
-    { qui: 'kaya', texte: "Là on entre dans la partie qui me tient à cœur. LOOP est censée masquer les commentaires méchants toute seule. Depuis que Nova a pris le contrôle, elle laisse tout passer." },
+    { qui: 'kaya', texte: "Là on entre dans la partie qui me tient à cœur. TokTik est censée masquer les commentaires méchants toute seule. Depuis que Nova a pris le contrôle, elle laisse tout passer." },
     { qui: 'ilyes', texte: "ouais j'ai vu les coms sous ta vidéo c'est chaud 😬" },
     { qui: 'scratchy', texte: "tout ça tient dans un seul bloc : <b>si … alors</b>. l'appli teste quelque chose, et n'agit que si c'est vrai." }
   ],
@@ -725,7 +725,7 @@ const ETAPES = [
           id: 'e4a1', type: 'trous', icone: '🛡',
           titre: "Reconstruire le filtre",
           histoire: { qui: 'kaya', texte: "Le script tourne en boucle sur chaque commentaire qui arrive. Il manque deux blocs : celui qui <b>teste</b>, et celui qui <b>agit</b>. Clique sur un emplacement en pointillés pour choisir." },
-          consigne: "Complète le script pour que LOOP masque un commentaire <b>quand il est signalé</b>.",
+          consigne: "Complète le script pour que TokTik masque un commentaire <b>quand il est signalé</b>.",
           script: [
             { cat: 'evenements', chapeau: true, texte: "quand 🏳 est cliqué" },
             { cat: 'controle', texte: 'répéter indéfiniment', corps: [
@@ -803,14 +803,14 @@ const ETAPES = [
           id: 'e4b1', type: 'qcm', icone: '⚖',
           titre: "La règle appliquée à la lettre",
           histoire: { qui: 'nova', texte: "La règle du badge dit : <i>plus de 10 000 abonnés</i>. Ce compte en a exactement 10 000. Alors, badge ou pas badge ? Réfléchis bien : je n'invente rien, j'applique." },
-          consigne: "Le compte a exactement <b>10 000</b> abonnés. LOOP exécute :",
+          consigne: "Le compte a exactement <b>10 000</b> abonnés. TokTik exécute :",
           script: [
             { cat: 'controle', texte: 'si {#} alors',
               condition: { cat: 'operateurs', forme: 'booleen', texte: '{abonnés} > {10000}' },
               corps:  [{ cat: 'apparence', texte: 'dire {Badge accordé}' }],
               corps2: [{ cat: 'apparence', texte: 'dire {Badge refusé}' }] }
           ],
-          question: "Qu'affiche LOOP ?",
+          question: "Qu'affiche TokTik ?",
           options: [
             { texte: '« Badge refusé »', correct: true },
             { texte: '« Badge accordé »', retour: "Piège ! Le symbole > signifie « <b>strictement</b> plus grand que ». Or 10 000 n'est pas plus grand que 10 000." },
@@ -855,7 +855,7 @@ const ETAPES = [
         {
           id: 'e4b3', type: 'qcm', icone: '📊',
           titre: "Écrire la bonne condition",
-          histoire: { qui: 'kaya', texte: "Dernier réglage : LOOP doit signaler les vidéos qui <b>dépassent 100 000 vues</b>. Il ne manque que l'hexagone. Choisis bien — tu as vu ce matin ce qu'un seul symbole peut changer." },
+          histoire: { qui: 'kaya', texte: "Dernier réglage : TokTik doit signaler les vidéos qui <b>dépassent 100 000 vues</b>. Il ne manque que l'hexagone. Choisis bien — tu as vu ce matin ce qu'un seul symbole peut changer." },
           consigne: "Quel bloc de condition traduit exactement « <b>le nombre de vues dépasse 100 000</b> » ?",
           options: [
             { bloc: { cat: 'operateurs', forme: 'booleen', texte: '{vues} > {100000}' }, correct: true },
@@ -893,7 +893,8 @@ const ETAPES = [
   intro: [
     { texte: "Le fil s'efface. À la place, un seul écran : une <b>boîte</b>, avec une étiquette, et un nombre qui monte tout seul. <i>temps_passé</i>." },
     { qui: 'nova', texte: "Voilà. Tu voulais me voir ? Me voilà en entier. Une variable, une boucle, un ordre. C'est tout ce que je suis." },
-    { qui: 'scratchy', texte: "une <b>variable</b> c'est juste une boîte avec un nom, qui retient une valeur. suis-la pas à pas et elle n'a plus aucun secret." }
+    { qui: 'scratchy', texte: "une <b>variable</b> c'est juste une boîte avec un nom, qui retient une valeur. suis-la pas à pas et elle n'a plus aucun secret." },
+    { qui: 'scratchy', texte: "et regarde le nom de l'appli. tok. tik. <b>tic-tac.</b> le bruit du temps qui passe. ils l'ont écrit sur la porte d'entrée et personne ne l'a jamais lu." }
   ],
 
   choix: {

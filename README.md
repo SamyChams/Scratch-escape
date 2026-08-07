@@ -1,4 +1,4 @@
-# 🔁 LOOP — l'appli dont on ne sort pas
+# 🔁 TokTik — l'appli dont on ne sort pas
 
 **Escape game pédagogique pour apprendre les rudiments de Scratch — classe de 5ᵉ.**
 
@@ -56,7 +56,7 @@ directement exploitable en éducation aux médias.
 
 | | Qui | Rôle |
 |---|---|---|
-| 💠 | **NOVA** | l'algorithme de LOOP. Elle sait ce que tu regardes et combien de temps. C'est elle qui te retient. |
+| 💠 | **NOVA** | l'algorithme de TokTik. Elle sait ce que tu regardes et combien de temps. C'est elle qui te retient. |
 | 🎧 | **Kaya** | une créatrice coincée dans l'appli, qui streame encore. C'est elle qui donne les indices. |
 | 🐈 | **@scratchy** | un compte à 3 abonnés que personne ne suit — mais qui a lu tout le code de l'appli. |
 | 💬 | **Ilyes & Nour** | le groupe de discussion, qui s'inquiète en arrière-plan. |
@@ -68,7 +68,7 @@ programmation et la leçon d'esprit critique se rejoignent.
 
 ### Un mot sur les références
 
-Le site n'imite **aucune plateforme réelle** et ne cite aucune marque : LOOP est
+Le site n'imite **aucune plateforme réelle** et ne cite aucune marque : TokTik est
 entièrement fictive. Ce sont les **formats** qui sont empruntés — le fil qu'on fait
 défiler, le chat de groupe, le live et ses commentaires — parce qu'ils sont immédiatement
 reconnaissables et qu'ils ne se démodent pas, contrairement à une tendance nommée qui
@@ -115,7 +115,7 @@ situation. L'antagoniste existe aussi pendant le travail, pas seulement entre le
 Télécharger le dossier et **double-cliquer sur `index.html`**. C'est tout : pas de serveur,
 pas de compte, pas de connexion Internet nécessaire. Rien n'est envoyé sur le réseau,
 aucune donnée personnelle n'est collectée (la progression reste dans le `localStorage`
-du poste, clé `loop-partie-v1`).
+du poste, clé `toktik-partie-v1`).
 
 ### Publier en ligne (GitHub Pages)
 
@@ -143,7 +143,7 @@ professeur.html     Fiche pédagogique (libre) + corrigé (protégé)
 outils.html         Changer le mot de passe / modifier le corrigé
 
 css/style.css       Habillage général
-css/appli.css       L'habillage de LOOP (écran, messages, choix)
+css/appli.css       L'habillage de TokTik (écran, messages, choix)
 css/blocs.css       Rendu des blocs façon Scratch 3
 
 js/parcours.js      Le scénario : 5 étapes, 10 branches, 30 énigmes,
@@ -268,4 +268,4 @@ Projet pédagogique pour le cycle 4 (thème « Algorithmique et programmation »
 
 Scratch est un projet du **MIT Media Lab** (<https://scratch.mit.edu>). Ce site n'y est
 pas affilié : il imite l'apparence des blocs uniquement pour faciliter le transfert des
-élèves vers le vrai logiciel. LOOP est une application entièrement fictive.
+élèves vers le vrai logiciel. TokTik est une application entièrement fictive.

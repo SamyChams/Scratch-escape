@@ -1,5 +1,5 @@
 /* =========================================================
-   corrige-chiffre.js — corrigé de LOOP, CHIFFRÉ
+   corrige-chiffre.js — corrigé de TokTik, CHIFFRÉ
    ---------------------------------------------------------
    Aucune réponse en clair : les solutions sont chiffrées en
    AES-256-GCM avec une clé dérivée du mot de passe enseignant
