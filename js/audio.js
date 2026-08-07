@@ -5,7 +5,7 @@
 
 const Son = (() => {
   let ctx = null;
-  let actif = localStorage.getItem('labo404-son') !== 'off';
+  let actif = localStorage.getItem('toktik-son') !== 'off';
 
   function contexte() {
     if (!ctx) {
@@ -44,7 +44,7 @@ const Son = (() => {
     estActif: () => actif,
     basculer() {
       actif = !actif;
-      localStorage.setItem('labo404-son', actif ? 'on' : 'off');
+      localStorage.setItem('toktik-son', actif ? 'on' : 'off');
       if (actif) this.clic();
       return actif;
     },
