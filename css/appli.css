@@ -318,3 +318,62 @@
 .carte-mode--choisi { border-color: var(--jaune); background: rgba(255, 198, 26, .12); }
 .carte-mode__icone { font-size: 1.8rem; }
 .carte-mode__nom { font-weight: 800; margin: 4px 0 2px; }
+
+/* ---------------------------------------------------------
+   L'atelier : le téléphone à réparer, à côté des réglages
+   --------------------------------------------------------- */
+.atelier {
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) 1fr;
+  gap: clamp(16px, 3vw, 28px);
+  align-items: start;
+  margin-bottom: 20px;
+}
+.atelier__apercu { text-align: center; position: sticky; top: 78px; }
+.atelier__titre {
+  font-size: .72rem; font-weight: 800;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--texte-doux);
+  margin-bottom: 10px;
+}
+.atelier__reste { font-size: .8rem; color: var(--texte-doux); margin-top: 10px; }
+.atelier__reste b { color: var(--accent); }
+
+/* Le téléphone lui-même */
+.tel {
+  --tel-coque: #0a0e24;
+  --tel-bord:  #4b5591;
+  --tel-ecran: #141a3c;
+  --tel-doux:  #8f9ad0;
+  --tel-clair: #e6ebff;
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  height: auto;
+  margin-inline: auto;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, .45));
+}
+
+/* La bascule cassé → réparé, et la transition qui la rend visible */
+.tel [class^="casse-"], .tel [class^="ok-"] { transition: opacity .55s ease; }
+.tel[data-r1="0"] .ok-1, .tel[data-r1="1"] .casse-1,
+.tel[data-r2="0"] .ok-2, .tel[data-r2="1"] .casse-2,
+.tel[data-r3="0"] .ok-3, .tel[data-r3="1"] .casse-3 { opacity: 0; }
+
+/* Le réglage qui vient d'être réparé attire l'œil une fois */
+@keyframes tel-repare {
+  0%   { filter: drop-shadow(0 8px 20px rgba(0,0,0,.45)); }
+  35%  { filter: drop-shadow(0 0 22px var(--accent)) drop-shadow(0 8px 20px rgba(0,0,0,.45)); }
+  100% { filter: drop-shadow(0 8px 20px rgba(0,0,0,.45)); }
+}
+.tel--repare { animation: tel-repare 1.4s ease; }
+
+@media (max-width: 700px) {
+  .atelier { grid-template-columns: 1fr; }
+  .atelier__apercu { position: static; }
+  .tel { max-width: 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tel [class^="casse-"], .tel [class^="ok-"] { transition: none; }
+  .tel--repare { animation: none; }
+}

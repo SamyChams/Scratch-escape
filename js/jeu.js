@@ -221,7 +221,7 @@
   }
 
   /* ---------------------------------------------- les énigmes de l'étape */
-  function afficherTaches(etape, branche) {
+  function afficherTaches(etape, branche, nouvelId) {
     vider(scene);
     window.scrollTo(0, 0);
     majProgression();
@@ -244,8 +244,29 @@
     const { ecran, contenu } = ecranAppli(etape.soustitre);
     contenu.appendChild(el('p', 'centre muet petit',
       `Section « ${etape.branches[branche].titre} » — trois réglages à réparer.`));
-    contenu.appendChild(bandeauMode(etape));
     scene.appendChild(ecran);
+
+    const atelier = el('div', 'atelier');
+
+    // L'aperçu de l'appli, dans son état réel
+    const reparees = enigmes.map((e) => Progression.estResolue(e.id));
+    const apercu = el('div', 'atelier__apercu');
+    apercu.appendChild(el('div', 'atelier__titre', 'Aperçu de ' + APPLI.nom));
+    // Si une énigme vient d'être résolue, on affiche d'abord l'ancien état
+    // pour que la réparation se joue sous les yeux de l'élève.
+    const iNeuf = nouvelId ? enigmes.findIndex((e) => e.id === nouvelId) : -1;
+    const depart = reparees.slice();
+    if (iNeuf >= 0) depart[iNeuf] = false;
+    apercu.innerHTML += Telephone.ecran(etape.id, depart);
+    const reste = reparees.filter((x) => !x).length;
+    apercu.appendChild(el('div', 'atelier__reste', reste
+      ? `<b>${reste}</b> réglage${reste > 1 ? 's' : ''} encore en panne`
+      : '✅ tout est réparé'));
+    atelier.appendChild(apercu);
+
+    const colonne = el('div');
+    atelier.appendChild(colonne);
+    contenu.appendChild(atelier);
 
     const liste = el('div', 'taches');
     enigmes.forEach((enigme, i) => {
@@ -264,7 +285,17 @@
       t.addEventListener('click', () => { Son.clic(); ouvrirEnigme(etape, branche, enigme); });
       liste.appendChild(t);
     });
-    contenu.appendChild(liste);
+    colonne.appendChild(bandeauMode(etape));
+    colonne.appendChild(liste);
+
+    // La réparation se joue une fraction de seconde après l'affichage.
+    if (iNeuf >= 0) {
+      const tel = apercu.querySelector('.tel');
+      setTimeout(() => {
+        tel.setAttribute('data-r' + (iNeuf + 1), '1');
+        tel.classList.add('tel--repare');
+      }, 450);
+    }
 
     contenu.appendChild(construireVerification(etape, branche, enigmes));
 
@@ -576,7 +607,7 @@
           <div style="font-size:2.6rem;font-weight:800;color:var(--jaune)">${fragment}</div>
         </div>`));
       const btn = el('button', 'btn btn--vert btn--grand', '✔ Continuer');
-      btn.addEventListener('click', () => { fermerModale(); afficherTaches(etape, branche); });
+      btn.addEventListener('click', () => { fermerModale(); afficherTaches(etape, branche, idCredite); });
       actions.appendChild(btn);
       actions.style.justifyContent = 'center';
       btn.focus();
