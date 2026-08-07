@@ -78,7 +78,62 @@ const Illus = (() => {
     <rect x="84" y="92" width="8" height="8" fill="#c56bff" opacity=".6"/>
   </svg>`;
 
-  const personnages = { scratchy, pixel, bug };
+
+  /** Nova, l'algorithme de LOOP : un œil géométrique qui te regarde. */
+  const nova = (taille = 90) => `
+  <svg viewBox="0 0 100 110" width="${taille}" height="${taille * 1.1}" role="img" aria-label="Nova, l'algorithme">
+    <defs>
+      <radialGradient id="nv-iris" cx="50%" cy="45%">
+        <stop offset="0%" stop-color="#ff7ae0"/>
+        <stop offset="55%" stop-color="#a35cf0"/>
+        <stop offset="100%" stop-color="#4a2a8a"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="50" cy="103" rx="22" ry="4" fill="rgba(0,0,0,.3)"/>
+    <g opacity=".55" stroke="#c56bff" stroke-width="2" fill="none">
+      <path d="M50 6 l38 22 v44 l-38 22 l-38-22 v-44 z"/>
+    </g>
+    <g opacity=".9" stroke="#7fe3ff" stroke-width="2.5" fill="none" stroke-linecap="round">
+      <path d="M50 14 l30 18"/><path d="M50 14 l-30 18"/>
+      <path d="M20 68 l30 18"/><path d="M80 68 l-30 18"/>
+    </g>
+    <circle cx="50" cy="14" r="3.5" fill="#7fe3ff"/>
+    <circle cx="20" cy="32" r="3" fill="#7fe3ff"/><circle cx="80" cy="32" r="3" fill="#7fe3ff"/>
+    <circle cx="20" cy="68" r="3" fill="#7fe3ff"/><circle cx="80" cy="68" r="3" fill="#7fe3ff"/>
+    <circle cx="50" cy="86" r="3.5" fill="#7fe3ff"/>
+    <path d="M12 50 q38 -30 76 0 q-38 30 -76 0 z" fill="#1a0f38" stroke="#c56bff" stroke-width="3"/>
+    <circle cx="50" cy="50" r="17" fill="url(#nv-iris)"/>
+    <ellipse cx="50" cy="50" rx="5" ry="15" fill="#12082b"/>
+    <circle cx="56" cy="42" r="3.4" fill="#fff" opacity=".92"/>
+    <circle cx="43" cy="57" r="1.8" fill="#fff" opacity=".55"/>
+    <rect x="6" y="44" width="6" height="6" fill="#ff7ae0" opacity=".8"/>
+    <rect x="90" y="58" width="5" height="5" fill="#7fe3ff" opacity=".7"/>
+  </svg>`;
+
+  /** Kaya, la créatrice coincée dans l'appli — elle streame encore. */
+  const kaya = (taille = 90) => `
+  <svg viewBox="0 0 100 110" width="${taille}" height="${taille * 1.1}" role="img" aria-label="Kaya, la créatrice">
+    <ellipse cx="50" cy="103" rx="24" ry="4" fill="rgba(0,0,0,.28)"/>
+    <circle cx="50" cy="46" r="34" fill="none" stroke="#ffe14d" stroke-width="3" stroke-dasharray="4 7" opacity=".65"/>
+    <path d="M22 100 q4 -26 28 -26 q24 0 28 26 z" fill="#2fb3a6"/>
+    <path d="M50 74 l-7 14 l7 6 l7 -6 z" fill="#249a8e"/>
+    <path d="M30 34 q20 -18 40 0 q4 22 -4 30 q-16 8 -32 0 q-8 -8 -4 -30" fill="#3a2a52"/>
+    <circle cx="50" cy="48" r="21" fill="#f0b98d"/>
+    <path d="M29 44 q21 -20 42 0 q2 -22 -21 -22 q-23 0 -21 22" fill="#3a2a52"/>
+    <circle cx="42" cy="48" r="2.9" fill="#2b2036"/><circle cx="58" cy="48" r="2.9" fill="#2b2036"/>
+    <circle cx="43" cy="47" r="1" fill="#fff"/><circle cx="59" cy="47" r="1" fill="#fff"/>
+    <path d="M44 58 q6 5 12 0" fill="none" stroke="#c4795a" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M27 40 v14 a5 5 0 0 0 5 5 h2 v-24 h-2 a5 5 0 0 0 -5 5 z" fill="#ff8c42"/>
+    <path d="M73 40 v14 a5 5 0 0 1 -5 5 h-2 v-24 h2 a5 5 0 0 1 5 5 z" fill="#ff8c42"/>
+    <path d="M27 40 q23 -16 46 0" fill="none" stroke="#ff8c42" stroke-width="4.5"/>
+    <path d="M34 60 q6 8 6 14" fill="none" stroke="#ff8c42" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="41" cy="76" r="4" fill="#ff8c42"/>
+    <rect x="60" y="84" width="26" height="12" rx="6" fill="#ff3b5c"/>
+    <circle cx="67" cy="90" r="3" fill="#fff"/>
+    <text x="76" y="94" font-size="8" font-weight="bold" fill="#fff" font-family="sans-serif">LIVE</text>
+  </svg>`;
+
+  const personnages = { scratchy, nova, kaya, pixel, bug };
 
   /* ================================ DÉCORS ================================ */
   /* Bandeaux d'ambiance en haut de chaque salle.
@@ -199,7 +254,10 @@ const Illus = (() => {
    * qui : 'scratchy' | 'pixel' | 'bug'
    */
   function dialogue(qui, texte, nomForce) {
-    const noms = { scratchy: 'Scratchy', pixel: 'Pixel', bug: 'Le Bug' };
+    const noms = {
+      scratchy: '@scratchy', nova: 'NOVA', kaya: 'Kaya',
+      pixel: 'Pixel', bug: 'Le Bug'
+    };
     const dessin = personnages[qui] || personnages.pixel;
     return `<div class="dialogue dialogue--${qui}">
       <div class="dialogue__avatar">${dessin(74)}</div>
@@ -210,7 +268,7 @@ const Illus = (() => {
     </div>`;
   }
 
-  return { decor, dialogue, scratchy, pixel, bug, teteChat };
+  return { decor, dialogue, scratchy, nova, kaya, pixel, bug, teteChat };
 })();
 
 if (typeof window !== 'undefined') window.Illus = Illus;

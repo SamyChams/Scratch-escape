@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Outils enseignant — mot de passe et corrigé</title>
+<title>Outils enseignant — LOOP</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/blocs.css">
@@ -88,13 +88,13 @@
 
   <section class="carte">
     <h2>❓ Ce que ce mot de passe protège… et ce qu'il ne protège pas</h2>
-    <p><b>Il protège :</b> le corrigé écrit — les solutions rédigées et le récapitulatif des codes de cadenas.
+    <p><b>Il protège :</b> le corrigé écrit — les solutions rédigées et le récapitulatif des codes de vérification.
        Ils sont chiffrés en AES-256-GCM et restent illisibles sans le mot de passe, même pour un élève qui
        ouvrirait le code source de la page.</p>
     <p><b>Il ne protège pas :</b> les données du jeu lui-même. Un site sans serveur envoie forcément au
        navigateur tout ce dont il a besoin pour fonctionner. Un élève qui sait ouvrir les outils de
        développement peut donc, en cherchant, retrouver quelle réponse est marquée comme correcte dans
-       <code>js/salles.js</code>.</p>
+       <code>js/parcours.js</code>.</p>
     <div class="encart encart--astuce">
       En pratique, un élève capable de faire ça a de toute façon compris bien plus que ce que la séance
       cherche à évaluer. Pour un verrouillage complet, il faudrait un site avec serveur, qui garde les
@@ -104,7 +104,7 @@
 
 </div>
 
-<script src="js/salles.js"></script>
+<script src="js/parcours.js"></script>
 <script src="js/coffre.js"></script>
 <script src="js/corrige-chiffre.js"></script>
 <script>
@@ -136,23 +136,30 @@
   function construireFormulaire() {
     const hote = $('formulaire');
     hote.innerHTML = '';
-    SALLES.forEach((salle) => {
+    ETAPES.forEach((etape) => {
       const bloc = document.createElement('div');
-      bloc.innerHTML = `<h3>${salle.icone} Salle ${salle.numero} — ${salle.titre}
-        <span class="muet petit">(code : ${codeSalle(salle)})</span></h3>`;
-      salle.enigmes.forEach((e) => {
-        const l = document.createElement('div');
-        l.className = 'ligne-sol';
-        l.innerHTML = `<label for="sol-${e.id}">${e.titre}</label>`;
-        const ta = document.createElement('textarea');
-        ta.className = 'champ-long';
-        ta.id = 'sol-' + e.id;
-        ta.rows = 2;
-        ta.value = donnees.solutions[e.id] || '';
-        ta.addEventListener('input', () => { donnees.solutions[e.id] = ta.value; });
-        l.appendChild(ta);
-        bloc.appendChild(l);
+      bloc.innerHTML = `<h3>${etape.icone} Étape ${etape.numero} — ${etape.titre}</h3>`;
+
+      Object.keys(etape.branches).forEach((cle) => {
+        const br = etape.branches[cle];
+        bloc.insertAdjacentHTML('beforeend',
+          `<div class="muet petit" style="margin:14px 0 6px"><b>Branche ${cle.toUpperCase()}</b> —
+           ${br.titre} · code : <b>${codeDe(etape, cle)}</b></div>`);
+        br.enigmes.forEach((e) => {
+          const l = document.createElement('div');
+          l.className = 'ligne-sol';
+          l.innerHTML = `<label for="sol-${e.id}">${e.titre}</label>`;
+          const ta = document.createElement('textarea');
+          ta.className = 'champ-long';
+          ta.id = 'sol-' + e.id;
+          ta.rows = 2;
+          ta.value = donnees.solutions[e.id] || '';
+          ta.addEventListener('input', () => { donnees.solutions[e.id] = ta.value; });
+          l.appendChild(ta);
+          bloc.appendChild(l);
+        });
       });
+
       hote.appendChild(bloc);
     });
   }
@@ -175,7 +182,11 @@
 
     // les codes sont toujours recalculés à partir des énigmes
     donnees.codes = {};
-    SALLES.forEach((s) => { donnees.codes[s.id] = codeSalle(s); });
+    ETAPES.forEach((etape) => {
+      Object.keys(etape.branches).forEach((cle) => {
+        donnees.codes[etape.id + cle] = codeDe(etape, cle);
+      });
+    });
 
     $('retour2').innerHTML = '<p class="muet petit">Chiffrement en cours…</p>';
     const coffre = await Coffre.fermer(mdp, donnees);

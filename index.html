@@ -3,79 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>L'Évasion du Labo 404 — apprendre Scratch en s'échappant</title>
+<title>LOOP — l'appli dont on ne sort pas</title>
 <meta name="description" content="Escape game pédagogique pour découvrir les bases de Scratch : blocs, coordonnées, boucles, tests et variables. Niveau 5e.">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/blocs.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐈</text></svg>">
+<link rel="stylesheet" href="css/appli.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔁</text></svg>">
 </head>
 <body>
 <div class="page conteneur">
 
   <header class="heros">
-    <div class="heros__chat" id="chat-accueil"></div>
-    <h1 class="heros__titre">L'Évasion du Labo&nbsp;404</h1>
+    <div class="heros__chat" id="illu-accueil"></div>
+    <h1 class="heros__titre">LOOP</h1>
     <p class="heros__sous">
-      Scratchy, le chat de Scratch, est prisonnier d'un vieux serveur infecté par un virus.
-      <b>Cinq salles</b>, <b>quinze énigmes</b>, cinq cadenas… et une seule façon de le libérer :
-      apprendre à programmer.
+      Il est <b>23 h 47</b>. Tu as dit « encore une dernière » onze fois.
+      Et là, l'appli refuse de se fermer.<br>
+      Pour te déconnecter, il va falloir apprendre à lire son code.
     </p>
   </header>
 
-  <!-- ------------------------------------------------ Personnages -->
-  <section class="carte" style="margin-bottom:26px">
-    <h2 class="centre">🎭 Les personnages</h2>
-    <div class="grille-cartes" id="personnages" style="margin-bottom:0"></div>
-  </section>
-
   <!-- ------------------------------------------------ Départ -->
   <section class="carte centre" style="margin-bottom:26px">
-    <h2>🎮 Commencer la mission</h2>
-    <p class="muet">Choisis ton nom de code (ton prénom, par exemple) :</p>
+    <h2>▶ Ouvrir l'appli</h2>
+    <p class="muet">Choisis ton pseudo :</p>
     <p>
-      <label for="pseudo" class="cache">Nom de code</label>
+      <label for="pseudo" class="cache">Pseudo</label>
       <input id="pseudo" class="champ-pseudo" type="text" maxlength="24"
-             placeholder="Ton nom de code" autocomplete="off">
+             placeholder="Ton pseudo" autocomplete="off">
     </p>
     <div class="actions" style="justify-content:center">
-      <button id="btn-jouer" class="btn btn--grand">🚀 Entrer dans le labo</button>
+      <button id="btn-jouer" class="btn btn--grand">🔁 Entrer dans LOOP</button>
       <button id="btn-continuer" class="btn btn--bleu btn--grand cache">▶ Reprendre ma partie</button>
     </div>
     <p id="info-partie" class="muet petit cache"></p>
   </section>
 
+  <!-- ------------------------------------------------ Personnages -->
+  <section class="carte" style="margin-bottom:26px">
+    <h2 class="centre">Qui tu vas croiser</h2>
+    <div class="grille-cartes" id="personnages" style="margin-bottom:0"></div>
+  </section>
+
   <!-- ------------------------------------------------ Le parcours -->
-  <h2 class="centre">🗺 Ton parcours</h2>
+  <h2 class="centre">Les 5 réglages à reprendre</h2>
   <div class="grille-cartes">
     <div class="carte">
-      <div style="font-size:2rem">🧱</div>
-      <h3>1. Le Hall des Briques</h3>
-      <p class="petit">L'écran de Scratch, les lutins, les catégories de blocs et l'ordre des instructions.</p>
+      <div style="font-size:2rem">🎛</div>
+      <h3>1. L'Éditeur</h3>
+      <p class="petit">Où le code de l'appli est rangé : les blocs, leurs couleurs, et l'ordre dans lequel ils s'exécutent.</p>
     </div>
     <div class="carte">
-      <div style="font-size:2rem">🧭</div>
-      <h3>2. Le Couloir des Coordonnées</h3>
-      <p class="petit">Les repères x et y, avancer, tourner, s'orienter… et un labyrinthe à programmer.</p>
+      <div style="font-size:2rem">🎯</div>
+      <h3>2. Les Filtres</h3>
+      <p class="petit">Placer un élément à l'écran au pixel près : les coordonnées x et y, et les directions.</p>
     </div>
     <div class="carte">
       <div style="font-size:2rem">🔁</div>
-      <h3>3. La Salle des Miroirs</h3>
-      <p class="petit">Les boucles : répéter n fois, répéter indéfiniment, et le calcul des angles.</p>
+      <h3>3. Le Montage</h3>
+      <p class="petit">Ce qui se répète : les boucles, y compris celle du scroll infini qui te retient depuis deux heures.</p>
     </div>
     <div class="carte">
       <div style="font-size:2rem">🔀</div>
-      <h3>4. Le Laboratoire des Choix</h3>
-      <p class="petit">Les tests si… alors… sinon, les conditions et les capteurs.</p>
+      <h3>4. La Modération</h3>
+      <p class="petit">Quand l'appli doit choisir : si… alors… sinon, et les conditions qui décident à ta place.</p>
     </div>
     <div class="carte">
-      <div style="font-size:2rem">💾</div>
-      <h3>5. Le Cœur du Serveur</h3>
-      <p class="petit">Les variables et les messages, pour affronter le Bug une bonne fois pour toutes.</p>
+      <div style="font-size:2rem">💠</div>
+      <h3>5. L'Algorithme</h3>
+      <p class="petit">Le cœur de Nova : une variable, une boucle, un ordre. Et la façon de le réécrire.</p>
     </div>
     <div class="carte" style="border-color:var(--jaune)">
       <div style="font-size:2rem">🏆</div>
-      <h3>La sortie</h3>
-      <p class="petit">Un diplôme d'évasion à ton nom, à imprimer, avec ton temps et tes étoiles.</p>
+      <h3>La déconnexion</h3>
+      <p class="petit">Une attestation à ton nom, à imprimer, avec ton temps, tes étoiles et le parcours que tu as suivi.</p>
     </div>
   </div>
 
@@ -83,12 +84,13 @@
   <section class="carte">
     <h2>❓ Comment ça marche ?</h2>
     <ul>
-      <li>Chaque salle contient <b>3 énigmes</b>. Tu peux les faire dans l'ordre que tu veux.</li>
-      <li>Chaque énigme résolue te donne <b>un chiffre</b> du code de la porte.</li>
-      <li>Compose les 3 chiffres <b>dans l'ordre des énigmes</b> pour ouvrir le cadenas et passer à la salle suivante.</li>
-      <li>Bloqué ? Le bouton <b>💡 Un indice</b> t'aide, et le <b>📘 cahier de cours</b> est disponible à tout moment.</li>
-      <li>Aucune limite de temps : on peut se tromper autant de fois qu'on veut. Le chrono sert juste à décorer ton diplôme !</li>
-      <li>Ta progression est <b>sauvegardée automatiquement</b> dans ce navigateur : tu peux reprendre plus tard sur le même ordinateur.</li>
+      <li>À chaque étape, tu fais un <b>choix</b>. Il n'y a pas de mauvaise réponse : ton choix décide simplement de la suite.</li>
+      <li><b>Ton voisin n'aura pas les mêmes exercices que toi.</b> C'est normal — c'est exactement ce que fait un algorithme.</li>
+      <li>Chaque réglage réparé te donne <b>un chiffre</b> du code de vérification.</li>
+      <li>Compose les deux chiffres <b>dans l'ordre</b> pour débloquer la section suivante.</li>
+      <li>Bloqué ? <b>Kaya</b> te donne des indices, et le <b>📘 cahier de cours</b> est disponible à tout moment.</li>
+      <li>Aucune limite de temps, aucun échec possible : on peut se tromper autant de fois qu'on veut.</li>
+      <li>Ta progression est <b>sauvegardée automatiquement</b> dans ce navigateur.</li>
     </ul>
   </section>
 
@@ -99,7 +101,8 @@
 
   <p class="centre muet petit" style="margin-top:34px">
     Projet pédagogique — initiation à Scratch, cycle 4 (classe de 5<sup>e</sup>).<br>
-    Fonctionne sans installation et sans connexion : rien n'est envoyé sur Internet.
+    LOOP est une application entièrement fictive. Fonctionne sans installation et sans connexion :
+    rien n'est envoyé sur Internet.
   </p>
 
 </div>
@@ -108,15 +111,19 @@
 <script src="js/progression.js"></script>
 <script>
 (() => {
-  document.getElementById('chat-accueil').innerHTML = Illus.scratchy(150);
+  document.getElementById('illu-accueil').innerHTML = Illus.nova(150);
   document.getElementById('personnages').innerHTML = [
-    ['scratchy', 'Scratchy', "Le chat de Scratch. Enfermé tout au fond du serveur, il compte sur toi. Il ne dit qu'un mot, mais il le dit souvent."],
-    ['pixel',    'Pixel',    "Un petit drone de maintenance. Il connaît le labo par cœur mais ne sait pas programmer : c'est lui qui te donne les indices."],
-    ['bug',      'Le Bug',   "Le virus qui a pris le contrôle du Labo 404. Il adore les énigmes, les pièges… et se moquer de ceux qui abandonnent."]
-  ].map(([id, nom, texte]) => `
+    ['nova',     'NOVA',      'algorithme',
+     "L'algorithme de LOOP. Elle sait ce que tu regardes, combien de temps, et ce que tu vas regarder après. C'est elle qui te retient."],
+    ['kaya',     'Kaya',      'en live',
+     "Une créatrice coincée dans l'appli depuis mardi. Elle continue son live pour t'aider : c'est elle qui te donne les indices."],
+    ['scratchy', '@scratchy', '3 abonnés',
+     "Un tout petit compte que personne ne suit. Sauf qu'il a lu le code de l'appli en entier, et qu'il sait comment la réécrire."]
+  ].map(([id, nom, etiquette, texte]) => `
     <div class="centre">
       <div style="display:flex;justify-content:center">${Illus[id](110)}</div>
-      <h3>${nom}</h3>
+      <h3 style="margin-bottom:2px">${nom}</h3>
+      <div class="muet petit" style="margin-bottom:8px">${etiquette}</div>
       <p class="petit muet">${texte}</p>
     </div>`).join('');
 
@@ -130,15 +137,15 @@
     champ.value = e.pseudo;
     btnReprise.classList.remove('cache');
     info.classList.remove('cache');
-    info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — salle ${e.salle + 1}/5, `
-                   + `${e.resolues.length} énigme(s) résolue(s).<br>`
-                   + `« Entrer dans le labo » effacera cette partie pour en commencer une nouvelle.`;
+    info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — étape ${e.etape + 1}/5, `
+                   + `${e.resolues.length} réglage(s) réparé(s).<br>`
+                   + `« Entrer dans LOOP » effacera cette partie pour en commencer une nouvelle.`;
     btnReprise.addEventListener('click', () => { location.href = 'jeu.html'; });
   }
 
   function demarrer() {
     const nom = champ.value.trim();
-    if (!nom) { champ.focus(); champ.placeholder = 'Écris ton nom de code ici !'; return; }
+    if (!nom) { champ.focus(); champ.placeholder = 'Écris ton pseudo ici !'; return; }
     if (Progression.existe() && !confirm('Une partie est déjà en cours. La remplacer par une nouvelle ?')) return;
     Progression.demarrer(nom);
     location.href = 'jeu.html';

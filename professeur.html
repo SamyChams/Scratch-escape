@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Espace enseignant — L'Évasion du Labo 404</title>
+<title>Espace enseignant — LOOP</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/blocs.css">
@@ -30,13 +30,13 @@
     <p>Séance d'introduction ou de remédiation sur les rudiments de Scratch, en classe de 5<sup>e</sup>
        (cycle 4, thème « Algorithmique et programmation »).</p>
     <table class="tableau">
-      <thead><tr><th>Salle</th><th>Notion travaillée</th><th>Compétence visée</th></tr></thead>
+      <thead><tr><th>Étape</th><th>Notion travaillée</th><th>Compétence visée</th></tr></thead>
       <tbody>
-        <tr><td>1 — Le Hall des Briques</td><td>Interface, catégories, séquence d'instructions</td><td>Repérer les éléments de l'environnement ; comprendre qu'un programme s'exécute dans l'ordre</td></tr>
-        <tr><td>2 — Le Couloir des Coordonnées</td><td>Repère (x ; y), direction, déplacements relatifs et absolus</td><td>Se repérer dans un plan ; distinguer « aller à » et « avancer de »</td></tr>
-        <tr><td>3 — La Salle des Miroirs</td><td>Boucles bornées et infinies, angles d'un polygone</td><td>Factoriser une répétition ; relier programmation et géométrie (360 ÷ n)</td></tr>
-        <tr><td>4 — Le Laboratoire des Choix</td><td>Instructions conditionnelles, conditions booléennes</td><td>Comprendre si… alors… sinon ; interpréter une inégalité stricte</td></tr>
-        <tr><td>5 — Le Cœur du Serveur</td><td>Variables, initialisation, messages</td><td>Suivre l'évolution d'une variable ; synchroniser des lutins</td></tr>
+        <tr><td>1 — L'Éditeur</td><td>Interface, catégories, séquence d'instructions</td><td>Repérer les éléments de l'environnement ; comprendre qu'un programme s'exécute dans l'ordre</td></tr>
+        <tr><td>2 — Les Filtres</td><td>Repère (x ; y), direction, déplacements</td><td>Se repérer dans un plan ; distinguer « aller à » et « avancer de »</td></tr>
+        <tr><td>3 — Le Montage</td><td>Boucles bornées et infinies, angles</td><td>Factoriser une répétition ; relier programmation et géométrie (360 ÷ n)</td></tr>
+        <tr><td>4 — La Modération</td><td>Instructions conditionnelles, conditions booléennes</td><td>Comprendre si… alors… sinon ; interpréter une inégalité stricte</td></tr>
+        <tr><td>5 — L'Algorithme</td><td>Variables, initialisation, messages</td><td>Suivre l'évolution d'une variable ; synchroniser plusieurs scripts</td></tr>
       </tbody>
     </table>
   </section>
@@ -44,15 +44,15 @@
   <section class="carte">
     <h2>🕒 Organisation proposée</h2>
     <ul>
-      <li><b>Durée :</b> 45 à 60 minutes pour les 5 salles. Les salles 1 à 3 seules tiennent en 30 minutes.</li>
-      <li><b>Modalité :</b> en binôme devant un poste, un élève « pilote », l'autre « navigateur » (on échange à chaque salle).</li>
+      <li><b>Durée :</b> 45 à 60 minutes pour les 5 étapes. Les étapes 1 à 3 seules tiennent en 30 minutes.</li>
+      <li><b>Modalité :</b> en binôme devant un poste, un élève « pilote », l'autre « navigateur » (on échange à chaque étape).</li>
       <li><b>Matériel :</b> un navigateur récent. Aucune installation, aucun compte, fonctionne hors connexion.</li>
       <li><b>Trace écrite :</b> la page <a href="memo.html">Cahier de cours</a> est imprimable et sert de leçon à coller dans le cahier.</li>
-      <li><b>Prolongement :</b> faire reproduire dans le vrai Scratch le script final de la salle 5, ou le pentagone de la salle 3.</li>
+      <li><b>Prolongement :</b> faire reproduire dans le vrai Scratch le script final de l'étape 5, ou le pentagone de l'étape 3.</li>
     </ul>
     <div class="encart">
       <b>Sauvegarde :</b> la progression est stockée dans le navigateur du poste (localStorage), sous la clé
-      <code>labo404-partie-v1</code>. Rien n'est envoyé sur Internet, aucune donnée personnelle n'est collectée.
+      <code>loop-partie-v1</code>. Rien n'est envoyé sur Internet, aucune donnée personnelle n'est collectée.
       Pour repartir de zéro sur un poste, terminer la partie puis cliquer sur « Rejouer », ou vider les données
       du site dans le navigateur.
     </div>
@@ -61,13 +61,15 @@
   <section class="carte">
     <h2>🧩 Différenciation</h2>
     <ul>
-      <li>Chaque énigme propose <b>deux indices progressifs</b>, donnés par le personnage de Pixel : le premier oriente,
+      <li>Chaque énigme propose <b>deux indices progressifs</b>, donnés par le personnage de Kaya : le premier oriente,
           le second donne presque la méthode. Encourager les élèves fragiles à les utiliser sans culpabiliser
           (le jeu ne peut pas être perdu).</li>
-      <li>Le bouton <b>📘 Revoir le cours</b> ouvre directement la fiche correspondant à la salle en cours.</li>
-      <li>Élèves rapides : leur demander de trouver un <b>chemin différent</b> pour le labyrinthe de la salle 2,
-          ou l'angle d'un octogone (45°).</li>
-      <li>Les énigmes d'une même salle sont <b>indépendantes</b> : un binôme bloqué peut passer à la suivante et revenir.</li>
+      <li>Le bouton <b>📘 Revoir le cours</b> ouvre directement la fiche correspondant à l'étape en cours.</li>
+      <li>Élèves rapides : leur demander de trouver un <b>chemin différent</b> pour le labyrinthe de l'étape 2, l'angle d'un octogone (45°),
+          ou de rejouer en prenant l'autre branche à chaque étape.</li>
+      <li>Les deux énigmes d'une même étape sont <b>indépendantes</b> : un binôme bloqué peut passer à la suivante et revenir.</li>
+      <li>Le parcours est <b>à embranchements</b> : deux binômes voisins ne font pas les mêmes exercices,
+          ce qui limite la recopie. Les cinq notions restent traversées quel que soit le chemin.</li>
     </ul>
   </section>
 
@@ -98,13 +100,14 @@
 
   <p class="centre muet petit" style="margin-top:30px">
     Ce support est un projet de classe. Scratch est développé par le MIT Media Lab ; ce site n'y est pas affilié
-    et se contente d'en imiter l'apparence pour faciliter le transfert vers le vrai logiciel.
+    et se contente d'en imiter l'apparence pour faciliter le transfert vers le vrai logiciel.<br>
+    LOOP est une application entièrement fictive : aucune plateforme réelle n'est nommée ni représentée.
   </p>
 
 </div>
 
 <script src="js/blocs.js"></script>
-<script src="js/salles.js"></script>
+<script src="js/parcours.js"></script>
 <script src="js/coffre.js"></script>
 <script src="js/corrige-chiffre.js"></script>
 <script>
@@ -141,36 +144,47 @@
 
   function afficher(d) {
     hote.innerHTML = '<div class="encart encart--piege"><b>Ne pas projeter devant les élèves.</b> '
-      + 'Cette page reste déchiffrée jusqu\'à sa fermeture.</div>';
+      + 'Cette page reste déchiffrée jusqu\'à sa fermeture.</div>'
+      + '<div class="encart">Le parcours est <b>à embranchements</b> : à chaque étape, le choix de '
+      + 'l\'élève décide de la branche, donc des deux énigmes rencontrées. Un élève en joue <b>10</b> '
+      + 'sur les <b>20</b> écrites. Les cinq notions sont traversées quel que soit le chemin.</div>';
 
-    SALLES.forEach((salle) => {
+    ETAPES.forEach((etape) => {
       const s = document.createElement('section');
-      s.style.marginBottom = '26px';
-
+      s.style.marginBottom = '30px';
       let html = `<div class="fiche__entete">
-          <div class="fiche__icone">${salle.icone}</div>
+          <div class="fiche__icone">${etape.icone}</div>
           <div>
-            <h3 style="margin-bottom:2px">Salle ${salle.numero} — ${salle.titre}</h3>
-            <div class="muet petit">Code du cadenas :
-              <b style="color:var(--jaune);font-size:1.3rem;letter-spacing:4px">${d.codes[salle.id] || codeSalle(salle)}</b></div>
+            <h3 style="margin-bottom:2px">Étape ${etape.numero} — ${etape.titre}</h3>
+            <div class="muet petit">${etape.notion}</div>
           </div>
         </div>
-        <table class="tableau">
-          <thead><tr><th style="width:24%">Énigme</th><th style="width:15%">Type</th><th>Solution</th><th style="width:8%">Chiffre</th></tr></thead><tbody>`;
+        <p class="petit"><b>Choix proposé :</b> « ${etape.choix.question} »</p>`;
 
-      salle.enigmes.forEach((e, i) => {
-        html += `<tr>
-          <td><b>${i + 1}. ${e.titre}</b></td>
-          <td class="petit">${TYPES[e.type] || e.type}</td>
-          <td>${d.solutions[e.id] || '<i>(non renseignée)</i>'}
-              <div class="muet petit" style="margin-top:6px"><b>À retenir :</b> ${e.explication}</div>
-              <div class="muet petit" style="margin-top:6px"><b>Indices proposés :</b>
-                <ol style="margin:4px 0 0"><li>${e.indices[0]}</li><li>${e.indices[1]}</li></ol></div></td>
-          <td class="centre"><b style="font-size:1.3rem;color:var(--jaune)">${e.fragment}</b></td>
-        </tr>`;
+      Object.keys(etape.branches).forEach((cle) => {
+        const br = etape.branches[cle];
+        const opt = etape.choix.options.find((o) => o.branche === cle);
+        html += `<h4 style="margin:16px 0 6px">Branche ${cle.toUpperCase()} — ${br.titre}
+            <span class="muet petit">(si l'élève répond « ${opt ? opt.texte : '?'} »)</span><br>
+            <span class="muet petit">Code de vérification :
+              <b style="color:var(--jaune);font-size:1.2rem;letter-spacing:3px">${d.codes[etape.id + cle] || codeDe(etape, cle)}</b></span>
+          </h4>
+          <table class="tableau">
+            <thead><tr><th style="width:24%">Énigme</th><th style="width:15%">Type</th><th>Solution</th><th style="width:8%">Chiffre</th></tr></thead><tbody>`;
+        br.enigmes.forEach((e, i) => {
+          html += `<tr>
+            <td><b>${i + 1}. ${e.titre}</b></td>
+            <td class="petit">${TYPES[e.type] || e.type}</td>
+            <td>${d.solutions[e.id] || '<i>(non renseignée)</i>'}
+                <div class="muet petit" style="margin-top:6px"><b>À retenir :</b> ${e.explication}</div>
+                <div class="muet petit" style="margin-top:6px"><b>Indices :</b>
+                  <ol style="margin:4px 0 0"><li>${e.indices[0]}</li><li>${e.indices[1]}</li></ol></div></td>
+            <td class="centre"><b style="font-size:1.3rem;color:var(--jaune)">${e.fragment}</b></td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
       });
 
-      html += '</tbody></table>';
       s.innerHTML = html;
       hote.appendChild(s);
     });
