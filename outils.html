@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outils enseignant — mot de passe et corrigé</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/blocs.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+<style>
+  .champ-long {
+    width: 100%; font-family: inherit; font-size: .95rem;
+    color: var(--texte); background: #131a42;
+    border: 2px solid var(--bord); border-radius: 10px;
+    padding: 10px 12px; resize: vertical;
+  }
+  .champ-long:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .ligne-sol { margin-bottom: 16px; }
+  .ligne-sol label { display: block; font-weight: 700; margin-bottom: 6px; }
+  .etape { counter-increment: etape; }
+  .etape h2::before { content: counter(etape) ". "; color: var(--jaune); }
+  body { counter-reset: etape; }
+</style>
+</head>
+<body>
+<div class="page conteneur">
+
+  <header class="centre" style="padding:20px 0">
+    <div style="font-size:3.2rem">🔧</div>
+    <h1>Outils enseignant</h1>
+    <p class="muet">Changer le mot de passe du corrigé, ou modifier les solutions.</p>
+    <div class="actions" style="justify-content:center">
+      <a class="btn btn--fantome" href="professeur.html">👩‍🏫 Espace enseignant</a>
+      <a class="btn btn--fantome" href="index.html">🏠 Accueil</a>
+    </div>
+  </header>
+
+  <section class="carte etape">
+    <h2>Ouvrir le corrigé</h2>
+    <p>Saisis le mot de passe actuel. Celui livré par défaut est <code>labo404</code>.</p>
+    <div class="centre">
+      <label for="mdp-actuel" class="cache">Mot de passe actuel</label>
+      <input id="mdp-actuel" class="champ-pseudo" type="password" placeholder="Mot de passe actuel">
+    </div>
+    <div class="actions" style="justify-content:center">
+      <button id="btn-ouvrir" class="btn">🔓 Ouvrir</button>
+    </div>
+    <div id="retour1"></div>
+  </section>
+
+  <div id="suite" class="cache">
+
+    <section class="carte etape">
+      <h2>Vérifier ou modifier les solutions</h2>
+      <p class="muet">Ces textes n'apparaissent que sur la page enseignant, une fois le mot de passe saisi.
+         Tu peux les laisser tels quels.</p>
+      <div id="formulaire"></div>
+    </section>
+
+    <section class="carte etape">
+      <h2>Choisir le nouveau mot de passe</h2>
+      <p>Laisse les cases vides pour <b>conserver</b> le mot de passe actuel.</p>
+      <div class="centre">
+        <label for="mdp1" class="cache">Nouveau mot de passe</label>
+        <input id="mdp1" class="champ-pseudo" type="password" placeholder="Nouveau mot de passe">
+        <label for="mdp2" class="cache">Confirmation</label>
+        <input id="mdp2" class="champ-pseudo" type="password" placeholder="Répéter le mot de passe" style="margin-top:10px">
+      </div>
+      <div class="encart" style="margin-top:16px">
+        Choisis un mot de passe que les élèves ne devineront pas, et <b>différent</b> de ceux
+        que tu utilises ailleurs : il protège un corrigé, pas un compte bancaire.
+      </div>
+    </section>
+
+    <section class="carte etape">
+      <h2>Enregistrer le nouveau fichier</h2>
+      <p>Le bouton télécharge un fichier <code>corrige-chiffre.js</code>.
+         Remplace avec lui le fichier <code>js/corrige-chiffre.js</code> du site, puis renvoie-le sur GitHub
+         (ou recopie-le simplement dans le dossier si tu utilises le site en local).</p>
+      <div class="actions" style="justify-content:center">
+        <button id="btn-generer" class="btn btn--grand">💾 Générer le fichier chiffré</button>
+      </div>
+      <div id="retour2"></div>
+    </section>
+
+  </div>
+
+  <section class="carte">
+    <h2>❓ Ce que ce mot de passe protège… et ce qu'il ne protège pas</h2>
+    <p><b>Il protège :</b> le corrigé écrit — les solutions rédigées et le récapitulatif des codes de cadenas.
+       Ils sont chiffrés en AES-256-GCM et restent illisibles sans le mot de passe, même pour un élève qui
+       ouvrirait le code source de la page.</p>
+    <p><b>Il ne protège pas :</b> les données du jeu lui-même. Un site sans serveur envoie forcément au
+       navigateur tout ce dont il a besoin pour fonctionner. Un élève qui sait ouvrir les outils de
+       développement peut donc, en cherchant, retrouver quelle réponse est marquée comme correcte dans
+       <code>js/salles.js</code>.</p>
+    <div class="encart encart--astuce">
+      En pratique, un élève capable de faire ça a de toute façon compris bien plus que ce que la séance
+      cherche à évaluer. Pour un verrouillage complet, il faudrait un site avec serveur, qui garde les
+      réponses de son côté — hors de portée d'un projet de classe hébergé sur GitHub Pages.
+    </div>
+  </section>
+
+</div>
+
+<script src="js/salles.js"></script>
+<script src="js/coffre.js"></script>
+<script src="js/corrige-chiffre.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  let donnees = null;
+  let motDePasseActuel = '';
+
+  if (!Coffre.disponible()) {
+    $('retour1').innerHTML = '<div class="retour retour--erreur">Ce navigateur ne fournit pas '
+      + 'les outils de chiffrement (Web Crypto). Essaie un navigateur plus récent.</div>';
+    $('btn-ouvrir').disabled = true;
+  }
+
+  async function ouvrir() {
+    $('retour1').innerHTML = '<p class="muet petit">Déchiffrement en cours…</p>';
+    donnees = await Coffre.ouvrir($('mdp-actuel').value, CORRIGE_CHIFFRE);
+    if (!donnees) {
+      $('retour1').innerHTML = '<div class="retour retour--erreur">❌ Mot de passe incorrect.</div>';
+      return;
+    }
+    motDePasseActuel = $('mdp-actuel').value;
+    $('retour1').innerHTML = '<div class="retour retour--ok">✅ Corrigé ouvert.</div>';
+    $('suite').classList.remove('cache');
+    construireFormulaire();
+    $('suite').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function construireFormulaire() {
+    const hote = $('formulaire');
+    hote.innerHTML = '';
+    SALLES.forEach((salle) => {
+      const bloc = document.createElement('div');
+      bloc.innerHTML = `<h3>${salle.icone} Salle ${salle.numero} — ${salle.titre}
+        <span class="muet petit">(code : ${codeSalle(salle)})</span></h3>`;
+      salle.enigmes.forEach((e) => {
+        const l = document.createElement('div');
+        l.className = 'ligne-sol';
+        l.innerHTML = `<label for="sol-${e.id}">${e.titre}</label>`;
+        const ta = document.createElement('textarea');
+        ta.className = 'champ-long';
+        ta.id = 'sol-' + e.id;
+        ta.rows = 2;
+        ta.value = donnees.solutions[e.id] || '';
+        ta.addEventListener('input', () => { donnees.solutions[e.id] = ta.value; });
+        l.appendChild(ta);
+        bloc.appendChild(l);
+      });
+      hote.appendChild(bloc);
+    });
+  }
+
+  async function generer() {
+    const a = $('mdp1').value, b = $('mdp2').value;
+    let mdp = motDePasseActuel;
+
+    if (a || b) {
+      if (a !== b) {
+        $('retour2').innerHTML = '<div class="retour retour--erreur">❌ Les deux mots de passe ne sont pas identiques.</div>';
+        return;
+      }
+      if (a.length < 4) {
+        $('retour2').innerHTML = '<div class="retour retour--erreur">❌ Choisis un mot de passe d\'au moins 4 caractères.</div>';
+        return;
+      }
+      mdp = a;
+    }
+
+    // les codes sont toujours recalculés à partir des énigmes
+    donnees.codes = {};
+    SALLES.forEach((s) => { donnees.codes[s.id] = codeSalle(s); });
+
+    $('retour2').innerHTML = '<p class="muet petit">Chiffrement en cours…</p>';
+    const coffre = await Coffre.fermer(mdp, donnees);
+    const fichier = Coffre.versFichier(coffre);
+
+    const lien = document.createElement('a');
+    lien.href = URL.createObjectURL(new Blob([fichier], { type: 'text/javascript' }));
+    lien.download = 'corrige-chiffre.js';
+    lien.click();
+    URL.revokeObjectURL(lien.href);
+
+    $('retour2').innerHTML = '<div class="retour retour--ok">✅ Fichier <code>corrige-chiffre.js</code> téléchargé.'
+      + '<br>Place-le dans le dossier <code>js/</code> du site, à la place de l\'ancien.'
+      + (mdp !== motDePasseActuel ? '<br><b>Le nouveau mot de passe est actif dès que le fichier est remplacé.</b>' : '')
+      + '</div>';
+  }
+
+  $('btn-ouvrir').addEventListener('click', ouvrir);
+  $('mdp-actuel').addEventListener('keydown', (e) => { if (e.key === 'Enter') ouvrir(); });
+  $('btn-generer').addEventListener('click', generer);
+})();
+</script>
+</body>
+</html>

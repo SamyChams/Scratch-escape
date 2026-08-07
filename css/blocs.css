@@ -1,0 +1,169 @@
+/* =========================================================
+   Rendu des blocs façon Scratch 3 (HTML + CSS uniquement)
+   ========================================================= */
+
+.bloc {
+  --couleur: #4c97ff;
+  --couleur-fonce: #3373cc;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--couleur);
+  color: #fff;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: .95rem;
+  line-height: 1.2;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-bottom: 3px solid var(--couleur-fonce);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .18);
+  text-align: left;
+  user-select: none;
+}
+
+/* Le petit ergot sous le bloc, pour l'emboîtement */
+.bloc::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -6px;
+  width: 22px;
+  height: 6px;
+  background: var(--couleur);
+  border-radius: 0 0 4px 4px;
+}
+
+/* Bloc "chapeau" : arrondi en haut, rien ne peut s'y emboîter */
+.bloc--chapeau { border-radius: 18px 18px 6px 6px; padding-top: 14px; }
+
+/* Bloc booléen : hexagone (les conditions) */
+.bloc--booleen {
+  border-radius: 999px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  padding: 8px 20px;
+  border-bottom: none;
+  font-size: .9rem;
+}
+.bloc--booleen::after { display: none; }
+
+/* Champ ovale (valeur modifiable) */
+.bloc__champ {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 10px;
+  background: #fff;
+  color: #303030;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: .9rem;
+}
+.bloc__champ--liste {
+  background: rgba(0, 0, 0, .18);
+  color: #fff;
+  border-radius: 6px;
+}
+
+/* Emplacement à compléter (trou) */
+.trou {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  min-height: 30px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, .35);
+  border: 2px dashed rgba(255, 255, 255, .75);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, .85);
+  cursor: pointer;
+  font-weight: 700;
+}
+.trou:hover { background: rgba(0, 0, 0, .5); border-color: #fff; }
+.trou--actif { border-color: var(--jaune, #ffbf00); background: rgba(255, 191, 0, .25); }
+.trou--rempli { border-style: solid; padding: 2px 4px; background: rgba(0, 0, 0, .22); }
+.trou input {
+  width: 52px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  text-align: center;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 0;
+  background: #fff;
+  color: #303030;
+}
+.trou .bloc { font-size: .85rem; padding: 6px 10px; }
+.trou .bloc::after { display: none; }
+
+/* Bloc en C (répéter, si…alors) */
+.bloc-c {
+  --couleur: #ffab19;
+  --couleur-fonce: #cf8b17;
+  display: inline-block;
+  min-width: 190px;
+}
+.bloc-c__haut,
+.bloc-c__bas {
+  background: var(--couleur);
+  color: #fff;
+  font-weight: 700;
+  font-size: .95rem;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.bloc-c__haut { border-radius: 6px 6px 0 0; }
+.bloc-c__bas  { border-radius: 0 0 6px 6px; min-height: 16px; padding: 6px 14px; border-bottom: 3px solid var(--couleur-fonce); position: relative; }
+.bloc-c__bas::after {
+  content: "";
+  position: absolute; left: 16px; bottom: -6px;
+  width: 22px; height: 6px;
+  background: var(--couleur); border-radius: 0 0 4px 4px;
+}
+.bloc-c__corps {
+  border-left: 16px solid var(--couleur);
+  padding: 8px 8px 8px 10px;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  background: rgba(0, 0, 0, .16);
+  min-height: 34px;
+}
+
+/* Pile de blocs emboîtés */
+.pile { display: grid; gap: 8px; justify-items: start; }
+.pile .bloc, .pile .bloc-c { width: auto; }
+
+/* Palette de couleurs Scratch par catégorie */
+.bloc--mouvement,  .bloc-c--mouvement  { --couleur: #4c97ff; --couleur-fonce: #3373cc; }
+.bloc--apparence,  .bloc-c--apparence  { --couleur: #9966ff; --couleur-fonce: #774dcb; }
+.bloc--son,        .bloc-c--son        { --couleur: #cf63cf; --couleur-fonce: #bd42bd; }
+.bloc--evenements, .bloc-c--evenements { --couleur: #ffbf00; --couleur-fonce: #cc9900; }
+.bloc--controle,   .bloc-c--controle   { --couleur: #ffab19; --couleur-fonce: #cf8b17; }
+.bloc--capteurs,   .bloc-c--capteurs   { --couleur: #5cb1d6; --couleur-fonce: #2e8eb8; }
+.bloc--operateurs, .bloc-c--operateurs { --couleur: #59c059; --couleur-fonce: #389438; }
+.bloc--variables,  .bloc-c--variables  { --couleur: #ff8c1a; --couleur-fonce: #db6e00; }
+.bloc--stylo,      .bloc-c--stylo      { --couleur: #0fbd8c; --couleur-fonce: #0b8e69; }
+
+/* Bloc cliquable (palette d'une énigme) */
+.bloc--cliquable { cursor: pointer; transition: transform .1s ease, filter .15s; }
+.bloc--cliquable:hover { filter: brightness(1.12); transform: translateX(3px); }
+.bloc--cliquable:active { transform: scale(.97); }
+
+/* Pastille de couleur utilisée dans les fiches */
+.puce-couleur {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  vertical-align: -2px;
+  margin-right: 6px;
+  border: 1px solid rgba(255, 255, 255, .4);
+}

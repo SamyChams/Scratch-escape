@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace enseignant — L'Évasion du Labo 404</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/blocs.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👩‍🏫</text></svg>">
+</head>
+<body>
+<div class="page conteneur">
+
+  <header class="centre" style="padding:20px 0">
+    <div style="font-size:3.2rem">👩‍🏫</div>
+    <h1>Espace enseignant</h1>
+    <p class="muet">Fiche pédagogique en accès libre, corrigé protégé par mot de passe.</p>
+    <div class="actions no-print" style="justify-content:center">
+      <a class="btn btn--fantome" href="index.html">🏠 Accueil</a>
+      <a class="btn btn--fantome" href="memo.html">📘 Cahier de cours</a>
+      <a class="btn btn--fantome" href="outils.html">🔧 Changer le mot de passe</a>
+      <button class="btn btn--fantome" onclick="window.print()">🖨 Imprimer</button>
+    </div>
+  </header>
+
+  <!-- ------------------------------------------------ Fiche pédago -->
+  <section class="carte">
+    <h2>🎯 Objectifs</h2>
+    <p>Séance d'introduction ou de remédiation sur les rudiments de Scratch, en classe de 5<sup>e</sup>
+       (cycle 4, thème « Algorithmique et programmation »).</p>
+    <table class="tableau">
+      <thead><tr><th>Salle</th><th>Notion travaillée</th><th>Compétence visée</th></tr></thead>
+      <tbody>
+        <tr><td>1 — Le Hall des Briques</td><td>Interface, catégories, séquence d'instructions</td><td>Repérer les éléments de l'environnement ; comprendre qu'un programme s'exécute dans l'ordre</td></tr>
+        <tr><td>2 — Le Couloir des Coordonnées</td><td>Repère (x ; y), direction, déplacements relatifs et absolus</td><td>Se repérer dans un plan ; distinguer « aller à » et « avancer de »</td></tr>
+        <tr><td>3 — La Salle des Miroirs</td><td>Boucles bornées et infinies, angles d'un polygone</td><td>Factoriser une répétition ; relier programmation et géométrie (360 ÷ n)</td></tr>
+        <tr><td>4 — Le Laboratoire des Choix</td><td>Instructions conditionnelles, conditions booléennes</td><td>Comprendre si… alors… sinon ; interpréter une inégalité stricte</td></tr>
+        <tr><td>5 — Le Cœur du Serveur</td><td>Variables, initialisation, messages</td><td>Suivre l'évolution d'une variable ; synchroniser des lutins</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="carte">
+    <h2>🕒 Organisation proposée</h2>
+    <ul>
+      <li><b>Durée :</b> 45 à 60 minutes pour les 5 salles. Les salles 1 à 3 seules tiennent en 30 minutes.</li>
+      <li><b>Modalité :</b> en binôme devant un poste, un élève « pilote », l'autre « navigateur » (on échange à chaque salle).</li>
+      <li><b>Matériel :</b> un navigateur récent. Aucune installation, aucun compte, fonctionne hors connexion.</li>
+      <li><b>Trace écrite :</b> la page <a href="memo.html">Cahier de cours</a> est imprimable et sert de leçon à coller dans le cahier.</li>
+      <li><b>Prolongement :</b> faire reproduire dans le vrai Scratch le script final de la salle 5, ou le pentagone de la salle 3.</li>
+    </ul>
+    <div class="encart">
+      <b>Sauvegarde :</b> la progression est stockée dans le navigateur du poste (localStorage), sous la clé
+      <code>labo404-partie-v1</code>. Rien n'est envoyé sur Internet, aucune donnée personnelle n'est collectée.
+      Pour repartir de zéro sur un poste, terminer la partie puis cliquer sur « Rejouer », ou vider les données
+      du site dans le navigateur.
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2>🧩 Différenciation</h2>
+    <ul>
+      <li>Chaque énigme propose <b>deux indices progressifs</b>, donnés par le personnage de Pixel : le premier oriente,
+          le second donne presque la méthode. Encourager les élèves fragiles à les utiliser sans culpabiliser
+          (le jeu ne peut pas être perdu).</li>
+      <li>Le bouton <b>📘 Revoir le cours</b> ouvre directement la fiche correspondant à la salle en cours.</li>
+      <li>Élèves rapides : leur demander de trouver un <b>chemin différent</b> pour le labyrinthe de la salle 2,
+          ou l'angle d'un octogone (45°).</li>
+      <li>Les énigmes d'une même salle sont <b>indépendantes</b> : un binôme bloqué peut passer à la suivante et revenir.</li>
+    </ul>
+  </section>
+
+  <!-- ------------------------------------------------ Corrigé protégé -->
+  <section class="carte" id="zone-corrige">
+    <h2>🔑 Corrigé complet</h2>
+
+    <div id="verrou">
+      <p>Le corrigé est <b>chiffré</b> : les solutions ne figurent nulle part en clair dans les fichiers du site.
+         Saisis le mot de passe enseignant pour l'afficher.</p>
+      <div class="centre">
+        <label for="mdp" class="cache">Mot de passe enseignant</label>
+        <input id="mdp" class="champ-pseudo" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      </div>
+      <div class="actions" style="justify-content:center">
+        <button id="btn-ouvrir" class="btn">🔓 Afficher le corrigé</button>
+      </div>
+      <div id="retour-mdp"></div>
+      <div class="encart encart--piege" style="margin-top:18px">
+        <b>À faire dès la première utilisation :</b> le mot de passe livré par défaut est
+        <code>labo404</code> — il est public puisqu'il est écrit ici. Change-le avec la page
+        <a href="outils.html">🔧 Outils</a> avant de mettre le site à disposition des élèves.
+      </div>
+    </div>
+
+    <div id="corrige" class="cache"></div>
+  </section>
+
+  <p class="centre muet petit" style="margin-top:30px">
+    Ce support est un projet de classe. Scratch est développé par le MIT Media Lab ; ce site n'y est pas affilié
+    et se contente d'en imiter l'apparence pour faciliter le transfert vers le vrai logiciel.
+  </p>
+
+</div>
+
+<script src="js/blocs.js"></script>
+<script src="js/salles.js"></script>
+<script src="js/coffre.js"></script>
+<script src="js/corrige-chiffre.js"></script>
+<script>
+(() => {
+  const champ   = document.getElementById('mdp');
+  const bouton  = document.getElementById('btn-ouvrir');
+  const retour  = document.getElementById('retour-mdp');
+  const verrou  = document.getElementById('verrou');
+  const hote    = document.getElementById('corrige');
+
+  const TYPES = {
+    qcm: 'Choix multiple', association: 'Reliage', ordre: 'Remise en ordre',
+    saisie: 'Réponse à écrire', grille: 'Programme à construire', trous: 'Script à compléter'
+  };
+
+  if (!Coffre.disponible()) {
+    retour.innerHTML = '<div class="retour retour--erreur">Ce navigateur ne fournit pas les outils de '
+      + 'déchiffrement (Web Crypto). Ouvre la page en <b>https</b> ou via un navigateur plus récent.</div>';
+    bouton.disabled = true;
+  }
+
+  async function ouvrir() {
+    retour.innerHTML = '<p class="muet petit">Déchiffrement en cours…</p>';
+    const donnees = await Coffre.ouvrir(champ.value, CORRIGE_CHIFFRE);
+    if (!donnees) {
+      retour.innerHTML = '<div class="retour retour--erreur">❌ Mot de passe incorrect.</div>';
+      champ.select();
+      return;
+    }
+    verrou.classList.add('cache');
+    hote.classList.remove('cache');
+    afficher(donnees);
+  }
+
+  function afficher(d) {
+    hote.innerHTML = '<div class="encart encart--piege"><b>Ne pas projeter devant les élèves.</b> '
+      + 'Cette page reste déchiffrée jusqu\'à sa fermeture.</div>';
+
+    SALLES.forEach((salle) => {
+      const s = document.createElement('section');
+      s.style.marginBottom = '26px';
+
+      let html = `<div class="fiche__entete">
+          <div class="fiche__icone">${salle.icone}</div>
+          <div>
+            <h3 style="margin-bottom:2px">Salle ${salle.numero} — ${salle.titre}</h3>
+            <div class="muet petit">Code du cadenas :
+              <b style="color:var(--jaune);font-size:1.3rem;letter-spacing:4px">${d.codes[salle.id] || codeSalle(salle)}</b></div>
+          </div>
+        </div>
+        <table class="tableau">
+          <thead><tr><th style="width:24%">Énigme</th><th style="width:15%">Type</th><th>Solution</th><th style="width:8%">Chiffre</th></tr></thead><tbody>`;
+
+      salle.enigmes.forEach((e, i) => {
+        html += `<tr>
+          <td><b>${i + 1}. ${e.titre}</b></td>
+          <td class="petit">${TYPES[e.type] || e.type}</td>
+          <td>${d.solutions[e.id] || '<i>(non renseignée)</i>'}
+              <div class="muet petit" style="margin-top:6px"><b>À retenir :</b> ${e.explication}</div>
+              <div class="muet petit" style="margin-top:6px"><b>Indices proposés :</b>
+                <ol style="margin:4px 0 0"><li>${e.indices[0]}</li><li>${e.indices[1]}</li></ol></div></td>
+          <td class="centre"><b style="font-size:1.3rem;color:var(--jaune)">${e.fragment}</b></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      s.innerHTML = html;
+      hote.appendChild(s);
+    });
+  }
+
+  bouton.addEventListener('click', ouvrir);
+  champ.addEventListener('keydown', (e) => { if (e.key === 'Enter') ouvrir(); });
+})();
+</script>
+</body>
+</html>

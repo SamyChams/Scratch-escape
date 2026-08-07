@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Évasion du Labo 404 — apprendre Scratch en s'échappant</title>
+<meta name="description" content="Escape game pédagogique pour découvrir les bases de Scratch : blocs, coordonnées, boucles, tests et variables. Niveau 5e.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/blocs.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐈</text></svg>">
+</head>
+<body>
+<div class="page conteneur">
+
+  <header class="heros">
+    <div class="heros__chat" id="chat-accueil"></div>
+    <h1 class="heros__titre">L'Évasion du Labo&nbsp;404</h1>
+    <p class="heros__sous">
+      Scratchy, le chat de Scratch, est prisonnier d'un vieux serveur infecté par un virus.
+      <b>Cinq salles</b>, <b>quinze énigmes</b>, cinq cadenas… et une seule façon de le libérer :
+      apprendre à programmer.
+    </p>
+  </header>
+
+  <!-- ------------------------------------------------ Personnages -->
+  <section class="carte" style="margin-bottom:26px">
+    <h2 class="centre">🎭 Les personnages</h2>
+    <div class="grille-cartes" id="personnages" style="margin-bottom:0"></div>
+  </section>
+
+  <!-- ------------------------------------------------ Départ -->
+  <section class="carte centre" style="margin-bottom:26px">
+    <h2>🎮 Commencer la mission</h2>
+    <p class="muet">Choisis ton nom de code (ton prénom, par exemple) :</p>
+    <p>
+      <label for="pseudo" class="cache">Nom de code</label>
+      <input id="pseudo" class="champ-pseudo" type="text" maxlength="24"
+             placeholder="Ton nom de code" autocomplete="off">
+    </p>
+    <div class="actions" style="justify-content:center">
+      <button id="btn-jouer" class="btn btn--grand">🚀 Entrer dans le labo</button>
+      <button id="btn-continuer" class="btn btn--bleu btn--grand cache">▶ Reprendre ma partie</button>
+    </div>
+    <p id="info-partie" class="muet petit cache"></p>
+  </section>
+
+  <!-- ------------------------------------------------ Le parcours -->
+  <h2 class="centre">🗺 Ton parcours</h2>
+  <div class="grille-cartes">
+    <div class="carte">
+      <div style="font-size:2rem">🧱</div>
+      <h3>1. Le Hall des Briques</h3>
+      <p class="petit">L'écran de Scratch, les lutins, les catégories de blocs et l'ordre des instructions.</p>
+    </div>
+    <div class="carte">
+      <div style="font-size:2rem">🧭</div>
+      <h3>2. Le Couloir des Coordonnées</h3>
+      <p class="petit">Les repères x et y, avancer, tourner, s'orienter… et un labyrinthe à programmer.</p>
+    </div>
+    <div class="carte">
+      <div style="font-size:2rem">🔁</div>
+      <h3>3. La Salle des Miroirs</h3>
+      <p class="petit">Les boucles : répéter n fois, répéter indéfiniment, et le calcul des angles.</p>
+    </div>
+    <div class="carte">
+      <div style="font-size:2rem">🔀</div>
+      <h3>4. Le Laboratoire des Choix</h3>
+      <p class="petit">Les tests si… alors… sinon, les conditions et les capteurs.</p>
+    </div>
+    <div class="carte">
+      <div style="font-size:2rem">💾</div>
+      <h3>5. Le Cœur du Serveur</h3>
+      <p class="petit">Les variables et les messages, pour affronter le Bug une bonne fois pour toutes.</p>
+    </div>
+    <div class="carte" style="border-color:var(--jaune)">
+      <div style="font-size:2rem">🏆</div>
+      <h3>La sortie</h3>
+      <p class="petit">Un diplôme d'évasion à ton nom, à imprimer, avec ton temps et tes étoiles.</p>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------ Règles -->
+  <section class="carte">
+    <h2>❓ Comment ça marche ?</h2>
+    <ul>
+      <li>Chaque salle contient <b>3 énigmes</b>. Tu peux les faire dans l'ordre que tu veux.</li>
+      <li>Chaque énigme résolue te donne <b>un chiffre</b> du code de la porte.</li>
+      <li>Compose les 3 chiffres <b>dans l'ordre des énigmes</b> pour ouvrir le cadenas et passer à la salle suivante.</li>
+      <li>Bloqué ? Le bouton <b>💡 Un indice</b> t'aide, et le <b>📘 cahier de cours</b> est disponible à tout moment.</li>
+      <li>Aucune limite de temps : on peut se tromper autant de fois qu'on veut. Le chrono sert juste à décorer ton diplôme !</li>
+      <li>Ta progression est <b>sauvegardée automatiquement</b> dans ce navigateur : tu peux reprendre plus tard sur le même ordinateur.</li>
+    </ul>
+  </section>
+
+  <div class="actions" style="justify-content:center;margin-top:24px">
+    <a class="btn btn--violet" href="memo.html">📘 Le cahier de cours</a>
+    <a class="btn btn--fantome" href="professeur.html">👩‍🏫 Espace enseignant</a>
+  </div>
+
+  <p class="centre muet petit" style="margin-top:34px">
+    Projet pédagogique — initiation à Scratch, cycle 4 (classe de 5<sup>e</sup>).<br>
+    Fonctionne sans installation et sans connexion : rien n'est envoyé sur Internet.
+  </p>
+
+</div>
+
+<script src="js/illustrations.js"></script>
+<script src="js/progression.js"></script>
+<script>
+(() => {
+  document.getElementById('chat-accueil').innerHTML = Illus.scratchy(150);
+  document.getElementById('personnages').innerHTML = [
+    ['scratchy', 'Scratchy', "Le chat de Scratch. Enfermé tout au fond du serveur, il compte sur toi. Il ne dit qu'un mot, mais il le dit souvent."],
+    ['pixel',    'Pixel',    "Un petit drone de maintenance. Il connaît le labo par cœur mais ne sait pas programmer : c'est lui qui te donne les indices."],
+    ['bug',      'Le Bug',   "Le virus qui a pris le contrôle du Labo 404. Il adore les énigmes, les pièges… et se moquer de ceux qui abandonnent."]
+  ].map(([id, nom, texte]) => `
+    <div class="centre">
+      <div style="display:flex;justify-content:center">${Illus[id](110)}</div>
+      <h3>${nom}</h3>
+      <p class="petit muet">${texte}</p>
+    </div>`).join('');
+
+  const champ      = document.getElementById('pseudo');
+  const btnJouer   = document.getElementById('btn-jouer');
+  const btnReprise = document.getElementById('btn-continuer');
+  const info       = document.getElementById('info-partie');
+
+  if (Progression.existe()) {
+    const e = Progression.etat;
+    champ.value = e.pseudo;
+    btnReprise.classList.remove('cache');
+    info.classList.remove('cache');
+    info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — salle ${e.salle + 1}/5, `
+                   + `${e.resolues.length} énigme(s) résolue(s).<br>`
+                   + `« Entrer dans le labo » effacera cette partie pour en commencer une nouvelle.`;
+    btnReprise.addEventListener('click', () => { location.href = 'jeu.html'; });
+  }
+
+  function demarrer() {
+    const nom = champ.value.trim();
+    if (!nom) { champ.focus(); champ.placeholder = 'Écris ton nom de code ici !'; return; }
+    if (Progression.existe() && !confirm('Une partie est déjà en cours. La remplacer par une nouvelle ?')) return;
+    Progression.demarrer(nom);
+    location.href = 'jeu.html';
+  }
+
+  btnJouer.addEventListener('click', demarrer);
+  champ.addEventListener('keydown', (e) => { if (e.key === 'Enter') demarrer(); });
+})();
+</script>
+</body>
+</html>
