@@ -18,6 +18,7 @@ const Progression = (() => {
     debut: null,          // horodatage de départ
     duree: 0,             // durée totale en secondes (à la victoire)
     prologueVu: false,    // le récit d'introduction a déjà été joué
+    sallesVues: [],       // salles dont le dialogue d'entrée a déjà été joué
     termine: false
   });
 
@@ -67,6 +68,11 @@ const Progression = (() => {
     },
 
     marquerPrologue() { etat.prologueVu = true; sauver(); },
+
+    salleVue(id) { return etat.sallesVues.includes(id); },
+    marquerSalleVue(id) {
+      if (!etat.sallesVues.includes(id)) { etat.sallesVues.push(id); sauver(); }
+    },
 
     compterIndice() { etat.indices++; sauver(); },
     compterErreur() { etat.erreurs++; sauver(); },

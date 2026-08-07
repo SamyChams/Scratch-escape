@@ -61,22 +61,20 @@
     window.scrollTo(0, 0);
     const carte = el('div', 'carte recit');
     carte.appendChild(el('h1', 'centre', titre));
-
-    scenes.forEach((s) => {
-      carte.appendChild(s.qui
-        ? el('div', null, Illus.dialogue(s.qui, s.texte))
-        : el('div', 'narration', s.texte));
-    });
-
-    const actions = el('div', 'actions');
-    actions.style.justifyContent = 'center';
-    const btn = el('button', 'btn btn--grand', libelleBouton);
-    btn.addEventListener('click', () => { Son.clic(); suite(); });
-    actions.appendChild(btn);
-    carte.appendChild(actions);
     scene.appendChild(carte);
-    // focus sans faire défiler : le récit doit se lire depuis le début
-    btn.focus({ preventScroll: true });
+
+    // Les répliques s'écrivent une par une ; le bouton n'apparaît qu'à la fin.
+    Recit.jouer(carte, scenes, {
+      onFin: () => {
+        const actions = el('div', 'actions apparition');
+        actions.style.justifyContent = 'center';
+        const btn = el('button', 'btn btn--grand', libelleBouton);
+        btn.addEventListener('click', () => { Son.clic(); suite(); });
+        actions.appendChild(btn);
+        carte.appendChild(actions);
+        btn.focus({ preventScroll: true });
+      }
+    });
   }
 
   function majSon() {
@@ -121,10 +119,32 @@
       </div>`;
     scene.appendChild(bandeau);
 
-    scene.appendChild(el('div', 'narration', salle.entree));
-    (salle.dialogues || []).forEach((d) => {
-      scene.appendChild(el('div', null, Illus.dialogue(d.qui, d.texte)));
-    });
+    /* --- entrée en scène ---------------------------------------- */
+    const scenes = [{ texte: salle.entree }].concat(salle.dialogues || []);
+    const premiereVisite = !Progression.salleVue(salle.id);
+
+    // Tout ce qui suit le dialogue attend la fin de celui-ci.
+    const suite = el('div');
+
+    if (premiereVisite) {
+      const zoneRecit = el('div', 'recit');
+      scene.appendChild(zoneRecit);
+      suite.classList.add('cache');
+      Recit.jouer(zoneRecit, scenes, {
+        onFin: () => {
+          Progression.marquerSalleVue(salle.id);
+          suite.classList.remove('cache');
+          suite.classList.add('apparition');
+        }
+      });
+    } else {
+      scenes.forEach((s) => {
+        scene.appendChild(s.qui
+          ? el('div', null, Illus.dialogue(s.qui, s.texte))
+          : el('div', 'narration', s.texte));
+      });
+    }
+    scene.appendChild(suite);
 
     /* --- les trois énigmes ------------------------------------- */
     const grille = el('div', 'grille-enigmes');
@@ -142,10 +162,10 @@
       tuile.addEventListener('click', () => { Son.clic(); ouvrirEnigme(salle, enigme); });
       grille.appendChild(tuile);
     });
-    scene.appendChild(grille);
+    suite.appendChild(grille);
 
     /* --- le cadenas -------------------------------------------- */
-    scene.appendChild(construireCadenas(salle));
+    suite.appendChild(construireCadenas(salle));
 
     /* --- rappel de cours --------------------------------------- */
     const aide = el('div', 'centre');
@@ -153,7 +173,7 @@
     const b = el('button', 'btn btn--fantome', '📘 Ouvrir le cahier de cours de cette salle');
     b.addEventListener('click', () => ouvrirMemo(salle.memo));
     aide.appendChild(b);
-    scene.appendChild(aide);
+    suite.appendChild(aide);
   }
 
   /* ================================================== CADENAS */
@@ -295,11 +315,17 @@
     indicesAffiches = 0;
     const boite = ouvrirModale(enigme.titre, enigme.icone);
 
-    // Mise en scène : ce que l'élève « voit » dans la salle
+    // Mise en scène : ce que l'élève « voit » dans la salle.
+    // Elle s'écrit petit à petit ; un clic dessus l'affiche d'un coup.
     if (enigme.histoire) {
-      boite.appendChild(enigme.histoire.qui
-        ? el('div', null, Illus.dialogue(enigme.histoire.qui, enigme.histoire.texte))
-        : el('div', 'mise-en-scene', enigme.histoire.texte));
+      const h = enigme.histoire;
+      const noeud = h.qui
+        ? el('div', null, Illus.dialogue(h.qui, '<span class="recit__cible"></span>'))
+        : el('div', 'mise-en-scene', '<span class="recit__cible"></span>');
+      boite.appendChild(noeud);
+      const machine = Recit.ecrire(noeud.querySelector('.recit__cible'), h.texte);
+      noeud.addEventListener('click', () => machine.terminer());
+      noeud.title = "Clique pour afficher tout le texte";
     }
 
     boite.appendChild(el('div', 'consigne', enigme.consigne));

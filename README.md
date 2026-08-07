@@ -44,6 +44,17 @@ de faire dans l'histoire (réparer une manette, éclairer un couloir, ouvrir une
 de poser une question hors-sol. Chaque salle a son **décor illustré** et sa propre couleur, qui
 teinte toute l'interface.
 
+Les répliques **s'écrivent lettre après lettre**, comme dans un jeu d'aventure. L'élève avance
+avec la **barre Espace** (ou Entrée, ou un clic) :
+
+- pendant que le texte défile → la touche affiche la réplique d'un coup ;
+- quand la réplique est finie → la touche passe à la suivante.
+
+Un bouton **« Tout afficher »** permet de sauter la séquence, et les énigmes n'apparaissent
+qu'une fois le dialogue d'entrée terminé. Un dialogue déjà vu ne se rejoue pas quand on revient
+dans la salle. L'animation est automatiquement désactivée si le système de l'élève demande de
+réduire les animations.
+
 ### Pensé pour la classe
 
 - **Aucun échec possible** : pas de compte à rebours, on peut se tromper autant de fois qu'on veut.
@@ -94,6 +105,7 @@ js/illustrations.js Décors et personnages, dessinés en SVG
 js/cours.js         Contenu des 6 fiches de cours
 js/salles.js        Scénario, 5 salles, 15 énigmes, dialogues
 js/jeu.js           Moteur du jeu et des 6 types d'énigmes
+js/recit.js         Dialogues progressifs (machine à écrire, touche Espace)
 js/memo.js          Affichage des fiches
 js/progression.js   Sauvegarde, chronomètre, étoiles
 js/audio.js         Bruitages synthétisés (aucun fichier son)
