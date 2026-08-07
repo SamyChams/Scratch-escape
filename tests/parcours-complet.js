@@ -24,8 +24,15 @@ const erreurs = [];
   await page.fill('#pseudo', 'Camille');
   await page.click('#btn-jouer');
   await page.waitForURL('**/jeu.html');
-  // prologue : récit d'introduction
+
+  // Les dialogues s'écrivent progressivement : on les passe.
+  const passerRecit = async () => {
+    const p = page.locator('.recit__passer');
+    if (await p.count()) { await p.click(); await page.waitForTimeout(250); }
+  };
+  await passerRecit();   // prologue
   await page.locator('button', { hasText: 'Entrer dans le Labo 404' }).click();
+  await passerRecit();   // entrée de la salle 1
   await page.waitForSelector('.grille-enigmes .tuile');
   console.log('✓ accueil → jeu, pseudo =', await page.textContent('#pseudo'));
 
@@ -76,7 +83,9 @@ const erreurs = [];
   const passerPorte = async (code) => {
     for (let i = 0; i < code.length; i++) await page.locator('.molette').nth(i).fill(code[i]);
     await page.locator('.cadenas button', { hasText: 'Ouvrir la porte' }).click();
+    await passerRecit();   // récit de la porte qui s'ouvre
     await page.locator('button', { hasText: /salle suivante|Voir la fin/i }).click();
+    await passerRecit();   // entrée de la salle suivante (ou épilogue)
     const fin = page.locator('button', { hasText: 'Recevoir mon diplôme' });
     if (await fin.count()) await fin.click();
     console.log('  ✓ cadenas', code, 'ouvert');

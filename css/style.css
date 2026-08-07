@@ -694,6 +694,65 @@ a  { color: var(--bleu); }
 .recit { max-width: 760px; margin-inline: auto; }
 .recit .dialogue { margin-bottom: 20px; }
 
+/* Répliques qui s'écrivent une par une */
+.recit__bulle { animation: entre-bulle .32s ease both; }
+@keyframes entre-bulle {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.recit__pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 2px dashed var(--bord);
+}
+.recit__passer {
+  font-family: inherit; font-size: .88rem; font-weight: 700;
+  color: var(--texte-doux);
+  background: transparent;
+  border: 2px solid var(--bord);
+  border-radius: 999px;
+  padding: .4em 1em;
+  cursor: pointer;
+}
+.recit__passer:hover { border-color: var(--jaune); color: var(--jaune); }
+.recit__invite { font-size: .92rem; color: var(--texte-doux); }
+.recit__invite b {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 2px solid var(--bord);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  background: #0d1330;
+  color: var(--texte);
+}
+.recit__fleche {
+  display: inline-block;
+  color: var(--jaune);
+  animation: rebond 1.1s ease-in-out infinite;
+}
+@keyframes rebond {
+  0%, 100% { transform: translateY(0); opacity: .5; }
+  50%      { transform: translateY(4px); opacity: 1; }
+}
+
+/* Curseur clignotant pendant la frappe */
+.ecriture-en-cours::after {
+  content: "▌";
+  color: var(--jaune);
+  margin-left: 1px;
+  animation: clignote .7s steps(1) infinite;
+}
+@keyframes clignote { 50% { opacity: 0; } }
+
+/* La zone de jeu apparaît une fois le dialogue terminé */
+.apparition { animation: apparait .45s ease both; }
+
 @media (max-width: 560px) {
   .dialogue__avatar { width: 56px; }
   .bandeau__voile { background: linear-gradient(180deg, rgba(16,20,48,.35) 0%, rgba(16,20,48,.9) 100%); }
