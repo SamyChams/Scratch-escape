@@ -377,3 +377,40 @@
   .tel [class^="casse-"], .tel [class^="ok-"] { transition: none; }
   .tel--repare { animation: none; }
 }
+
+/* ---------------------------------------------------------
+   Le fil qui défile, dans le prologue
+   --------------------------------------------------------- */
+.tel-fil__defile { animation: fil-defile 7s linear infinite; }
+.tel-fil__pouce  { animation: fil-pouce 2.6s ease-in-out infinite; }
+.tel-fil__bloc   { opacity: 0; transition: opacity .7s ease; }
+
+/* Le motif se répète toutes les deux cartes : on remonte de deux pas
+   exactement, ce qui rend le raccord invisible. */
+@keyframes fil-defile {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-188px); }
+}
+@keyframes fil-pouce {
+  0%          { transform: translateY(228px); opacity: 0; }
+  12%, 55%    { opacity: 1; }
+  70%, 100%   { transform: translateY(96px); opacity: 0; }
+}
+
+/* Une fois l'appli bloquée : le fil se fige, le pouce continue dans le vide */
+.tel-fil--bloque .tel-fil__defile { animation-play-state: paused; }
+.tel-fil--bloque .tel-fil__bloc   { opacity: 1; }
+
+.prologue { display: grid; grid-template-columns: minmax(150px, 200px) 1fr; gap: clamp(16px, 3vw, 30px); align-items: start; }
+.prologue__tel { position: sticky; top: 78px; text-align: center; }
+.prologue__legende { font-size: .78rem; color: var(--texte-doux); margin-top: 10px; font-style: italic; }
+
+@media (max-width: 760px) {
+  .prologue { grid-template-columns: 1fr; }
+  .prologue__tel { position: static; }
+  .prologue__tel .tel { max-width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tel-fil__defile, .tel-fil__pouce { animation: none; }
+  .tel-fil__bloc { transition: none; }
+}
