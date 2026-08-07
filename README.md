@@ -17,9 +17,9 @@ Pour se déconnecter, il va falloir apprendre à lire le code de l'appli.
 ## Chaque élève joue un parcours différent
 
 C'est le cœur du dispositif. À chaque étape, l'élève fait un **choix** — sans bonne ni
-mauvaise réponse — et ce choix décide des **deux énigmes** qu'il va rencontrer.
+mauvaise réponse — et ce choix décide des **trois énigmes** qu'il va rencontrer.
 
-**20 énigmes sont écrites, un élève en joue 10.** Deux voisins n'ont donc aucun exercice
+**30 énigmes sont écrites, un élève en joue 15.** Deux voisins n'ont donc aucun exercice
 en commun, ce qui limite la recopie et rend le rejeu intéressant.
 
 La règle de conception est stricte : **on branche sur la forme, jamais sur la notion.**
@@ -40,7 +40,7 @@ et un point d'appui pour parler de bulles algorithmiques en éducation aux médi
 | 🔀 La Modération | si… alors… sinon, conditions | le filtre anti-commentaires · le badge vérifié |
 | 💠 L'Algorithme | variables, initialisation, messages | démonter le compteur · prévenir tous les comptes |
 
-Chaque réglage réparé donne **un chiffre** du code de vérification à deux chiffres qui
+Chaque réglage réparé donne **un chiffre** du code de vérification à trois chiffres qui
 déverrouille l'étape suivante. À la fin, l'élève obtient une **attestation imprimable**
 avec son temps, ses étoiles, son mode et le parcours qu'il a suivi.
 
@@ -146,7 +146,7 @@ css/style.css       Habillage général
 css/appli.css       L'habillage de LOOP (écran, messages, choix)
 css/blocs.css       Rendu des blocs façon Scratch 3
 
-js/parcours.js      Le scénario : 5 étapes, 10 branches, 20 énigmes,
+js/parcours.js      Le scénario : 5 étapes, 10 branches, 30 énigmes,
                     5 remédiations, 3 modes de jeu
 js/jeu.js           Moteur : parcours de l'arbre, récit, codes
 js/enigmes.js       Les six types d'énigmes jouables
@@ -200,15 +200,15 @@ Chaque étape suit toujours la même forme :
     ]
   },
   branches: {
-    a: { titre: "…", enigmes: [ /* deux énigmes */ ] },
-    b: { titre: "…", enigmes: [ /* deux autres */ ] }
+    a: { titre: "…", enigmes: [ /* trois énigmes */ ] },
+    b: { titre: "…", enigmes: [ /* trois autres */ ] }
   },
   sortie: [ /* récit de sortie */ ]
 }
 ```
 
 Le code de vérification n'est écrit nulle part : il est reconstitué à partir des
-`fragment` des deux énigmes de la branche jouée. Ajouter une énigme allonge donc
+`fragment` des énigmes de la branche jouée. Ajouter une énigme allonge donc
 automatiquement le code, sans rien d'autre à modifier.
 
 Pour la mise en scène d'une énigme, ajouter un champ `histoire` :
@@ -254,7 +254,7 @@ Quatre tests automatisés :
 npm install playwright
 python3 -m http.server 8765 &
 
-node tests/parcours-complet.js       # résout réellement les 20 énigmes, les deux branches
+node tests/parcours-complet.js       # résout réellement les 30 énigmes, les deux branches
 node tests/embranchements.js         # vérifie que deux élèves n'ont aucun exercice commun
 node tests/modes-et-remediation.js   # quota, porte de sortie, version simple, profil
 node tests/corrige-chiffre.js        # vérifie la protection du corrigé

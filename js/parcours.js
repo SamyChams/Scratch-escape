@@ -252,6 +252,24 @@ const ETAPES = [
             "Un seul bloc a une forme de chapeau arrondi : il ne peut aller qu'à une place, tout en haut.",
             "Suis la consigne dans l'ordre où elle est écrite : se placer, afficher, puis lancer."
           ]
+        },
+        {
+          id: 'e1a3', type: 'qcm', icone: '🗂',
+          titre: "L'intrus de la palette",
+          histoire: { qui: 'nova', texte: "J'ai glissé un bloc étranger dans le tiroir Mouvement. Un seul. Si tu ne le repères pas, tout l'éditeur reste verrouillé." },
+          consigne: "Trois de ces blocs appartiennent à la catégorie <b>Mouvement</b>. Lequel est l'intrus ?",
+          options: [
+            { bloc: { cat: 'apparence', texte: 'dire {Salut !} pendant {2} secondes' }, correct: true },
+            { bloc: { cat: 'mouvement', texte: 'avancer de {10} pas' }, retour: "Celui-ci déplace bien le lutin : il est à sa place dans Mouvement." },
+            { bloc: { cat: 'mouvement', texte: 'aller à x: {0} y: {0}' }, retour: "Celui-ci change la position du lutin : c'est bien du Mouvement." },
+            { bloc: { cat: 'mouvement', texte: 'tourner ↻ de {90} degrés' }, retour: "Tourner, c'est encore du mouvement — même sans changer de place." }
+          ],
+          fragment: '8',
+          explication: "« dire » ne déplace rien : il change ce que le lutin <b>montre</b>. C'est la catégorie <b>Apparence</b>, en violet. La couleur suffit à le repérer sans même lire le texte.",
+          indices: [
+            "Demande-toi pour chaque bloc : est-ce qu'il <b>déplace</b> quelque chose ?",
+            "Un seul de ces blocs n'est pas bleu. Regarde les couleurs avant de lire."
+          ]
         }
       ]
     },
@@ -294,6 +312,25 @@ const ETAPES = [
           indices: [
             "Le bloc chapeau jaune arrondi va toujours tout en haut.",
             "« mettre vues à 0 » sert à préparer : il doit venir avant qu'on publie quoi que ce soit."
+          ]
+        },
+        {
+          id: 'e1b3', type: 'association', icone: '🗂',
+          titre: "Ranger les blocs",
+          histoire: { qui: 'kaya', texte: "Dernier réglage de l'éditeur : les tiroirs sont vides. Prends chaque bloc et dis-moi dans quelle catégorie il va. Tu verras, la couleur t'aide énormément." },
+          consigne: "Clique sur un bloc à gauche, puis sur sa catégorie à droite.",
+          paires: [
+            { g: 'avancer de 10 pas',        d: 'Mouvement' },
+            { g: 'dire « Salut ! »',         d: 'Apparence' },
+            { g: 'répéter 10 fois',          d: 'Contrôle' },
+            { g: 'quand 🏳 est cliqué',      d: 'Événements' },
+            { g: 'mettre vues à 0',          d: 'Variables' }
+          ],
+          fragment: '2',
+          explication: "Savoir dans quel tiroir chercher est la compétence la plus rentable de Scratch : elle te fait gagner du temps sur absolument tous les projets.",
+          indices: [
+            "Pose-toi la question : ce bloc <b>déplace</b>, <b>montre</b>, <b>répète</b>, <b>déclenche</b>, ou <b>mémorise</b> ?",
+            "« répéter » ne fait rien tout seul : il commande les autres blocs. C'est du Contrôle."
           ]
         }
       ]
@@ -377,6 +414,24 @@ const ETAPES = [
             "Le sticker regarde vers la <b>droite</b> au départ. Une zone morte bloque la colonne du milieu : il faut passer par le <b>haut</b>.",
             "Une solution : avancer 1 fois, tourner ↺, avancer 3 fois, tourner ↻, avancer 3 fois."
           ]
+        },
+        {
+          id: 'e2a3', type: 'association', icone: '🧭',
+          titre: "Les quatre directions",
+          histoire: { qui: 'nova', texte: "Ton sticker est replacé, soit. Mais il regarde n'importe où. Dis-moi ce que veut dire chaque orientation — je te préviens, deux d'entre elles se ressemblent beaucoup." },
+          consigne: "Relie chaque valeur du bloc <b>s'orienter à …</b> à la direction correspondante.",
+          paires: [
+            { g: "s'orienter à 90",   d: 'Vers la droite ➡' },
+            { g: "s'orienter à -90",  d: 'Vers la gauche ⬅' },
+            { g: "s'orienter à 0",    d: 'Vers le haut ⬆' },
+            { g: "s'orienter à 180",  d: 'Vers le bas ⬇' }
+          ],
+          fragment: '6',
+          explication: "Dans Scratch, <b>0 c'est le haut</b> et on tourne dans le sens des aiguilles d'une montre : 90 à droite, 180 en bas, -90 à gauche. C'est le seul point où Scratch surprend au début.",
+          indices: [
+            "Le lutin regarde vers la droite par défaut : c'est l'orientation 90.",
+            "0 et 180 sont les deux verticales. 0 c'est le haut, comme le nord sur une carte."
+          ]
         }
       ]
     },
@@ -421,6 +476,24 @@ const ETAPES = [
           indices: [
             "Attention : au départ il regarde vers le <b>bas</b>, pas vers la droite. Descends d'abord, tu tourneras ensuite.",
             "Une solution : avancer 3 fois pour atteindre le bas, tourner ↺ (tu regardes alors vers la droite), puis avancer 4 fois."
+          ]
+        },
+        {
+          id: 'e2b3', type: 'qcm', icone: '✨',
+          titre: "Se poser ou avancer ?",
+          histoire: { qui: 'scratchy', texte: "attention, c'est LE piège de la section. deux blocs qui déplacent un élément, mais pas du tout de la même façon. si tu confonds, ton sous-titre repart à l'autre bout de l'écran." },
+          consigne: "Quel bloc <b>téléporte</b> l'élément à un endroit précis, quelle que soit sa position de départ ?",
+          options: [
+            { bloc: { cat: 'mouvement', texte: 'aller à x: {100} y: {50}' }, correct: true },
+            { bloc: { cat: 'mouvement', texte: 'avancer de {100} pas' }, retour: "Celui-ci avance <b>depuis là où il est</b>, dans la direction où il regarde : le résultat dépend du point de départ." },
+            { bloc: { cat: 'mouvement', texte: 'ajouter {100} à x' }, retour: "Celui-ci <b>ajoute</b> 100 à la position actuelle : le résultat dépend aussi d'où on part." },
+            { bloc: { cat: 'mouvement', texte: 'tourner ↻ de {90} degrés' }, retour: "Celui-ci ne déplace rien du tout : il change seulement la direction du regard." }
+          ],
+          fragment: '1',
+          explication: "<b>aller à x… y…</b> donne une position <b>absolue</b> : on arrive toujours au même endroit. Les trois autres sont <b>relatifs</b> : le résultat dépend d'où on était.",
+          indices: [
+            "Cherche le bloc dans lequel on écrit directement les deux coordonnées d'arrivée.",
+            "Si tu exécutes le bon bloc deux fois de suite, l'élément ne bouge pas la deuxième fois : il y est déjà."
           ]
         }
       ]
@@ -518,6 +591,26 @@ const ETAPES = [
             "Compte les cases : combien entre le départ et le bord droit ? Puis entre ce coin et la cible ?",
             "Il part vers la droite : avancer <b>4</b> cases, tourner vers le haut, puis avancer encore <b>4</b> cases."
           ]
+        },
+        {
+          id: 'e3a3', type: 'saisie', icone: '⬜',
+          titre: "L'angle du carré",
+          histoire: { qui: 'kaya', texte: "La vignette du montage doit être un carré parfait, sinon l'appli la recadre n'importe comment. Nova a effacé l'angle. Tu connais la méthode maintenant." },
+          consigne: "Pour tracer un <b>carré</b> (4 côtés), on répète 4 fois : avancer, puis tourner. De combien de <b>degrés</b> ?",
+          script: [
+            { cat: 'controle', texte: 'répéter {4} fois', corps: [
+              { cat: 'mouvement', texte: 'avancer de {100} pas' },
+              { cat: 'mouvement', texte: 'tourner ↻ de {?} degrés' }
+            ]}
+          ],
+          reponses: ['90', '90°', '90 degrés'],
+          champ: { placeholder: '… degrés', largeur: 150 },
+          fragment: '4',
+          explication: "Un tour complet fait <b>360°</b>, partagé en 4 virages identiques : 360 ÷ 4 = <b>90°</b>. La méthode marche pour n'importe quel polygone régulier : 360 ÷ nombre de côtés.",
+          indices: [
+            "Le lutin fait un tour complet en dessinant la figure : 360° en tout.",
+            "360 partagé en 4 virages identiques."
+          ]
         }
       ]
     },
@@ -568,6 +661,23 @@ const ETAPES = [
           indices: [
             "En faisant le tour complet de la figure, on tourne en tout de <b>360°</b>.",
             "Ces 360° sont partagés en 5 virages identiques : calcule 360 ÷ 5."
+          ]
+        },
+        {
+          id: 'e3b3', type: 'trous', icone: '🔢',
+          titre: "Combien de tours ?",
+          histoire: { qui: 'nova', texte: "Le fil doit défiler d'exactement 60 pas pour révéler la vidéo suivante. Chaque tour de boucle en avance 10. Je te laisse trouver le nombre — tu as toute la nuit, après tout." },
+          consigne: "Complète le nombre de répétitions pour que l'élément parcoure <b>exactement 60 pas</b>.",
+          script: [
+            { cat: 'evenements', chapeau: true, texte: "quand 🏳 est cliqué" },
+            { cat: 'controle', texte: 'répéter {?0} fois', corps: [{ cat: 'mouvement', texte: 'avancer de {10} pas' }] }
+          ],
+          trous: [{ type: 'nombre', reponse: 6 }],
+          fragment: '9',
+          explication: "Chaque tour avance de 10 pas. Pour en faire 60 : 60 ÷ 10 = <b>6 tours</b>. Une boucle transforme une multiplication en une seule ligne.",
+          indices: [
+            "Chaque passage dans la boucle ajoute 10 pas. Combien de passages pour arriver à 60 ?",
+            "60 ÷ 10."
           ]
         }
       ]
@@ -664,6 +774,24 @@ const ETAPES = [
             "Regarde bien la forme du bloc : y a-t-il une partie « sinon » ?",
             "Les blocs à l'intérieur du C ne se déclenchent que si l'hexagone répond « vrai »."
           ]
+        },
+        {
+          id: 'e4a3', type: 'association', icone: '⬡',
+          titre: "Ce que teste chaque hexagone",
+          histoire: { qui: 'scratchy', texte: "le filtre marche, mais nova a mélangé les étiquettes des capteurs. relie chaque hexagone à ce qu'il vérifie vraiment — sinon tu modères n'importe quoi." },
+          consigne: "Relie chaque bloc de condition à ce qu'il teste.",
+          paires: [
+            { g: 'touche espace pressée ?', d: 'Le clavier' },
+            { g: 'touché ? bord',           d: 'Un contact' },
+            { g: 'score > 10',              d: 'Une comparaison' },
+            { g: 'souris pressée ?',        d: 'La souris' }
+          ],
+          fragment: '5',
+          explication: "Tous les blocs en <b>hexagone</b> ⬡ répondent seulement par <b>vrai</b> ou <b>faux</b>. Ils viennent des Capteurs (bleu clair) pour observer le monde, ou des Opérateurs (vert) pour comparer des valeurs.",
+          indices: [
+            "Deux de ces blocs surveillent le matériel : le clavier et la souris.",
+            "Un seul compare deux nombres entre eux : celui avec le symbole >."
+          ]
         }
       ]
     },
@@ -722,6 +850,24 @@ const ETAPES = [
           indices: [
             "Il faut que 10 000 rende le test <b>vrai</b>. Essaie mentalement chaque hexagone avec la valeur 10 000.",
             "10 000 > 9 999 : est-ce vrai ? Oui. C'est celui-là."
+          ]
+        },
+        {
+          id: 'e4b3', type: 'qcm', icone: '📊',
+          titre: "Écrire la bonne condition",
+          histoire: { qui: 'kaya', texte: "Dernier réglage : LOOP doit signaler les vidéos qui <b>dépassent 100 000 vues</b>. Il ne manque que l'hexagone. Choisis bien — tu as vu ce matin ce qu'un seul symbole peut changer." },
+          consigne: "Quel bloc de condition traduit exactement « <b>le nombre de vues dépasse 100 000</b> » ?",
+          options: [
+            { bloc: { cat: 'operateurs', forme: 'booleen', texte: '{vues} > {100000}' }, correct: true },
+            { bloc: { cat: 'operateurs', forme: 'booleen', texte: '{vues} < {100000}' }, retour: "Le symbole < signifie « plus petit que » : ce test repérerait les vidéos qui font <b>moins</b> de 100 000 vues." },
+            { bloc: { cat: 'operateurs', forme: 'booleen', texte: '{vues} = {100000}' }, retour: "Celui-ci n'est vrai que pour <b>exactement</b> 100 000 vues, ni une de plus ni une de moins." },
+            { bloc: { cat: 'capteurs', forme: 'booleen', texte: 'touche {=espace} pressée ?' }, retour: "Celui-ci surveille le clavier : il n'a aucun rapport avec le nombre de vues." }
+          ],
+          fragment: '7',
+          explication: "« Dépasser » se traduit par <b>&gt;</b>, strictement plus grand. Le sens du symbole est la moitié du travail : &lt; et &gt; donnent des programmes exactement opposés.",
+          indices: [
+            "Le symbole ouvert du côté du plus grand nombre : > se lit « plus grand que ».",
+            "Deux blocs comparent des nombres et un seul teste un dépassement vers le haut."
           ]
         }
       ]
@@ -803,6 +949,29 @@ const ETAPES = [
             "Le chapeau jaune arrondi va toujours tout en haut.",
             "On remet la variable à 0 <b>avant</b> de compter, sinon on compterait par-dessus l'ancien total."
           ]
+        },
+        {
+          id: 'e5a3', type: 'qcm', icone: '🔄',
+          titre: "Pourquoi remettre à zéro ?",
+          histoire: { qui: 'scratchy', texte: "une dernière chose avant de partir. regarde bien le deuxième bloc de ton script. si tu l'enlèves, tout marche encore… la première fois. après, c'est le bazar. tu sais pourquoi ?" },
+          consigne: "À quoi sert le bloc <b>mettre énergie à 0</b> placé juste après le drapeau vert ?",
+          script: [
+            { cat: 'evenements', chapeau: true, texte: "quand 🏳 est cliqué" },
+            { cat: 'variables',  texte: 'mettre {énergie} à {0}' },
+            { cat: 'controle',   texte: 'répéter {10} fois', corps: [{ cat: 'variables', texte: 'ajouter {1} à {énergie}' }] }
+          ],
+          options: [
+            { texte: "À repartir de zéro à chaque partie, au lieu de compter par-dessus la précédente.", correct: true },
+            { texte: "À créer la variable énergie.", retour: "La variable existe déjà : on la crée une fois pour toutes dans la catégorie Variables. Ce bloc ne fait que ranger une valeur dedans." },
+            { texte: "À supprimer la variable une fois la partie finie.", retour: "Rien n'est supprimé : la variable existe toujours, elle contient simplement 0." },
+            { texte: "À rien : le script marcherait pareil sans lui.", retour: "Il marcherait la première fois ! Mais au deuxième essai, énergie repartirait de 10 et finirait à 20." }
+          ],
+          fragment: '3',
+          explication: "C'est ce qu'on appelle <b>initialiser</b>. Une variable garde sa valeur entre deux exécutions : sans remise à zéro, le score du deuxième essai s'ajoute à celui du premier. C'est l'oubli n°1 des projets Scratch.",
+          indices: [
+            "Imagine qu'on clique sur le drapeau vert <b>deux fois de suite</b>. Que vaudrait énergie à la fin ?",
+            "Sans ce bloc : 10 au premier essai, puis 20, puis 30…"
+          ]
         }
       ]
     },
@@ -846,6 +1015,24 @@ const ETAPES = [
           indices: [
             "Fais-le tour par tour : 0, puis 25, puis…",
             "Attention au dernier bloc : il est <b>sous</b> la boucle, pas dedans. Il ne s'exécute qu'une seule fois."
+          ]
+        },
+        {
+          id: 'e5b3', type: 'ordre', icone: '📥',
+          titre: "Le lutin qui reçoit",
+          histoire: { qui: 'kaya', texte: "Ton signal part bien, mais il faut encore que les autres comptes sachent quoi en faire. Voilà le script d'un compte qui reçoit le message. Il est en vrac — remets-le d'aplomb et on est tous dehors." },
+          consigne: "Remets le script dans l'ordre : à la réception du message, le compte se remet au centre, remercie, puis se déconnecte.",
+          blocs: [
+            { cat: 'evenements', chapeau: true, texte: 'quand je reçois {=déconnexion}' },
+            { cat: 'mouvement',  texte: 'aller à x: {0} y: {0}' },
+            { cat: 'apparence',  texte: 'dire {Merci !} pendant {2} secondes' },
+            { cat: 'apparence',  texte: 'cacher' }
+          ],
+          fragment: '0',
+          explication: "« quand je reçois » est un <b>bloc chapeau</b>, exactement comme le drapeau vert : il démarre son propre script. C'est ce qui permet à des dizaines de lutins de réagir en même temps à un seul message.",
+          indices: [
+            "Un seul bloc est arrondi sur le dessus : il ne peut aller que tout en haut.",
+            "On se replace, puis on parle, puis on disparaît — dans cet ordre, sinon on parlerait après avoir disparu."
           ]
         }
       ]
