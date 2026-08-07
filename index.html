@@ -32,6 +32,8 @@
       <input id="pseudo" class="champ-pseudo" type="text" maxlength="24"
              placeholder="Ton pseudo" autocomplete="off">
     </p>
+    <div class="modes" id="modes" style="margin:22px 0"></div>
+
     <div class="actions" style="justify-content:center">
       <button id="btn-jouer" class="btn btn--grand">🔁 Entrer dans LOOP</button>
       <button id="btn-continuer" class="btn btn--bleu btn--grand cache">▶ Reprendre ma partie</button>
@@ -89,7 +91,9 @@
       <li>Chaque réglage réparé te donne <b>un chiffre</b> du code de vérification.</li>
       <li>Compose les deux chiffres <b>dans l'ordre</b> pour débloquer la section suivante.</li>
       <li>Bloqué ? <b>Kaya</b> te donne des indices, et le <b>📘 cahier de cours</b> est disponible à tout moment.</li>
-      <li>Aucune limite de temps, aucun échec possible : on peut se tromper autant de fois qu'on veut.</li>
+      <li>Trois <b>modes de jeu</b> : tranquille (par défaut), défi chrono, ou sans faute. On peut en changer à tout moment, sans rien perdre.</li>
+      <li>En mode tranquille, aucune limite de temps et aucun échec possible : on se trompe autant de fois qu'on veut.</li>
+      <li>Bloqué deux fois sur la même énigme ? Kaya propose une <b>version plus simple</b> qui rapporte le même chiffre.</li>
       <li>Ta progression est <b>sauvegardée automatiquement</b> dans ce navigateur.</li>
     </ul>
   </section>
@@ -108,6 +112,7 @@
 </div>
 
 <script src="js/illustrations.js"></script>
+<script src="js/parcours.js"></script>
 <script src="js/progression.js"></script>
 <script>
 (() => {
@@ -126,6 +131,25 @@
       <div class="muet petit" style="margin-bottom:8px">${etiquette}</div>
       <p class="petit muet">${texte}</p>
     </div>`).join('');
+
+  // --- choix du mode de jeu ---------------------------------------
+  let mode = 'chill';
+  const hoteModes = document.getElementById('modes');
+  function dessinerModes() {
+    hoteModes.innerHTML = '';
+    Object.values(MODES).forEach((m) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'carte-mode' + (m.id === mode ? ' carte-mode--choisi' : '');
+      b.innerHTML = `<div class="carte-mode__icone">${m.icone}</div>
+        <div class="carte-mode__nom">${m.nom}</div>
+        <div class="petit muet">${m.resume}</div>
+        <div class="petit muet"><i>${m.conseil}</i></div>`;
+      b.addEventListener('click', () => { mode = m.id; dessinerModes(); });
+      hoteModes.appendChild(b);
+    });
+  }
+  dessinerModes();
 
   const champ      = document.getElementById('pseudo');
   const btnJouer   = document.getElementById('btn-jouer');
@@ -148,6 +172,7 @@
     if (!nom) { champ.focus(); champ.placeholder = 'Écris ton pseudo ici !'; return; }
     if (Progression.existe() && !confirm('Une partie est déjà en cours. La remplacer par une nouvelle ?')) return;
     Progression.demarrer(nom);
+    Progression.changerMode(mode);
     location.href = 'jeu.html';
   }
 

@@ -215,7 +215,16 @@ a  { color: var(--bleu); }
   font-size: .95rem;
 }
 .hud__espace { flex: 1 1 auto; }
-.hud .btn { font-size: .9rem; padding: .5em 1em; }
+.hud .btn { font-size: .85rem; padding: .45em .85em; }
+/* Au-delà de quatre boutons, la barre déborde : on allège d'abord
+   ce qui est décoratif, puis les libellés. */
+@media (max-width: 1250px) {
+  .hud .barre-progression { display: none; }
+}
+@media (max-width: 1000px) {
+  .hud__logo { font-size: .95rem; }
+  .hud .btn { font-size: .8rem; padding: .4em .7em; }
+}
 
 .barre-progression {
   height: 10px;

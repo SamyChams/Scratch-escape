@@ -39,6 +39,8 @@
     majSon();
     btnSon.addEventListener('click', () => { Son.basculer(); majSon(); });
     document.getElementById('btn-memo').addEventListener('click', () => ouvrirMemo());
+    document.getElementById('btn-mode').addEventListener('click',
+      () => choisirMode(() => afficherEtape(etapeCourante)));
     document.getElementById('btn-quitter').addEventListener('click', quitter);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerModale(); });
 
@@ -199,9 +201,14 @@
       b.type = 'button';
       b.addEventListener('click', () => {
         Son.clic();
-        Progression.choisirBranche(etape.id, opt.branche);
-        // La réponse du personnage, puis les deux énigmes de la branche.
-        jouerRecit([opt.reponse], null, '➡ Ouvrir la section', () => {
+        Progression.choisirBranche(etape.id, opt.branche, opt.profil);
+        // La réponse du personnage, puis la fiche que Nova ajoute à son profil.
+        const scenes = [opt.reponse];
+        if (PROFILS[opt.profil]) {
+          scenes.push({ qui: 'nova',
+            texte: `Noté. Tu es du genre à <b>${PROFILS[opt.profil]}</b>. Je range ça dans ton profil — j'en aurai besoin plus tard.` });
+        }
+        jouerRecit(scenes, null, '➡ Ouvrir la section', () => {
           afficherTaches(etape, opt.branche);
         }, etape.soustitre);
       });
@@ -219,11 +226,25 @@
     window.scrollTo(0, 0);
     majProgression();
 
+    Progression.entrerEtape(etape.id);
     const enigmes = enigmesDe(etape, branche);
+
+    // Bandeau illustré de la section
+    const bandeau = el('div', 'bandeau');
+    bandeau.innerHTML = Illus.decor(etape.id) + `
+      <div class="bandeau__voile">
+        <div class="bandeau__icone">${etape.icone}</div>
+        <div>
+          <div class="bandeau__num">Étape ${etape.numero} sur ${ETAPES.length}</div>
+          <h1 class="bandeau__titre">${etape.titre}</h1>
+        </div>
+      </div>`;
+    scene.appendChild(bandeau);
+
     const { ecran, contenu } = ecranAppli(etape.soustitre);
-    contenu.appendChild(el('h1', 'centre', `${etape.icone} ${etape.titre}`));
     contenu.appendChild(el('p', 'centre muet petit',
       `Section « ${etape.branches[branche].titre} » — deux réglages à réparer.`));
+    contenu.appendChild(bandeauMode(etape));
     scene.appendChild(ecran);
 
     const liste = el('div', 'taches');
@@ -253,6 +274,104 @@
     b.addEventListener('click', () => ouvrirMemo(etape.memo));
     aide.appendChild(b);
     contenu.appendChild(aide);
+  }
+
+  /** Rappel du mode en cours, avec le chrono ou le quota selon le cas. */
+  function bandeauMode(etape) {
+    const regles = Progression.reglesMode();
+    const bloc = el('div', 'mode-rappel mode-rappel--' + regles.id);
+    const gauche = el('span', null, `${regles.icone} <b>${regles.nom}</b>`);
+    bloc.appendChild(gauche);
+
+    if (regles.chrono) {
+      const t = el('span', 'mode-rappel__valeur');
+      const cible = Math.round(regles.objectif / 60);
+      const maj = () => {
+        const s = Progression.secondesEtape(etape.id);
+        const m = String(Math.floor(s / 60)).padStart(2, '0');
+        t.textContent = `${m}:${String(s % 60).padStart(2, '0')} / ${cible}:00`;
+        t.classList.toggle('mode-rappel__valeur--depasse', s > regles.objectif);
+      };
+      maj();
+      const id = setInterval(() => { if (document.body.contains(t)) maj(); else clearInterval(id); }, 1000);
+      bloc.appendChild(t);
+    } else if (regles.erreursMax !== null) {
+      const restantes = Math.max(0, regles.erreursMax - Progression.erreursDe(etape.id));
+      bloc.appendChild(el('span', 'mode-rappel__valeur',
+        `${restantes} erreur${restantes > 1 ? 's' : ''} restante${restantes > 1 ? 's' : ''}`));
+    } else {
+      bloc.appendChild(el('span', 'mode-rappel__valeur', 'essais illimités'));
+    }
+
+    const b = el('button', 'mode-rappel__changer', 'changer');
+    b.addEventListener('click', () => choisirMode(() => afficherEtape(etapeCourante)));
+    bloc.appendChild(b);
+    return bloc;
+  }
+
+  /* ---------------------------------------------- choix du mode de jeu */
+  function choisirMode(apres) {
+    const boite = ouvrirModale('Comment tu veux jouer ?', '🎮');
+    const actuel = Progression.mode;
+    const liste = el('div', 'options');
+
+    Object.values(MODES).forEach((m) => {
+      const b = el('button', 'option' + (m.id === actuel ? ' option--choisie' : ''));
+      b.type = 'button';
+      b.innerHTML = `<span class="option__lettre">${m.icone}</span>
+        <span><b>${m.nom}</b>${m.id === actuel ? ' — mode actuel' : ''}
+          <div class="muet petit">${m.resume}</div>
+          <div class="muet petit"><i>${m.conseil}</i></div></span>`;
+      b.addEventListener('click', () => {
+        Son.clic();
+        Progression.changerMode(m.id);
+        fermerModale();
+        apres();
+      });
+      liste.appendChild(b);
+    });
+    boite.appendChild(liste);
+    boite.appendChild(el('p', 'muet petit centre',
+      'Le mode ne change ni les exercices ni les notions : seulement la pression. On peut en changer à tout moment.'));
+  }
+
+  /**
+   * Mode « sans faute » : le quota d'erreurs de l'étape est atteint.
+   * On ne bloque jamais l'élève — on lui ouvre deux portes.
+   */
+  function quotaAtteint(etape, branche) {
+    vider(scene);
+    window.scrollTo(0, 0);
+    const { ecran, contenu } = ecranAppli(etape.soustitre);
+    contenu.appendChild(el('h1', 'centre', '🎯 Quota atteint'));
+    contenu.appendChild(el('div', null, messageHTML({ qui: 'kaya' },
+      `Tu as fait <b>${Progression.reglesMode().erreursMax} erreurs</b> sur cette étape, et tu jouais en mode
+       « sans faute ». Franchement ? Ça arrive à tout le monde, et ça ne dit rien de ce que tu as compris.
+       Tu peux recommencer l'étape, ou passer en mode tranquille — dans ce cas tu gardes tout ce que tu as
+       déjà réparé et tu continues sans limite.`)));
+
+    const actions = el('div', 'actions');
+    actions.style.justifyContent = 'center';
+
+    const tranquille = el('button', 'btn btn--grand', '🌙 Passer en mode tranquille');
+    tranquille.addEventListener('click', () => {
+      Son.clic();
+      Progression.changerMode('chill');
+      Progression.reprendreEtape(etape.id);
+      afficherTaches(etape, branche);
+    });
+
+    const recommencer = el('button', 'btn btn--fantome btn--grand', '🔄 Recommencer l\'étape');
+    recommencer.addEventListener('click', () => {
+      Son.clic();
+      Progression.reprendreEtape(etape.id, enigmesDe(etape, branche).map((x) => x.id));
+      afficherTaches(etape, branche);
+    });
+
+    actions.appendChild(tranquille);
+    actions.appendChild(recommencer);
+    contenu.appendChild(actions);
+    scene.appendChild(ecran);
   }
 
   /* ---------------------------------------------- le code de vérification */
@@ -316,7 +435,8 @@
       vider(zoneRetour);
       if (saisi === code) {
         Son.deverrouille();
-        sectionOuverte(etape);
+        const tenu = Progression.fermerEtape(etape.id);
+        sectionOuverte(etape, tenu);
       } else {
         Son.mauvais();
         Progression.compterErreur();
@@ -332,9 +452,16 @@
   }
 
   /* ---------------------------------------------- section franchie */
-  function sectionOuverte(etape) {
+  function sectionOuverte(etape, medaille) {
     const derniere = etape.numero >= ETAPES.length;
     const scenes = (etape.sortie || []).slice();
+
+    // Mode chrono : Nova commente le temps mis sur l'étape.
+    if (medaille === true) {
+      scenes.unshift({ qui: 'nova', texte: "Rapide. Trop rapide. ⚡ Tu gardes ton éclair pour cette étape." });
+    } else if (medaille === false) {
+      scenes.unshift({ qui: 'nova', texte: "Tu as dépassé le temps cible — ça ne t'empêche pas de passer, rassure-toi. Tu perds juste l'éclair." });
+    }
 
     if (!scenes.length) {
       suivre();
@@ -386,8 +513,10 @@
   }
 
   /* ================================================== UNE ÉNIGME */
-  function ouvrirEnigme(etape, branche, enigme) {
+  function ouvrirEnigme(etape, branche, enigme, remplace) {
     indicesAffiches = 0;
+    let echecs = 0;                       // échecs sur CETTE énigme
+    const idCredite = remplace || enigme.id;   // la remédiation vaut l'originale
     const boite = ouvrirModale(enigme.titre, enigme.icone);
 
     // Mise en scène : ce que l'élève « voit » avant de travailler.
@@ -434,14 +563,17 @@
 
     function reussir() {
       Son.bon();
-      Progression.resoudre(enigme.id, enigme.fragment);
+      const fragment = remplace
+        ? enigmesDe(etape, branche).find((x) => x.id === remplace).fragment
+        : enigme.fragment;
+      Progression.resoudre(idCredite, fragment);
       vider(zoneRetour);
       vider(actions);
       zoneRetour.appendChild(el('div', 'retour retour--ok', `
         🎉 <b>Réglage réparé !</b> ${enigme.explication}
         <div style="margin-top:14px;text-align:center">
           <div class="muet petit">Chiffre du code obtenu</div>
-          <div style="font-size:2.6rem;font-weight:800;color:var(--jaune)">${enigme.fragment}</div>
+          <div style="font-size:2.6rem;font-weight:800;color:var(--jaune)">${fragment}</div>
         </div>`));
       const btn = el('button', 'btn btn--vert btn--grand', '✔ Continuer');
       btn.addEventListener('click', () => { fermerModale(); afficherTaches(etape, branche); });
@@ -452,9 +584,33 @@
 
     function echouer(message) {
       Son.mauvais();
-      Progression.compterErreur();
+      echecs++;
+      const total = Progression.compterErreur(etape.id);
       vider(zoneRetour);
       zoneRetour.appendChild(el('div', 'retour retour--erreur', message));
+
+      // Nova commente : elle existe aussi pendant le travail.
+      if (echecs === 2) {
+        const pique = PIQUES[Math.floor(Math.random() * PIQUES.length)];
+        zoneRetour.appendChild(el('div', null, messageHTML({ qui: 'nova' }, pique)));
+      }
+
+      // Après deux échecs, on propose une version plus accessible.
+      if (echecs >= 2 && !remplace && remediationDe(etape) && !actions.querySelector('.btn--remediation')) {
+        const b = el('button', 'btn btn--violet btn--remediation', '🧭 Version plus simple');
+        b.title = "Une question plus facile sur la même notion, qui donne le même chiffre";
+        b.addEventListener('click', () => {
+          Son.clic();
+          ouvrirEnigme(etape, branche, remediationDe(etape), enigme.id);
+        });
+        actions.insertBefore(b, actions.firstChild);
+      }
+
+      // Mode « sans faute » : on prévient dès que le quota est atteint.
+      if (Progression.quotaDepasse(etape.id)) {
+        fermerModale();
+        quotaAtteint(etape, branche);
+      }
     }
 
     Enigmes.construire(enigme, { zoneJeu, zoneRetour, actions, reussir, echouer });
@@ -512,8 +668,30 @@
       <div style="margin:14px 0;font-size:.9rem">
         <b>Ton parcours :</b><br>${chemin.join(' · ')}
       </div>
+      <div style="margin:14px 0;font-size:.9rem">
+        <b>Mode :</b> ${Progression.reglesMode().icone} ${Progression.reglesMode().nom}
+        ${Progression.reglesMode().chrono ? ` — ⚡ ${Progression.medaillesGagnees()}/${ETAPES.length}` : ''}
+      </div>
       <div>Fait le ${new Date().toLocaleDateString('fr-FR')}</div>`;
     scene.appendChild(d);
+
+    // Le portrait que l'algorithme a constitué au fil des choix
+    const etiquettes = (e.profil || []).filter((t) => PROFILS[t]);
+    if (etiquettes.length) {
+      const p = el('div', 'carte');
+      p.style.marginTop = '20px';
+      p.innerHTML = `<h2 class="centre">💠 Ce que Nova avait retenu de toi</h2>`;
+      p.appendChild(el('div', null, messageHTML({ qui: 'nova' },
+        "J'ai construit ce portrait sans jamais te le demander, juste en regardant ce que tu choisissais. "
+        + "C'est exactement ce que fait un algorithme de recommandation — à la différence près que lui ne te "
+        + "montre jamais la fiche.")));
+      const liste = el('div', 'profil');
+      etiquettes.forEach((t) => liste.appendChild(el('span', 'profil__etiquette', PROFILS[t])));
+      p.appendChild(liste);
+      p.appendChild(el('p', 'centre muet petit',
+        "Ton voisin n'a pas le même portrait, parce qu'il n'a pas fait les mêmes choix."));
+      scene.appendChild(p);
+    }
 
     const note = el('div', 'carte centre no-print');
     note.style.marginTop = '20px';

@@ -155,90 +155,106 @@ const Illus = (() => {
 
   const decors = {
 
-    /* Salle 1 — un mur de briques d'où s'échappent des blocs colorés */
-    s1: () => cadre(`
-      <g opacity=".5">
-        ${rep(5, r => rep(17, c =>
-          `<rect x="${c * 50 + (r % 2 ? -25 : 0)}" y="${r * 31}" width="46" height="27" rx="4" fill="#b5482f"/>`))}
+    /* Étape 1 — l'éditeur : une palette de blocs colorés qu'on assemble */
+    e1: () => cadre(`
+      <rect x="40" y="18" width="200" height="118" rx="10" fill="#0e1433" stroke="#4c97ff" stroke-width="2"/>
+      <text x="52" y="40" font-size="13" font-family="monospace" fill="#7fb5ff">palette</text>
+      ${rep(5, i => `<rect x="54" y="${50 + i * 17}" width="${140 - i * 12}" height="12" rx="6"
+        fill="${['#4c97ff', '#9966ff', '#ffbf00', '#ffab19', '#59c059'][i]}"/>`)}
+      <path d="M256 76 h44" stroke="#ffe14d" stroke-width="4" stroke-linecap="round"/>
+      <path d="M304 76 l-12-7 v14 z" fill="#ffe14d"/>
+      <g>
+        <rect x="330" y="26" width="150" height="26" rx="7" fill="#ffbf00"/>
+        <rect x="330" y="58" width="170" height="26" rx="7" fill="#4c97ff"/>
+        <rect x="330" y="90" width="140" height="26" rx="7" fill="#9966ff"/>
+        <rect x="346" y="52" width="22" height="7" fill="#cc9900"/>
+        <rect x="346" y="84" width="22" height="7" fill="#3373cc"/>
+      </g>
+      ${teteChat(620, 74, 34)}
+      <g fill="#fff" opacity=".5">
+        ${rep(6, i => `<circle cx="${540 + i * 42}" cy="${28 + (i * 31) % 96}" r="1.8"/>`)}
+      </g>`, '#4c97ff', 'e1'),
+
+    /* Étape 2 — les filtres : un sticker qu'on positionne sur une grille */
+    e2: () => cadre(`
+      <g stroke="#7fd0ee" stroke-width="1" opacity=".45">
+        ${rep(17, i => `<line x1="${i * 50}" y1="0" x2="${i * 50}" y2="150"/>`)}
+        ${rep(4, i => `<line x1="0" y1="${i * 40 + 15}" x2="800" y2="${i * 40 + 15}"/>`)}
+      </g>
+      <g stroke="#ffbf00" stroke-width="2.5" stroke-linecap="round">
+        <path d="M60 96 h84"/><path d="M60 96 v-52"/>
+      </g>
+      <path d="M146 96 l-9-5 v10 z" fill="#ffbf00"/>
+      <path d="M60 40 l-5 9 h10 z" fill="#ffbf00"/>
+      <text x="152" y="101" font-size="15" font-family="monospace" fill="#ffbf00">x</text>
+      <text x="46" y="36" font-size="15" font-family="monospace" fill="#ffbf00">y</text>
+      <rect x="300" y="20" width="200" height="112" rx="14" fill="#12224a" stroke="#7fd0ee" stroke-width="2.5"/>
+      ${teteChat(400, 76, 32)}
+      <g stroke="#ff3b5c" stroke-width="2.5" fill="none">
+        <circle cx="612" cy="72" r="26"/>
+        <path d="M612 38 v14 M612 92 v14 M578 72 h14 M632 72 h14"/>
+      </g>
+      <text x="612" y="79" font-size="22" text-anchor="middle">😎</text>
+      <path d="M540 72 h34" stroke="#ffe14d" stroke-width="3" stroke-dasharray="5 5"/>`, '#5cb1d6', 'e2'),
+
+    /* Étape 3 — le montage : une bande vidéo où la même image se répète */
+    e3: () => cadre(`
+      <rect x="0" y="34" width="800" height="82" fill="#1c1330" opacity=".85"/>
+      <g fill="#ffab19">
+        ${rep(20, i => `<rect x="${i * 40 + 6}" y="38" width="10" height="9" rx="2" opacity=".7"/>`)}
+        ${rep(20, i => `<rect x="${i * 40 + 6}" y="103" width="10" height="9" rx="2" opacity=".7"/>`)}
       </g>
       <g>
-        <rect x="70"  y="24"  width="92"  height="26" rx="7" fill="#ffbf00" transform="rotate(-4 116 37)"/>
-        <rect x="96"  y="62"  width="104" height="26" rx="7" fill="#4c97ff"/>
-        <rect x="76"  y="100" width="84"  height="26" rx="7" fill="#9966ff" transform="rotate(5 118 113)"/>
-        <rect x="560" y="30"  width="98"  height="26" rx="7" fill="#59c059" transform="rotate(-7 609 43)"/>
-        <rect x="586" y="76"  width="88"  height="26" rx="7" fill="#ffab19" transform="rotate(6 630 89)"/>
-        <rect x="546" y="116" width="76"  height="24" rx="7" fill="#cf63cf" transform="rotate(-3 584 128)"/>
-      </g>
-      ${teteChat(400, 74, 32)}
-      <g fill="#fff" opacity=".8">
-        ${rep(9, i => `<circle cx="${230 + i * 38}" cy="${26 + (i * 37) % 100}" r="${1.4 + (i % 3) * .7}"/>`)}
-      </g>`, '#4c97ff', 's1'),
-
-    /* Salle 2 — un couloir en perspective avec le repère x / y */
-    s2: () => cadre(`
-      <g stroke="#7fd0ee" stroke-width="1.3" opacity=".6">
-        ${rep(17, i => `<line x1="${i * 50}" y1="150" x2="${330 + i * 8}" y2="56"/>`)}
-        ${rep(5, i => `<line x1="${370 - i * 90}" y1="${64 + i * 22}" x2="${430 + i * 90}" y2="${64 + i * 22}"/>`)}
-      </g>
-      <rect x="356" y="26" width="88" height="36" rx="6" fill="#0d1b3a" stroke="#7fd0ee" stroke-width="2"/>
-      <text x="400" y="51" font-size="18" font-family="monospace" fill="#8ceaff" text-anchor="middle">x ; y</text>
-      <g stroke="#ffbf00" stroke-width="3.4" stroke-linecap="round">
-        <path d="M60 116 h70"/><path d="M60 116 v-54"/>
-      </g>
-      <path d="M132 116 l-10-6 v12 z" fill="#ffbf00"/>
-      <path d="M60 58 l-6 10 h12 z" fill="#ffbf00"/>
-      <text x="142" y="122" font-size="16" font-family="monospace" fill="#ffbf00">x</text>
-      <text x="46" y="54" font-size="16" font-family="monospace" fill="#ffbf00">y</text>
-      ${teteChat(660, 92, 26)}
-      <path d="M700 92 h44" stroke="#ffe14d" stroke-width="4" stroke-linecap="round"/>
-      <path d="M746 92 l-11-7 v14 z" fill="#ffe14d"/>`, '#5cb1d6', 's2'),
-
-    /* Salle 3 — des miroirs qui répètent le même reflet */
-    s3: () => cadre(`
-      <g>
-        ${rep(6, i => {
-          const x = 60 + i * 122, o = (1 - i * 0.15).toFixed(2), h = 104 - i * 9;
-          return `<rect x="${x}" y="${(150 - h) / 2}" width="76" height="${h}" rx="34"
-                    fill="#2a1a4e" stroke="#ffab19" stroke-width="3" opacity="${o}"/>
-                  ${teteChat(x + 38, 75, 24 - i * 1.6, o)}`;
-        })}
+        ${rep(6, i => `<rect x="${40 + i * 122}" y="54" width="104" height="42" rx="6"
+          fill="#2f1f52" stroke="#ffab19" stroke-width="2"/>
+          ${teteChat(92 + i * 122, 75, 15)}`)}
       </g>
       <g fill="none" stroke="#ffe14d" stroke-width="4" stroke-linecap="round">
-        <path d="M404 22 a24 24 0 1 1-18 9"/>
+        <path d="M406 12 a20 20 0 1 1-15 7"/>
       </g>
-      <path d="M382 26 l8 13 l-15 2 z" fill="#ffe14d"/>`, '#ffab19', 's3'),
+      <path d="M386 16 l7 11 l-13 2 z" fill="#ffe14d"/>
+      <text x="440" y="26" font-size="15" font-weight="bold" fill="#ffe14d" font-family="monospace">× 6</text>`,
+      '#ffab19', 'e3'),
 
-    /* Salle 4 — l'aiguillage : deux portes, une condition */
-    s4: () => cadre(`
-      <rect x="90"  y="34" width="104" height="112" rx="9" fill="#1d3a2c" stroke="#59c059" stroke-width="3.5"/>
-      <rect x="606" y="34" width="104" height="112" rx="9" fill="#3a1d2c" stroke="#ff6680" stroke-width="3.5"/>
-      <circle cx="176" cy="92" r="5" fill="#59c059"/><circle cx="624" cy="92" r="5" fill="#ff6680"/>
-      <text x="138" y="104" font-size="42" fill="#59c059" text-anchor="middle" font-family="monospace">✓</text>
-      <text x="662" y="104" font-size="42" fill="#ff6680" text-anchor="middle" font-family="monospace">✕</text>
-      <path d="M400 104 l-176 0 M400 104 l176 0" stroke="#ffbf00" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M224 104 l12-7 v14 z" fill="#ffbf00"/><path d="M576 104 l-12-7 v14 z" fill="#ffbf00"/>
-      <path d="M322 18 h156 l26 30 l-26 30 h-156 l-26-30 z" fill="#59c059" stroke="#9df09d" stroke-width="2.5"/>
-      <text x="400" y="57" font-size="22" font-weight="bold" fill="#0e2a0e" text-anchor="middle" font-family="monospace">si … ?</text>
-      ${teteChat(400, 116, 24)}`, '#59c059', 's4'),
+    /* Étape 4 — la modération : des commentaires, dont certains sont masqués */
+    e4: () => cadre(`
+      <g>
+        ${rep(3, i => `<rect x="${60 + i * 20}" y="${20 + i * 40}" width="240" height="30" rx="15"
+          fill="#1d3a2c" stroke="#59c059" stroke-width="2"/>
+          <circle cx="${82 + i * 20}" cy="${35 + i * 40}" r="9" fill="#59c059" opacity=".5"/>
+          <rect x="${100 + i * 20}" y="${30 + i * 40}" width="${150 - i * 22}" height="8" rx="4" fill="#9df09d" opacity=".55"/>`)}
+      </g>
+      <g>
+        ${rep(2, i => `<rect x="${470 + i * 26}" y="${34 + i * 48}" width="230" height="30" rx="15"
+          fill="#3a1d2c" stroke="#ff6680" stroke-width="2"/>
+          <circle cx="${492 + i * 26}" cy="${49 + i * 48}" r="9" fill="#ff6680" opacity=".5"/>
+          <rect x="${510 + i * 26}" y="${44 + i * 48}" width="${140 - i * 20}" height="8" rx="4" fill="#ffb3c0" opacity=".4"/>
+          <path d="M${478 + i * 26} ${40 + i * 48} l214 18 M${692 + i * 26} ${40 + i * 48} l-214 18"
+            stroke="#ff6680" stroke-width="2.5" opacity=".8"/>`)}
+      </g>
+      <path d="M352 42 h96 l16 32 l-16 32 h-96 l-16-32 z" fill="#59c059" stroke="#9df09d" stroke-width="2.5"/>
+      <text x="400" y="82" font-size="17" font-weight="bold" fill="#0e2a0e" text-anchor="middle" font-family="monospace">si ?</text>`,
+      '#59c059', 'e4'),
 
-    /* Salle 5 — le cœur du serveur, Scratchy en cage */
-    s5: () => cadre(`
-      <g fill="#241436" stroke="#ff8c1a" stroke-width="2.5">
-        <rect x="24" y="20" width="92" height="122" rx="7"/>
-        <rect x="684" y="20" width="92" height="122" rx="7"/>
+    /* Étape 5 — l'algorithme : l'œil de Nova et son compteur qui monte */
+    e5: () => cadre(`
+      <g opacity=".3" stroke="#c56bff" stroke-width="1.5" fill="none">
+        ${rep(6, i => `<circle cx="400" cy="75" r="${34 + i * 20}"/>`)}
       </g>
-      <g fill="#ffb45c">
-        ${rep(6, i => `<rect x="36" y="${32 + i * 18}" width="68" height="9" rx="4.5" opacity="${0.3 + (i % 3) * 0.25}"/>`)}
-        ${rep(6, i => `<rect x="696" y="${32 + i * 18}" width="68" height="9" rx="4.5" opacity="${0.3 + ((i + 1) % 3) * 0.25}"/>`)}
+      <g transform="translate(340 20) scale(1.2)">${nova(100).replace(/<svg[^>]*>|<\/svg>/g, '')}</g>
+      <g>
+        <rect x="60" y="52" width="200" height="46" rx="10" fill="#0e1433" stroke="#ff8c1a" stroke-width="2.5"/>
+        <text x="76" y="72" font-size="12" font-family="monospace" fill="#ffb45c">temps_passé</text>
+        <text x="76" y="92" font-size="19" font-weight="bold" font-family="monospace" fill="#ffe14d">00:47:12</text>
       </g>
-      <path d="M116 56 q90 26 0 52 M684 56 q-90 26 0 52" fill="none" stroke="#ff8c1a" stroke-width="3.5" opacity=".55"/>
-      <ellipse cx="400" cy="80" rx="120" ry="66" fill="#ffd08a" opacity=".13"/>
-      <circle cx="400" cy="80" r="58" fill="#3a2150" opacity=".55"/>
-      ${teteChat(400, 78, 34)}
-      <g stroke="#ffe14d" stroke-width="3" opacity=".95">
-        ${rep(9, i => `<path d="M${304 + i * 24} 16 v128"/>`)}
+      <path d="M270 75 h56" stroke="#ff8c1a" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>
+      <g>
+        <rect x="540" y="52" width="200" height="46" rx="10" fill="#0e1433" stroke="#c56bff" stroke-width="2.5"/>
+        <text x="556" y="72" font-size="12" font-family="monospace" fill="#d6a8ff">ajouter 1 à …</text>
+        <text x="556" y="92" font-size="19" font-weight="bold" font-family="monospace" fill="#7fe3ff">∞</text>
       </g>
-      <path d="M296 16 h216 M296 144 h216" stroke="#ffe14d" stroke-width="5" stroke-linecap="round"/>`, '#ff8c1a', 's5')
+      <path d="M474 75 h56" stroke="#c56bff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>`,
+      '#c56bff', 'e5')
   };
 
   /* =============================== OUTILS =============================== */
