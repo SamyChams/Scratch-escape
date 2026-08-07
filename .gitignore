@@ -1,3 +1,6 @@
 # Corrigé en clair, jamais versionné (voir outils.html)
 corrige-source.json
 node_modules/
+
+# Captures produites par les tests
+*.png

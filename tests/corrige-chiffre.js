@@ -1,8 +1,7 @@
 /* =========================================================
-   Vérifie la protection du corrigé enseignant :
-   corrigé invisible sans mot de passe, mauvais mot de passe
-   refusé, bon mot de passe accepté, et rotation du mot de
-   passe depuis outils.html.
+   Vérifie la protection du corrigé enseignant : invisible
+   sans mot de passe, mauvais mot de passe refusé, et rotation
+   du mot de passe depuis outils.html.
 
    Utilisation :
      npm install playwright
@@ -11,17 +10,21 @@
    ========================================================= */
 
 const { chromium } = require('playwright');
+
+// Sur une machine ordinaire, Playwright trouve Chromium tout seul.
+// CHROMIUM_PATH permet de le désigner à la main si besoin.
+const LANCEMENT = process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {};
 const BASE = 'http://127.0.0.1:8765';
 (async () => {
-  const nav = await chromium.launch();
+  const nav = await chromium.launch(LANCEMENT);
   const page = await nav.newPage({ viewport: { width: 1200, height: 900 } });
   const err = []; page.on('pageerror', e => err.push(e.message));
 
   // 1. Le corrigé est-il invisible sans mot de passe ?
   await page.goto(BASE + '/professeur.html');
   const txt = await page.locator('body').innerText();
-  console.log('corrigé masqué au chargement    :', !/Perdu|360 ÷ 5|libération/.test(txt) ? 'OUI ✓' : 'NON ✗');
-  console.log('codes absents de la page        :', !/491|270|365|814|526/.test(txt) ? 'OUI ✓' : 'NON ✗');
+  console.log('corrigé masqué au chargement    :', !/Badge refusé|360 ÷ 5|déconnexion/.test(txt) ? 'OUI ✓' : 'NON ✗');
+  console.log('codes absents de la page        :', !/\b41\b|\b73\b|\b29\b|\b58\b/.test(txt) ? 'OUI ✓' : 'NON ✗');
 
   // 2. Mauvais mot de passe
   await page.fill('#mdp', 'jesuisunélève');
@@ -35,7 +38,7 @@ const BASE = 'http://127.0.0.1:8765';
   await page.click('#btn-ouvrir');
   await page.waitForSelector('#corrige:not(.cache)', { timeout: 15000 });
   const ouvert = await page.locator('#corrige').innerText();
-  console.log('corrigé affiché après mdp       :', /Perdu/.test(ouvert) && /491/.test(ouvert) ? 'OUI ✓' : 'NON ✗');
+  console.log('corrigé affiché après mdp       :', /Badge refusé/.test(ouvert) && /41/.test(ouvert) ? 'OUI ✓' : 'NON ✗');
   await page.screenshot({ path: 'shot-prof.png', fullPage: true });
 
   // 4. Rotation du mot de passe via outils.html
@@ -50,7 +53,7 @@ const BASE = 'http://127.0.0.1:8765';
   const fichier = await (await dl).path();
   const contenu = require('fs').readFileSync(fichier, 'utf8');
   console.log('fichier régénéré, sans fuite    :',
-    /CORRIGE_CHIFFRE/.test(contenu) && !/Perdu|libération/.test(contenu) ? 'OUI ✓' : 'NON ✗');
+    /CORRIGE_CHIFFRE/.test(contenu) && !/Badge refusé|déconnexion/.test(contenu) ? 'OUI ✓' : 'NON ✗');
 
   // 5. Le nouveau fichier s'ouvre-t-il avec le nouveau mdp, et pas l'ancien ?
   const test = await page.evaluate(async (src) => {

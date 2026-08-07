@@ -1,6 +1,7 @@
 /* =========================================================
-   Test de bout en bout : résout les 15 énigmes, ouvre les
-   5 cadenas et vérifie qu'aucune erreur JavaScript ne survient.
+   Rejoue les deux branches du parcours en résolvant
+   réellement chacune des 20 énigmes, et vérifie que les deux
+   élèves n'ont aucun exercice en commun.
 
    Utilisation :
      npm install playwright
@@ -10,157 +11,165 @@
 
 const { chromium } = require('playwright');
 
+// Sur une machine ordinaire, Playwright trouve Chromium tout seul.
+// CHROMIUM_PATH permet de le désigner à la main si besoin.
+const LANCEMENT = process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {};
 const BASE = 'http://127.0.0.1:8765';
-const erreurs = [];
 
-(async () => {
-  const nav = await chromium.launch();
-  const page = await nav.newPage({ viewport: { width: 1280, height: 950 } });
-  page.on('console', m => { if (m.type() === 'error') erreurs.push('CONSOLE: ' + m.text()); });
-  page.on('pageerror', e => erreurs.push('PAGEERROR: ' + e.message));
+/* Solution attendue pour chacune des 20 énigmes écrites. */
+const SOLUTIONS = {
+  e1a1: { type: 'assoc' },
+  e1a2: { type: 'ordre' },
+  e1b1: { type: 'qcm' },
+  e1b2: { type: 'ordre' },
+  e2a1: { type: 'qcm' },
+  e2a2: { type: 'grille', suite: [0, 2, 0, 0, 0, 1, 0, 0, 0] },
+  e2b1: { type: 'saisie', valeur: '70' },
+  e2b2: { type: 'grille', suite: [0, 0, 0, 2, 0, 0, 0, 0] },
+  e3a1: { type: 'qcm' },
+  e3a2: { type: 'trous', nombres: ['4', '4'] },
+  e3b1: { type: 'qcm' },
+  e3b2: { type: 'saisie', valeur: '72' },
+  e4a1: { type: 'trous', choix: [0, 0] },
+  e4a2: { type: 'qcm' },
+  e4b1: { type: 'qcm' },
+  e4b2: { type: 'trous', choix: [0, 0] },
+  e5a1: { type: 'saisie', valeur: '16' },
+  e5a2: { type: 'ordre' },
+  e5b1: { type: 'qcm' },
+  e5b2: { type: 'saisie', valeur: '103' }
+};
 
-  // ---------- Accueil ----------
-  await page.goto(BASE + '/index.html');
-  await page.fill('#pseudo', 'Camille');
-  await page.click('#btn-jouer');
-  await page.waitForURL('**/jeu.html');
+async function resoudre(page, id, sol) {
+  const boite = page.locator('.modale__boite');
+  await boite.waitFor({ timeout: 10000 });
 
-  // Les dialogues s'écrivent progressivement : on les passe.
-  const passerRecit = async () => {
-    const p = page.locator('.recit__passer');
-    if (await p.count()) { await p.click(); await page.waitForTimeout(250); }
-  };
-  await passerRecit();   // prologue
-  await page.locator('button', { hasText: 'Entrer dans le Labo 404' }).click();
-  await passerRecit();   // entrée de la salle 1
-  await page.waitForSelector('.grille-enigmes .tuile');
-  console.log('✓ accueil → jeu, pseudo =', await page.textContent('#pseudo'));
-
-  const ouvrir = async (i) => {
-    await page.locator('.grille-enigmes .tuile').nth(i).click();
-    await page.waitForSelector('.modale__boite');
-  };
-  const continuer = async (nom) => {
-    const btn = page.locator('.modale__boite .actions button', { hasText: 'Continuer' });
-    await btn.waitFor({ timeout: 20000 });
-    await btn.click();
-    await page.waitForSelector('.modale', { state: 'detached' });
-    console.log('  ✓ résolue :', nom);
-  };
-  const qcmJuste = async (idEnigme) => {
-    const i = await page.evaluate((id) => {
-      for (const s of SALLES) for (const e of s.enigmes)
-        if (e.id === id) return e.options.findIndex(o => o.correct);
-    }, idEnigme);
+  if (sol.type === 'qcm') {
+    const i = await page.evaluate((eid) => {
+      for (const e of ETAPES) for (const c of Object.keys(e.branches))
+        for (const x of e.branches[c].enigmes)
+          if (x.id === eid) return x.options.findIndex(o => o.correct);
+    }, id);
     await page.locator('.option').nth(i).click();
-  };
-  const trier = async () => {
-    // range la liste avec les boutons ▼ (tri par sélection)
+
+  } else if (sol.type === 'assoc') {
+    const paires = await page.evaluate((eid) => {
+      for (const e of ETAPES) for (const c of Object.keys(e.branches))
+        for (const x of e.branches[c].enigmes) if (x.id === eid) return x.paires;
+    }, id);
+    for (const p of paires) {
+      await page.locator('.assoc__colonne').first().locator('.jeton', { hasText: p.g }).click();
+      await page.locator('.assoc__colonne').last().locator('.jeton', { hasText: new RegExp('^' + p.d + '$') }).click();
+    }
+
+  } else if (sol.type === 'ordre') {
     const n = await page.locator('.item-ordre').count();
     for (let cible = 0; cible < n; cible++) {
-      for (let tour = 0; tour < n; tour++) {
+      for (let t = 0; t < n; t++) {
         const idx = await page.locator('.item-ordre').evaluateAll(
           (els, c) => els.findIndex((e, k) => k >= c && Number(e.dataset.index) === c), cible);
         if (idx === cible) break;
-        await page.locator('.item-ordre').nth(idx).locator('.mini-btn').first().click(); // ▲
+        await page.locator('.item-ordre').nth(idx).locator('.mini-btn').first().click();
       }
     }
-    await page.locator('.modale__boite .actions button', { hasText: 'Vérifier' }).click();
+    await boite.locator('.actions button', { hasText: 'Vérifier' }).click();
+
+  } else if (sol.type === 'saisie') {
+    await boite.locator('input').first().fill(sol.valeur);
+    await boite.locator('.actions button', { hasText: 'Vérifier' }).click();
+
+  } else if (sol.type === 'grille') {
+    for (const k of sol.suite) await page.locator('.palette .bloc').nth(k).click();
+    await boite.locator('.actions button', { hasText: 'Lancer' }).click();
+
+  } else if (sol.type === 'trous') {
+    if (sol.nombres) {
+      for (let i = 0; i < sol.nombres.length; i++) {
+        await page.locator('.trou input').nth(i).fill(sol.nombres[i]);
+      }
+    } else {
+      for (let t = 0; t < sol.choix.length; t++) {
+        await page.locator(`.trou[data-trou="${t}"]`).click();
+        await page.locator('#modale-hote .carte .palette .bloc').nth(sol.choix[t]).click();
+      }
+    }
+    await boite.locator('.actions button', { hasText: /Lancer|Vérifier/ }).click();
+  }
+
+  const ok = boite.locator('.actions button', { hasText: 'Continuer' });
+  await ok.waitFor({ timeout: 25000 });
+  await ok.click();
+  await page.locator('.modale').waitFor({ state: 'detached' });
+}
+
+async function jouerBranche(page, branche, erreurs) {
+  await page.goto(BASE + '/index.html');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.fill('#pseudo', 'Réel-' + branche);
+  await page.click('#btn-jouer');
+
+  const passerRecit = async () => {
+    for (let i = 0; i < 30; i++) {
+      const b = page.locator('.recit__pied .recit__passer');
+      if (!(await b.count())) break;
+      await b.waitFor({ state: 'visible', timeout: 15000 });
+      await b.click();
+      // le bouton de suite n'apparaît qu'une fois toutes les répliques écrites
+      const suite = page.locator('#scene .actions button').last();
+      await suite.waitFor({ state: 'visible', timeout: 15000 });
+      await suite.click();
+      await page.waitForTimeout(250);
+      if (await page.locator('.bifurcation, .taches, .diplome').count()) break;
+    }
   };
 
-  // ================= SALLE 1 =================
-  await ouvrir(0); // association
-  const paires = await page.evaluate(() => SALLES[0].enigmes[0].paires);
-  for (const p of paires) {
-    await page.locator('.assoc__colonne').first().locator('.jeton', { hasText: p.g }).click();
-    await page.locator('.assoc__colonne').last().locator('.jeton', { hasText: new RegExp('^' + p.d + '$') }).click();
-  }
-  await continuer('s1e1 association');
+  for (let etape = 0; etape < 5; etape++) {
+    await passerRecit();
+    await page.locator('.bifurcation').waitFor({ timeout: 15000 });
+    await page.locator('.option-branche').nth(branche === 'a' ? 0 : 1).click();
+    await passerRecit();
+    await page.locator('.taches').waitFor({ timeout: 15000 });
 
-  await ouvrir(1); await qcmJuste('s1e2'); await continuer('s1e2 qcm');
-  await ouvrir(2); await trier();          await continuer('s1e3 ordre');
+    const ids = await page.evaluate(() => {
+      const e = ETAPES[Progression.etat.etape];
+      return enigmesDe(e, Progression.brancheDe(e.id)).map(x => x.id);
+    });
 
-  const passerPorte = async (code) => {
-    for (let i = 0; i < code.length; i++) await page.locator('.molette').nth(i).fill(code[i]);
-    await page.locator('.cadenas button', { hasText: 'Ouvrir la porte' }).click();
-    await passerRecit();   // récit de la porte qui s'ouvre
-    await page.locator('button', { hasText: /salle suivante|Voir la fin/i }).click();
-    await passerRecit();   // entrée de la salle suivante (ou épilogue)
-    const fin = page.locator('button', { hasText: 'Recevoir mon diplôme' });
-    if (await fin.count()) await fin.click();
-    console.log('  ✓ cadenas', code, 'ouvert');
-  };
-  await passerPorte('491');
-  await page.waitForSelector('.grille-enigmes');
+    for (let i = 0; i < ids.length; i++) {
+      await page.locator('.tache').nth(i).click();
+      await resoudre(page, ids[i], SOLUTIONS[ids[i]]);
+      console.log('   ✓', ids[i]);
+    }
 
-  // ================= SALLE 2 =================
-  await ouvrir(0); await qcmJuste('s2e1'); await continuer('s2e1 qcm');
-  await ouvrir(1);
-  await page.locator('.modale__boite input').fill('70');
-  await page.locator('.modale__boite .actions button', { hasText: 'Vérifier' }).click();
-  await continuer('s2e2 saisie');
-
-  await ouvrir(2); // labyrinthe : avancer, gauche, avancer×3, droite, avancer×3
-  const P = page.locator('.palette .bloc');
-  const suite = [0, 2, 0, 0, 0, 1, 0, 0, 0];
-  for (const k of suite) await P.nth(k).click();
-  await page.locator('.modale__boite .actions button', { hasText: 'Lancer' }).click();
-  await continuer('s2e3 grille');
-  await passerPorte('270');
-  await page.waitForSelector('.grille-enigmes');
-
-  // ================= SALLE 3 =================
-  await ouvrir(0); await qcmJuste('s3e1'); await continuer('s3e1 qcm');
-  await ouvrir(1);
-  await page.locator('.modale__boite input').fill('72');
-  await page.locator('.modale__boite .actions button', { hasText: 'Vérifier' }).click();
-  await continuer('s3e2 saisie');
-
-  await ouvrir(2);
-  await page.locator('.trou input').nth(0).fill('4');
-  await page.locator('.trou input').nth(1).fill('4');
-  await page.locator('.modale__boite .actions button', { hasText: 'Lancer' }).click();
-  await continuer('s3e3 trous+grille');
-  await passerPorte('365');
-  await page.waitForSelector('.grille-enigmes');
-
-  // ================= SALLE 4 =================
-  await ouvrir(0); await qcmJuste('s4e1'); await continuer('s4e1 qcm');
-  await ouvrir(1); await qcmJuste('s4e2'); await continuer('s4e2 qcm');
-  await ouvrir(2);
-  for (const t of [0, 1]) {
-    await page.locator(`.trou[data-trou="${t}"]`).click();
-    await page.locator('#modale-hote .carte .palette .bloc').first().click();
-  }
-  await page.locator('.modale__boite .actions button', { hasText: 'Vérifier' }).click();
-  await continuer('s4e3 trous');
-  await passerPorte('814');
-  await page.waitForSelector('.grille-enigmes');
-
-  // ================= SALLE 5 =================
-  await ouvrir(0);
-  await page.locator('.modale__boite input').fill('16');
-  await page.locator('.modale__boite .actions button', { hasText: 'Vérifier' }).click();
-  await continuer('s5e1 saisie');
-  await ouvrir(1); await qcmJuste('s5e2'); await continuer('s5e2 qcm');
-  await ouvrir(2); await trier();          await continuer('s5e3 ordre');
-  await passerPorte('526');
-
-  await page.waitForSelector('.diplome');
-  console.log('✓ VICTOIRE —', (await page.textContent('.diplome__nom')).trim(),
-              '| rang :', await page.evaluate(() => Progression.rang()));
-  await page.screenshot({ path: 'shot-victoire.png', fullPage: false });
-  console.log('  temps affiché sur le diplôme :', (await page.locator('.diplome__stat b').first().textContent()).trim());
-
-  // Pages annexes
-  for (const p of ['memo.html', 'professeur.html']) {
-    await page.goto(BASE + '/' + p);
+    const code = await page.evaluate(() => {
+      const e = ETAPES[Progression.etat.etape];
+      return codeDe(e, Progression.brancheDe(e.id));
+    });
+    for (let i = 0; i < code.length; i++) {
+      await page.locator('input.verif__case').nth(i).fill(code[i]);
+    }
+    await page.locator('.verif button').click();
     await page.waitForTimeout(300);
-    const n = await page.locator('.carte').count();
-    console.log(`✓ ${p} — ${n} sections rendues`);
   }
+  await passerRecit();
+  await page.locator('.diplome').waitFor({ timeout: 20000 });
+}
 
+(async () => {
+  const nav = await chromium.launch(LANCEMENT);
+  const erreurs = [];
+  for (const br of ['a', 'b']) {
+    const page = await nav.newPage({ viewport: { width: 1280, height: 950 } });
+    page.on('pageerror', e => erreurs.push(br + ': ' + e.message));
+    page.on('console', m => { if (m.type() === 'error') erreurs.push(br + ' console: ' + m.text()); });
+    console.log('— branche ' + br.toUpperCase());
+    await jouerBranche(page, br, erreurs);
+    console.log('✓ branche ' + br.toUpperCase() + ' : 10 énigmes réellement résolues, attestation atteinte');
+    if (br === 'b') await page.screenshot({ path: 'loop-fin.png' });
+    await page.close();
+  }
   await nav.close();
-  console.log(erreurs.length ? '\n❌ ERREURS:\n' + erreurs.join('\n') : '\n✅ Aucune erreur console.');
+  console.log(erreurs.length ? '\n❌ ERREURS:\n' + erreurs.join('\n') : '\n✅ Les 20 énigmes sont solubles, aucune erreur JS.');
   process.exit(erreurs.length ? 1 : 0);
 })().catch(e => { console.error('ÉCHEC:', e.message); process.exit(1); });

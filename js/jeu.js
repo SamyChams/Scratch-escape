@@ -1,8 +1,12 @@
 /* =========================================================
-   jeu.js — moteur de l'escape game
+   jeu.js — moteur de LOOP
    ---------------------------------------------------------
-   Gère l'affichage des salles, les six types d'énigmes,
-   les cadenas, les indices et l'écran de victoire.
+   Le jeu avance dans un arbre : à chaque étape, l'élève fait
+   un CHOIX qui décide de la branche, donc des deux énigmes
+   qu'il va rencontrer. Deux élèves n'ont pas le même parcours.
+
+   Les six types d'énigmes sont fabriqués par js/enigmes.js ;
+   ce fichier ne s'occupe que de l'enchaînement et du récit.
    ========================================================= */
 
 (() => {
@@ -11,15 +15,14 @@
   const scene    = document.getElementById('scene');
   const hote     = document.getElementById('modale-hote');
   const elChrono = document.getElementById('chrono');
-  const elSalle  = document.getElementById('num-salle');
+  const elEtape  = document.getElementById('num-etape');
   const elJauge  = document.getElementById('jauge');
   const elPseudo = document.getElementById('pseudo');
   const btnSon   = document.getElementById('btn-son');
 
-  let salleCourante = 0;
-  let indicesAffiches = 0;   // pour l'énigme ouverte
+  let etapeCourante = 0;
+  let indicesAffiches = 0;
 
-  /* ---------------------------------------------------- outils DOM */
   const el = (balise, classe, contenu) => {
     const n = document.createElement(balise);
     if (classe) n.className = classe;
@@ -42,39 +45,18 @@
     setInterval(() => { elChrono.textContent = Progression.chrono(); }, 1000);
     elChrono.textContent = Progression.chrono();
 
-    salleCourante = Math.min(Progression.etat.salle, SALLES.length - 1);
+    etapeCourante = Math.min(Progression.etat.etape, ETAPES.length - 1);
+
     if (Progression.etat.termine) {
       afficherVictoire();
     } else if (!Progression.etat.prologueVu) {
-      afficherRecit(PROLOGUE.scenes, PROLOGUE.titre, '▶ Entrer dans le Labo 404', () => {
+      jouerRecit(PROLOGUE.scenes, PROLOGUE.titre, '▶ Essayer de se déconnecter', () => {
         Progression.marquerPrologue();
-        afficherSalle(salleCourante);
+        afficherEtape(etapeCourante);
       });
     } else {
-      afficherSalle(salleCourante);
+      afficherEtape(etapeCourante);
     }
-  }
-
-  /* ---------------------------------------------- écran de récit */
-  function afficherRecit(scenes, titre, libelleBouton, suite) {
-    vider(scene);
-    window.scrollTo(0, 0);
-    const carte = el('div', 'carte recit');
-    carte.appendChild(el('h1', 'centre', titre));
-    scene.appendChild(carte);
-
-    // Les répliques s'écrivent une par une ; le bouton n'apparaît qu'à la fin.
-    Recit.jouer(carte, scenes, {
-      onFin: () => {
-        const actions = el('div', 'actions apparition');
-        actions.style.justifyContent = 'center';
-        const btn = el('button', 'btn btn--grand', libelleBouton);
-        btn.addEventListener('click', () => { Son.clic(); suite(); });
-        actions.appendChild(btn);
-        carte.appendChild(actions);
-        btn.focus({ preventScroll: true });
-      }
-    });
   }
 
   function majSon() {
@@ -84,124 +66,225 @@
   }
 
   function quitter() {
-    if (confirm("Retourner à l'accueil ? Ta progression est sauvegardée automatiquement.")) {
+    if (confirm("Revenir à l'accueil ? Ta progression est sauvegardée automatiquement.")) {
       location.href = 'index.html';
     }
   }
 
   function majProgression() {
-    const total = SALLES.reduce((s, x) => s + x.enigmes.length, 0);
+    // 2 énigmes par étape sur l'ensemble du parcours
+    const total = ETAPES.length * 2;
     const faits = Progression.etat.resolues.length;
-    elJauge.style.width = Math.round((faits / total) * 100) + '%';
-    elSalle.textContent = `Salle ${Math.min(salleCourante + 1, SALLES.length)}/${SALLES.length}`;
+    elJauge.style.width = Math.min(100, Math.round((faits / total) * 100)) + '%';
+    elEtape.textContent = `${Math.min(etapeCourante + 1, ETAPES.length)}/${ETAPES.length}`;
   }
 
-  /* ================================================== AFFICHER UNE SALLE */
-  function afficherSalle(indice) {
-    salleCourante = indice;
-    Progression.ouvrirSalle(indice);
-    majProgression();
+  /* ================================================== L'ÉCRAN DE L'APPLI */
+  const HEURES = ['23:47', '23:52', '00:03', '00:18', '00:31', '00:44'];
+
+  /** Cadre « téléphone » dans lequel se joue tout le récit. */
+  function ecranAppli(sousTitre) {
+    const ecran = el('div', 'ecran');
+    const barre = el('div', 'ecran__barre');
+    barre.innerHTML = `
+      <span class="ecran__marque">${APPLI.nom}</span>
+      <span class="muet petit">${sousTitre || ''}</span>
+      <span class="ecran__vide"></span>
+      <span>${HEURES[Math.min(etapeCourante + 1, HEURES.length - 1)]}</span>
+      <span title="Batterie">🔋</span>`;
+    const contenu = el('div', 'ecran__contenu');
+    ecran.appendChild(barre);
+    ecran.appendChild(contenu);
+    return { ecran, contenu };
+  }
+
+  /** Un message du fil : Nova, Kaya, @scratchy, les copains, ou la narration. */
+  function messageHTML(scene, corpsHTML) {
+    const corps = corpsHTML !== undefined ? corpsHTML : '<span class="recit__cible"></span>';
+
+    if (!scene.qui) return `<div class="msg msg--recit">${corps}</div>`;
+
+    const fiches = {
+      nova:     { nom: 'NOVA',      etiquette: 'algorithme', avatar: () => Illus.nova(60) },
+      kaya:     { nom: 'Kaya',      etiquette: 'en live',    avatar: () => Illus.kaya(60) },
+      scratchy: { nom: '@scratchy', etiquette: '3 abonnés',
+                  // en photo de profil, seule la tête du chat est lisible
+                  avatar: () => `<svg viewBox="0 0 100 100">${Illus.teteChat(50, 54, 34)}</svg>` },
+      ilyes:    { nom: 'Ilyes',     etiquette: 'groupe',     lettre: 'I' },
+      nour:     { nom: 'Nour',      etiquette: 'groupe',     lettre: 'N' }
+    };
+    const f = fiches[scene.qui] || fiches.scratchy;
+    const avatar = f.lettre
+      ? `<div class="msg__avatar msg__avatar--lettre">${f.lettre}</div>`
+      : `<div class="msg__avatar">${f.avatar()}</div>`;
+
+    return `<div class="msg msg--${scene.qui}">
+      ${avatar}
+      <div class="msg__corps">
+        <div class="msg__tete">
+          <span class="msg__nom">${f.nom}</span>
+          <span class="msg__etiquette">${f.etiquette}</span>
+        </div>
+        <div class="msg__bulle">${corps}</div>
+      </div>
+    </div>`;
+  }
+
+  /* ================================================== RÉCIT */
+  /** Joue une suite de répliques, puis appelle `suite`. */
+  function jouerRecit(scenes, titre, libelleBouton, suite, sousTitre) {
     vider(scene);
     window.scrollTo(0, 0);
 
-    const salle = SALLES[indice];
-    document.documentElement.style.setProperty('--accent', salle.couleur);
+    const { ecran, contenu } = ecranAppli(sousTitre);
+    if (titre) contenu.appendChild(el('h1', 'centre', titre));
+    scene.appendChild(ecran);
 
-    // Bandeau illustré
-    const bandeau = el('div', 'bandeau');
-    bandeau.innerHTML = Illus.decor(salle.id) + `
-      <div class="bandeau__voile">
-        <div class="bandeau__icone">${salle.icone}</div>
-        <div>
-          <div class="bandeau__num">Salle ${salle.numero} sur ${SALLES.length}</div>
-          <h1 class="bandeau__titre">${salle.titre}</h1>
-        </div>
-      </div>`;
-    scene.appendChild(bandeau);
+    const apres = el('div', 'actions');
+    apres.style.justifyContent = 'center';
 
-    /* --- entrée en scène ---------------------------------------- */
-    const scenes = [{ texte: salle.entree }].concat(salle.dialogues || []);
-    const premiereVisite = !Progression.salleVue(salle.id);
-
-    // Tout ce qui suit le dialogue attend la fin de celui-ci.
-    const suite = el('div');
-
-    if (premiereVisite) {
-      const zoneRecit = el('div', 'recit');
-      scene.appendChild(zoneRecit);
-      suite.classList.add('cache');
-      Recit.jouer(zoneRecit, scenes, {
-        onFin: () => {
-          Progression.marquerSalleVue(salle.id);
-          suite.classList.remove('cache');
-          suite.classList.add('apparition');
-        }
-      });
-    } else {
-      scenes.forEach((s) => {
-        scene.appendChild(s.qui
-          ? el('div', null, Illus.dialogue(s.qui, s.texte))
-          : el('div', 'narration', s.texte));
-      });
-    }
-    scene.appendChild(suite);
-
-    /* --- les trois énigmes ------------------------------------- */
-    const grille = el('div', 'grille-enigmes');
-    salle.enigmes.forEach((enigme, i) => {
-      const fait = Progression.estResolue(enigme.id);
-      const tuile = el('button', 'tuile' + (fait ? ' tuile--ok' : ''));
-      tuile.type = 'button';
-      tuile.innerHTML = `
-        <div class="tuile__puce">${fait ? '✅' : '🔒'}</div>
-        <div class="tuile__icone">${enigme.icone}</div>
-        <div class="tuile__titre">Énigme ${i + 1} — ${enigme.titre}</div>
-        <div class="tuile__etat">${fait
-          ? `Résolue · chiffre obtenu : <b>${enigme.fragment}</b>`
-          : 'Clique pour ouvrir'}</div>`;
-      tuile.addEventListener('click', () => { Son.clic(); ouvrirEnigme(salle, enigme); });
-      grille.appendChild(tuile);
+    Recit.jouer(contenu, scenes, {
+      bulle: (s) => messageHTML(s),
+      onFin: () => {
+        const btn = el('button', 'btn btn--grand', libelleBouton);
+        btn.addEventListener('click', () => { Son.clic(); suite(); });
+        apres.appendChild(btn);
+        contenu.appendChild(apres);
+        btn.focus({ preventScroll: true });
+      }
     });
-    suite.appendChild(grille);
-
-    /* --- le cadenas -------------------------------------------- */
-    suite.appendChild(construireCadenas(salle));
-
-    /* --- rappel de cours --------------------------------------- */
-    const aide = el('div', 'centre');
-    aide.style.marginTop = '26px';
-    const b = el('button', 'btn btn--fantome', '📘 Ouvrir le cahier de cours de cette salle');
-    b.addEventListener('click', () => ouvrirMemo(salle.memo));
-    aide.appendChild(b);
-    suite.appendChild(aide);
   }
 
-  /* ================================================== CADENAS */
-  function construireCadenas(salle) {
-    const carte = el('div', 'carte cadenas');
-    const tout = salle.enigmes.every((e) => Progression.estResolue(e.id));
+  /* ================================================== UNE ÉTAPE */
+  function afficherEtape(indice) {
+    etapeCourante = indice;
+    Progression.ouvrirEtape(indice);
+    majProgression();
 
-    carte.appendChild(el('h2', null, '🔐 Le cadenas de la porte'));
+    const etape = ETAPES[indice];
+    document.documentElement.style.setProperty('--accent', etape.couleur);
 
-    const frag = el('div', 'fragments');
-    salle.enigmes.forEach((e) => {
-      const ok = Progression.estResolue(e.id);
-      frag.appendChild(el('div', 'fragment' + (ok ? ' fragment--trouve' : ''), ok ? e.fragment : '?'));
+    const branche = Progression.brancheDe(etape.id);
+
+    // Pas encore de branche : on joue l'intro, puis on propose le choix.
+    if (!branche) {
+      const dejaVue = Progression.salleVue(etape.id);
+      if (dejaVue) { afficherBifurcation(etape); return; }
+
+      jouerRecit(etape.intro, `${etape.icone} ${etape.titre}`, '➡ Continuer', () => {
+        Progression.marquerSalleVue(etape.id);
+        afficherBifurcation(etape);
+      }, etape.soustitre);
+      return;
+    }
+
+    afficherTaches(etape, branche);
+  }
+
+  /* ---------------------------------------------- le choix qui bifurque */
+  function afficherBifurcation(etape) {
+    vider(scene);
+    window.scrollTo(0, 0);
+    const { ecran, contenu } = ecranAppli(etape.soustitre);
+    contenu.appendChild(el('h1', 'centre', `${etape.icone} ${etape.titre}`));
+    scene.appendChild(ecran);
+
+    const bloc = el('div', 'bifurcation');
+    bloc.appendChild(el('div', 'bifurcation__titre', `Étape ${etape.numero} sur ${ETAPES.length}`));
+    bloc.appendChild(el('div', 'bifurcation__question', etape.choix.question));
+
+    const options = el('div', 'bifurcation__options');
+    etape.choix.options.forEach((opt) => {
+      const b = el('button', 'option-branche', opt.texte);
+      b.type = 'button';
+      b.addEventListener('click', () => {
+        Son.clic();
+        Progression.choisirBranche(etape.id, opt.branche);
+        // La réponse du personnage, puis les deux énigmes de la branche.
+        jouerRecit([opt.reponse], null, '➡ Ouvrir la section', () => {
+          afficherTaches(etape, opt.branche);
+        }, etape.soustitre);
+      });
+      options.appendChild(b);
     });
-    carte.appendChild(frag);
+    bloc.appendChild(options);
+    bloc.appendChild(el('div', 'bifurcation__note',
+      "Il n'y a pas de mauvais choix ici — mais tu ne feras pas les mêmes exercices que ton voisin."));
+    contenu.appendChild(bloc);
+  }
+
+  /* ---------------------------------------------- les deux énigmes */
+  function afficherTaches(etape, branche) {
+    vider(scene);
+    window.scrollTo(0, 0);
+    majProgression();
+
+    const enigmes = enigmesDe(etape, branche);
+    const { ecran, contenu } = ecranAppli(etape.soustitre);
+    contenu.appendChild(el('h1', 'centre', `${etape.icone} ${etape.titre}`));
+    contenu.appendChild(el('p', 'centre muet petit',
+      `Section « ${etape.branches[branche].titre} » — deux réglages à réparer.`));
+    scene.appendChild(ecran);
+
+    const liste = el('div', 'taches');
+    enigmes.forEach((enigme, i) => {
+      const fait = Progression.estResolue(enigme.id);
+      const t = el('button', 'tache' + (fait ? ' tache--ok' : ''));
+      t.type = 'button';
+      t.innerHTML = `
+        <div class="tache__icone">${enigme.icone}</div>
+        <div>
+          <div class="tache__titre">${i + 1}. ${enigme.titre}</div>
+          <div class="tache__etat">${fait
+            ? `Réparé · chiffre obtenu : <b>${enigme.fragment}</b>`
+            : 'Appuie pour ouvrir'}</div>
+        </div>
+        <div class="tache__puce">${fait ? '✅' : '🔒'}</div>`;
+      t.addEventListener('click', () => { Son.clic(); ouvrirEnigme(etape, branche, enigme); });
+      liste.appendChild(t);
+    });
+    contenu.appendChild(liste);
+
+    contenu.appendChild(construireVerification(etape, branche, enigmes));
+
+    const aide = el('div', 'centre');
+    aide.style.marginTop = '22px';
+    const b = el('button', 'btn btn--fantome', '📘 Ouvrir le cahier de cours');
+    b.addEventListener('click', () => ouvrirMemo(etape.memo));
+    aide.appendChild(b);
+    contenu.appendChild(aide);
+  }
+
+  /* ---------------------------------------------- le code de vérification */
+  function construireVerification(etape, branche, enigmes) {
+    const carte = el('div', 'verif');
+    const tout = enigmes.every((e) => Progression.estResolue(e.id));
+
+    carte.appendChild(el('div', 'verif__titre', '🔐 Code de vérification'));
+    carte.appendChild(el('div', 'verif__sous',
+      tout ? "Compose les deux chiffres obtenus, dans l'ordre des réglages."
+           : "Répare les deux réglages : chacun te donne un chiffre du code."));
 
     if (!tout) {
-      carte.appendChild(el('p', 'muet', 'Résous les trois énigmes pour découvrir les trois chiffres du code.'));
+      const apercu = el('div', 'verif__cases');
+      enigmes.forEach((e) => {
+        const ok = Progression.estResolue(e.id);
+        const c = el('div', 'verif__case');
+        c.style.display = 'grid';
+        c.style.placeItems = 'center';
+        c.textContent = ok ? e.fragment : '?';
+        if (!ok) c.style.color = 'var(--texte-doux)';
+        apercu.appendChild(c);
+      });
+      carte.appendChild(apercu);
       return carte;
     }
 
-    carte.appendChild(el('p', null, 'Compose le code dans le bon ordre (énigme 1, puis 2, puis 3) :'));
-
-    const code = codeSalle(salle);
-    const molettes = el('div', 'cadenas__molettes');
+    const code = codeDe(etape, branche);
+    const cases = el('div', 'verif__cases');
     const champs = [];
     for (let i = 0; i < code.length; i++) {
-      const inp = el('input', 'molette');
+      const inp = el('input', 'verif__case');
       inp.type = 'text';
       inp.inputMode = 'numeric';
       inp.maxLength = 1;
@@ -215,14 +298,14 @@
         if (e.key === 'Enter') tenter();
       });
       champs.push(inp);
-      molettes.appendChild(inp);
+      cases.appendChild(inp);
     }
-    carte.appendChild(molettes);
+    carte.appendChild(cases);
 
     const zoneRetour = el('div');
     const actions = el('div', 'actions');
     actions.style.justifyContent = 'center';
-    const btn = el('button', 'btn btn--grand', '🔓 Ouvrir la porte');
+    const btn = el('button', 'btn btn--grand', '🔓 Valider le code');
     btn.addEventListener('click', tenter);
     actions.appendChild(btn);
     carte.appendChild(actions);
@@ -233,50 +316,43 @@
       vider(zoneRetour);
       if (saisi === code) {
         Son.deverrouille();
-        porteOuverte(salle);
+        sectionOuverte(etape);
       } else {
         Son.mauvais();
         Progression.compterErreur();
-        carte.classList.remove('cadenas--secoue');
+        carte.classList.remove('verif--secoue');
         void carte.offsetWidth;
-        carte.classList.add('cadenas--secoue');
+        carte.classList.add('verif--secoue');
         zoneRetour.appendChild(el('div', 'retour retour--erreur',
-          "❌ Le cadenas résiste. Vérifie les chiffres et surtout leur <b>ordre</b> : celui de l'énigme 1 en premier."));
+          "❌ Code refusé. Vérifie les deux chiffres et surtout leur <b>ordre</b> : celui du premier réglage d'abord."));
       }
     }
 
     return carte;
   }
 
-  function porteOuverte(salle) {
-    vider(scene);
-    window.scrollTo(0, 0);
-    const carte = el('div', 'carte recit');
-    carte.appendChild(el('div', 'centre', '<div style="font-size:4rem">🚪✨</div>'));
-    carte.appendChild(el('h1', 'centre', `Porte ${salle.numero} ouverte !`));
-    carte.appendChild(el('div', 'narration', salle.sortie));
-    (salle.dialoguesSortie || []).forEach((d) => {
-      carte.appendChild(el('div', null, Illus.dialogue(d.qui, d.texte)));
-    });
+  /* ---------------------------------------------- section franchie */
+  function sectionOuverte(etape) {
+    const derniere = etape.numero >= ETAPES.length;
+    const scenes = (etape.sortie || []).slice();
 
-    const actions = el('div', 'actions');
-    actions.style.justifyContent = 'center';
-    const suivante = salle.numero < SALLES.length;
-    const btn = el('button', 'btn btn--grand', suivante ? '➡ Entrer dans la salle suivante' : '✨ Voir la fin');
-    btn.addEventListener('click', () => {
-      Son.clic();
-      if (suivante) {
-        afficherSalle(salle.numero);
-      } else {
-        afficherRecit(EPILOGUE.scenes, 'Le Bug est vaincu', '🏆 Recevoir mon diplôme', () => {
+    if (!scenes.length) {
+      suivre();
+      return;
+    }
+    jouerRecit(scenes, `✅ ${etape.titre} — réparé`,
+      derniere ? '✨ Voir la fin' : '➡ Section suivante', suivre, etape.soustitre);
+
+    function suivre() {
+      if (derniere) {
+        jouerRecit(EPILOGUE.scenes, EPILOGUE.titre, '🏆 Recevoir mon diplôme', () => {
           Progression.terminer();
           afficherVictoire();
         });
+      } else {
+        afficherEtape(etape.numero);
       }
-    });
-    actions.appendChild(btn);
-    carte.appendChild(actions);
-    scene.appendChild(carte);
+    }
   }
 
   /* ================================================== MODALE */
@@ -305,32 +381,27 @@
     const fiches = ids ? COURS.filter((f) => ids.includes(f.id)) : COURS;
     const boite = ouvrirModale('Cahier de cours', '📘');
     fiches.forEach((f) => boite.appendChild(Memo.fiche(f)));
-    const p = el('p', 'centre muet petit',
-      'Toutes les fiches sont aussi consultables sur la page <a href="memo.html" target="_blank">Cahier de cours</a>.');
-    boite.appendChild(p);
+    boite.appendChild(el('p', 'centre muet petit',
+      'Toutes les fiches sont aussi sur la page <a href="memo.html" target="_blank">Cahier de cours</a>.'));
   }
 
-  /* ================================================== ÉNIGMES */
-  function ouvrirEnigme(salle, enigme) {
+  /* ================================================== UNE ÉNIGME */
+  function ouvrirEnigme(etape, branche, enigme) {
     indicesAffiches = 0;
     const boite = ouvrirModale(enigme.titre, enigme.icone);
 
-    // Mise en scène : ce que l'élève « voit » dans la salle.
-    // Elle s'écrit petit à petit ; un clic dessus l'affiche d'un coup.
+    // Mise en scène : ce que l'élève « voit » avant de travailler.
     if (enigme.histoire) {
       const h = enigme.histoire;
-      const noeud = h.qui
-        ? el('div', null, Illus.dialogue(h.qui, '<span class="recit__cible"></span>'))
-        : el('div', 'mise-en-scene', '<span class="recit__cible"></span>');
+      const noeud = el('div', null, messageHTML(h));
       boite.appendChild(noeud);
       const machine = Recit.ecrire(noeud.querySelector('.recit__cible'), h.texte);
       noeud.addEventListener('click', () => machine.terminer());
-      noeud.title = "Clique pour afficher tout le texte";
+      noeud.title = 'Clique pour afficher tout le texte';
     }
 
     boite.appendChild(el('div', 'consigne', enigme.consigne));
 
-    // Script d'illustration éventuel
     if (enigme.script && enigme.type !== 'trous') {
       const cadre = el('div');
       cadre.style.margin = '0 0 18px';
@@ -340,47 +411,40 @@
     if (enigme.question) boite.appendChild(el('p', null, `<b>${enigme.question}</b>`));
 
     const zoneJeu = el('div');
-    boite.appendChild(zoneJeu);
-
     const zoneRetour = el('div');
     const actions = el('div', 'actions');
+    boite.appendChild(zoneJeu);
     boite.appendChild(zoneRetour);
     boite.appendChild(actions);
 
-    /* --- Aide : indices ---------------------------------------- */
-    const btnIndice = el('button', 'btn btn--fantome', '💡 Un indice');
+    /* --- indices : c'est Kaya qui souffle ---------------------- */
+    const btnIndice = el('button', 'btn btn--fantome', '💡 Demander à Kaya');
     btnIndice.addEventListener('click', () => {
       if (indicesAffiches >= enigme.indices.length) return;
       Son.indice();
       Progression.compterIndice();
-      zoneRetour.appendChild(el('div', 'retour retour--indice',
-        Illus.dialogue('pixel', `<b>Indice ${indicesAffiches + 1} :</b> ${enigme.indices[indicesAffiches]}`)));
+      zoneRetour.appendChild(el('div', null,
+        messageHTML({ qui: 'kaya' }, `<b>Indice ${indicesAffiches + 1} :</b> ${enigme.indices[indicesAffiches]}`)));
       indicesAffiches++;
       if (indicesAffiches >= enigme.indices.length) btnIndice.disabled = true;
     });
 
     const btnCours = el('button', 'btn btn--fantome', '📘 Revoir le cours');
-    btnCours.addEventListener('click', () => {
-      const memoIds = salle.memo;
-      fermerModale();
-      ouvrirMemo(memoIds);
-    });
+    btnCours.addEventListener('click', () => { fermerModale(); ouvrirMemo(etape.memo); });
 
-    /* --- Réussite ----------------------------------------------- */
     function reussir() {
       Son.bon();
       Progression.resoudre(enigme.id, enigme.fragment);
       vider(zoneRetour);
       vider(actions);
-      const bravo = el('div', 'retour retour--ok');
-      bravo.innerHTML = `🎉 <b>Bravo !</b> ${enigme.explication}
+      zoneRetour.appendChild(el('div', 'retour retour--ok', `
+        🎉 <b>Réglage réparé !</b> ${enigme.explication}
         <div style="margin-top:14px;text-align:center">
           <div class="muet petit">Chiffre du code obtenu</div>
           <div style="font-size:2.6rem;font-weight:800;color:var(--jaune)">${enigme.fragment}</div>
-        </div>`;
-      zoneRetour.appendChild(bravo);
+        </div>`));
       const btn = el('button', 'btn btn--vert btn--grand', '✔ Continuer');
-      btn.addEventListener('click', () => { fermerModale(); afficherSalle(salleCourante); });
+      btn.addEventListener('click', () => { fermerModale(); afficherTaches(etape, branche); });
       actions.appendChild(btn);
       actions.style.justifyContent = 'center';
       btn.focus();
@@ -393,533 +457,15 @@
       zoneRetour.appendChild(el('div', 'retour retour--erreur', message));
     }
 
-    const ctx = { zoneJeu, zoneRetour, actions, reussir, echouer, el, vider };
-
-    switch (enigme.type) {
-      case 'qcm':         construireQcm(enigme, ctx); break;
-      case 'association': construireAssociation(enigme, ctx); break;
-      case 'ordre':       construireOrdre(enigme, ctx); break;
-      case 'saisie':      construireSaisie(enigme, ctx); break;
-      case 'grille':      construireGrille(enigme, ctx); break;
-      case 'trous':       construireTrous(enigme, ctx); break;
-    }
+    Enigmes.construire(enigme, { zoneJeu, zoneRetour, actions, reussir, echouer });
 
     actions.appendChild(btnIndice);
     actions.appendChild(btnCours);
 
     if (Progression.estResolue(enigme.id)) {
       zoneRetour.appendChild(el('div', 'retour retour--ok',
-        `✅ Tu as déjà résolu cette énigme. Le chiffre obtenu est <b>${enigme.fragment}</b>.`));
+        `✅ Déjà réparé. Le chiffre obtenu est <b>${enigme.fragment}</b>.`));
     }
-  }
-
-  /* ---------------------------------------------------------- QCM */
-  function construireQcm(enigme, ctx) {
-    const liste = el('div', 'options');
-    const lettres = 'ABCDEF';
-    const boutons = [];
-
-    enigme.options.forEach((opt, i) => {
-      const b = el('button', 'option');
-      b.type = 'button';
-      b.appendChild(el('span', 'option__lettre', lettres[i]));
-      const contenu = el('span');
-      if (opt.pile)      contenu.appendChild(Blocs.pile(opt.pile));
-      else if (opt.bloc) contenu.appendChild(Blocs.creer(opt.bloc));
-      else               contenu.innerHTML = opt.texte;
-      b.appendChild(contenu);
-
-      b.addEventListener('click', () => {
-        if (opt.correct) {
-          b.classList.add('option--juste');
-          boutons.forEach((x) => { x.disabled = true; });
-          ctx.reussir();
-        } else {
-          b.classList.add('option--faux');
-          b.disabled = true;
-          ctx.echouer(`❌ Pas tout à fait. ${opt.retour || 'Relis bien la question et réessaie.'}`);
-        }
-      });
-      boutons.push(b);
-      liste.appendChild(b);
-    });
-    ctx.zoneJeu.appendChild(liste);
-  }
-
-  /* -------------------------------------------------- ASSOCIATION */
-  function construireAssociation(enigme, ctx) {
-    const melange = (t) => t.slice().sort(() => Math.random() - 0.5);
-    const gauche = melange(enigme.paires);
-    const droite = melange(enigme.paires);
-
-    const zone = el('div', 'assoc');
-    const colG = el('div', 'assoc__colonne');
-    const colD = el('div', 'assoc__colonne');
-    colG.appendChild(el('div', 'assoc__titre', 'Catégorie'));
-    colD.appendChild(el('div', 'assoc__titre', 'Couleur'));
-
-    let choisiG = null;
-    let trouves = 0;
-
-    const faireJeton = (paire, cote) => {
-      const b = el('button', 'jeton');
-      b.type = 'button';
-      if (cote === 'd' && paire.couleur) {
-        const p = el('span', 'pastille');
-        p.style.background = paire.couleur;
-        b.appendChild(p);
-      }
-      b.appendChild(el('span', null, cote === 'g' ? paire.g : paire.d));
-      b.dataset.cle = paire.g;
-      return b;
-    };
-
-    gauche.forEach((p) => {
-      const b = faireJeton(p, 'g');
-      b.addEventListener('click', () => {
-        if (b.disabled) return;
-        Son.clic();
-        colG.querySelectorAll('.jeton--actif').forEach((x) => x.classList.remove('jeton--actif'));
-        choisiG = b;
-        b.classList.add('jeton--actif');
-      });
-      colG.appendChild(b);
-    });
-
-    droite.forEach((p) => {
-      const b = faireJeton(p, 'd');
-      b.addEventListener('click', () => {
-        if (b.disabled) return;
-        if (!choisiG) {
-          ctx.zoneRetour.innerHTML = '';
-          ctx.zoneRetour.appendChild(el('div', 'retour retour--indice',
-            '👉 Commence par cliquer sur une <b>catégorie</b> dans la colonne de gauche.'));
-          return;
-        }
-        if (choisiG.dataset.cle === b.dataset.cle) {
-          Son.bon();
-          [choisiG, b].forEach((x) => { x.classList.remove('jeton--actif'); x.classList.add('jeton--lie'); x.disabled = true; });
-          choisiG = null;
-          trouves++;
-          ctx.zoneRetour.innerHTML = '';
-          if (trouves === enigme.paires.length) ctx.reussir();
-        } else {
-          const mauvais = choisiG;
-          mauvais.classList.remove('jeton--actif');
-          choisiG = null;
-          ctx.echouer(`❌ Non, <b>${mauvais.textContent}</b> n'est pas de cette couleur. Réessaie !`);
-        }
-      });
-      colD.appendChild(b);
-    });
-
-    zone.appendChild(colG);
-    zone.appendChild(colD);
-    ctx.zoneJeu.appendChild(zone);
-  }
-
-  /* -------------------------------------------------------- ORDRE */
-  function construireOrdre(enigme, ctx) {
-    const liste = el('ul', 'liste-ordre');
-
-    // Mélange en s'assurant que l'ordre de départ n'est pas déjà le bon
-    let indices = enigme.blocs.map((_, i) => i);
-    let essais = 0;
-    do {
-      indices.sort(() => Math.random() - 0.5);
-      essais++;
-    } while (essais < 20 && indices.every((v, i) => v === i));
-
-    indices.forEach((idx) => {
-      const li = el('li', 'item-ordre');
-      li.dataset.index = idx;
-
-      const poignee = el('span', 'item-ordre__poignee', '⠿');
-      poignee.title = 'Glisse pour déplacer';
-      li.appendChild(poignee);
-      li.appendChild(el('span', 'item-ordre__rang', '·'));
-      li.appendChild(Blocs.creer(enigme.blocs[idx]));
-
-      const fleches = el('div', 'item-ordre__fleches');
-      const haut = el('button', 'mini-btn', '▲');
-      const bas  = el('button', 'mini-btn', '▼');
-      haut.title = 'Monter'; bas.title = 'Descendre';
-      haut.addEventListener('click', () => { Son.clic(); if (li.previousElementSibling) liste.insertBefore(li, li.previousElementSibling); majRangs(); });
-      bas.addEventListener('click',  () => { Son.clic(); if (li.nextElementSibling) liste.insertBefore(li.nextElementSibling, li); majRangs(); });
-      fleches.appendChild(haut);
-      fleches.appendChild(bas);
-      li.appendChild(fleches);
-
-      // Déplacement à la souris ou au doigt
-      poignee.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        li.classList.add('item-ordre--saisi');
-        poignee.setPointerCapture(e.pointerId);
-      });
-      poignee.addEventListener('pointermove', (e) => {
-        if (!li.classList.contains('item-ordre--saisi')) return;
-        const sous = document.elementFromPoint(e.clientX, e.clientY);
-        const cible = sous && sous.closest ? sous.closest('.item-ordre') : null;
-        if (cible && cible !== li && cible.parentNode === liste) {
-          const r = cible.getBoundingClientRect();
-          const apres = e.clientY > r.top + r.height / 2;
-          liste.insertBefore(li, apres ? cible.nextSibling : cible);
-          majRangs();
-        }
-      });
-      const relacher = () => { li.classList.remove('item-ordre--saisi'); majRangs(); };
-      poignee.addEventListener('pointerup', relacher);
-      poignee.addEventListener('pointercancel', relacher);
-
-      liste.appendChild(li);
-    });
-
-    function majRangs() {
-      [...liste.children].forEach((li, i) => {
-        li.querySelector('.item-ordre__rang').textContent = i + 1;
-      });
-    }
-    majRangs();
-
-    ctx.zoneJeu.appendChild(liste);
-    ctx.zoneJeu.appendChild(el('p', 'muet petit',
-      'Utilise les flèches ▲ ▼ ou attrape un bloc par la poignée ⠿ pour le déplacer.'));
-
-    const btn = el('button', 'btn', '✔ Vérifier le script');
-    btn.addEventListener('click', () => {
-      const ordre = [...liste.children].map((li) => Number(li.dataset.index));
-      const bienPlaces = ordre.filter((v, i) => v === i).length;
-      if (bienPlaces === ordre.length) ctx.reussir();
-      else ctx.echouer(`❌ Ce n'est pas encore ça : <b>${bienPlaces}</b> bloc(s) sur ${ordre.length} sont à la bonne place. Continue !`);
-    });
-    ctx.actions.appendChild(btn);
-  }
-
-  /* ------------------------------------------------------- SAISIE */
-  function construireSaisie(enigme, ctx) {
-    const zone = el('div', 'centre');
-    const inp = el('input', 'champ-pseudo');
-    inp.type = 'text';
-    inp.placeholder = (enigme.champ && enigme.champ.placeholder) || 'Ta réponse';
-    if (enigme.champ && enigme.champ.largeur) inp.style.width = enigme.champ.largeur + 'px';
-    inp.setAttribute('aria-label', 'Ta réponse');
-    zone.appendChild(inp);
-    ctx.zoneJeu.appendChild(zone);
-
-    const valider = () => {
-      const val = inp.value.trim().toLowerCase().replace(/\s+/g, ' ');
-      if (!val) { ctx.echouer('✏ Écris d\'abord ta réponse dans la case.'); return; }
-      const ok = enigme.reponses.some((r) => r.toLowerCase() === val);
-      if (ok) ctx.reussir();
-      else ctx.echouer("❌ Ce n'est pas la bonne valeur. Reprends le calcul étape par étape, ou demande un indice.");
-    };
-    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') valider(); });
-
-    const btn = el('button', 'btn', '✔ Vérifier');
-    btn.addEventListener('click', valider);
-    ctx.actions.appendChild(btn);
-    setTimeout(() => inp.focus(), 80);
-  }
-
-  /* ================================================== SIMULATEUR */
-  const DIRS = { E: [1, 0], S: [0, 1], W: [-1, 0], N: [0, -1] };
-  const FLECHES = { E: '➡', S: '⬇', W: '⬅', N: '⬆' };
-  const ROUE = ['E', 'S', 'W', 'N'];
-
-  /** Construit le plateau et renvoie de quoi le piloter. */
-  function construirePlateau(conf) {
-    const plateau = el('div', 'grille-jeu');
-    plateau.style.gridTemplateColumns = `repeat(${conf.largeur}, 1fr)`;
-    const cases = [];
-    for (let y = 0; y < conf.hauteur; y++) {
-      for (let x = 0; x < conf.largeur; x++) {
-        const c = el('div', 'case');
-        if (conf.murs.some(([mx, my]) => mx === x && my === y)) { c.classList.add('case--mur'); c.textContent = '🧱'; }
-        if (conf.sortie.x === x && conf.sortie.y === y) { c.classList.add('case--sortie'); c.textContent = '🚪'; }
-        cases.push(c);
-        plateau.appendChild(c);
-      }
-    }
-
-    const pion = el('div', 'pion');
-    pion.innerHTML = '<span>🐈</span><span class="pion__dir">➡</span>';
-
-    let etat;
-    function placer() {
-      const c = cases[etat.y * conf.largeur + etat.x];
-      c.appendChild(pion);
-      pion.querySelector('.pion__dir').textContent = FLECHES[etat.dir];
-    }
-    function reinit() {
-      etat = { x: conf.depart.x, y: conf.depart.y, dir: conf.depart.dir };
-      pion.classList.remove('pion--cogne');
-      placer();
-    }
-    reinit();
-
-    const estMur = (x, y) =>
-      x < 0 || y < 0 || x >= conf.largeur || y >= conf.hauteur ||
-      conf.murs.some(([mx, my]) => mx === x && my === y);
-
-    return {
-      element: plateau,
-      reinit,
-      get etat() { return etat; },
-      /** Applique une instruction ; renvoie false en cas de choc. */
-      appliquer(op) {
-        if (op.op === 'avancer') {
-          const [dx, dy] = DIRS[etat.dir];
-          const nx = etat.x + dx, ny = etat.y + dy;
-          if (estMur(nx, ny)) {
-            pion.classList.add('pion--cogne');
-            Son.cogne();
-            return false;
-          }
-          etat.x = nx; etat.y = ny;
-          Son.pas();
-        } else if (op.op === 'tourner') {
-          const i = ROUE.indexOf(etat.dir);
-          etat.dir = ROUE[(i + (op.sens === 'd' ? 1 : 3)) % 4];
-          Son.clic();
-        }
-        placer();
-        return true;
-      },
-      arrive() { return etat.x === conf.sortie.x && etat.y === conf.sortie.y; }
-    };
-  }
-
-  /** Déroule les boucles pour obtenir une liste d'instructions simples. */
-  function aplatir(programme, limite = 300) {
-    const sortie = [];
-    (function parcourir(liste) {
-      liste.forEach((op) => {
-        if (sortie.length > limite) return;
-        if (op.op === 'repeter') {
-          const n = Math.max(0, Math.min(50, Number(op.n) || 0));
-          for (let i = 0; i < n; i++) parcourir(op.corps);
-        } else {
-          sortie.push(op);
-        }
-      });
-    })(programme);
-    return sortie;
-  }
-
-  /** Anime le programme sur le plateau puis appelle fin(reussi, raison). */
-  function executer(plateau, programme, fin, surligner) {
-    const ops = aplatir(programme);
-    plateau.reinit();
-    if (!ops.length) { fin(false, 'vide'); return; }
-    let i = 0;
-    (function etape() {
-      if (i >= ops.length) {
-        fin(plateau.arrive(), plateau.arrive() ? 'ok' : 'raté');
-        return;
-      }
-      if (surligner) surligner(i);
-      const ok = plateau.appliquer(ops[i]);
-      if (!ok) { fin(false, 'mur'); return; }
-      if (plateau.arrive() && i === ops.length - 1) { fin(true, 'ok'); return; }
-      i++;
-      setTimeout(etape, 420);
-    })();
-  }
-
-  /* -------------------------------------------------------- GRILLE */
-  function construireGrille(enigme, ctx) {
-    const conf = enigme.grille;
-    const plateau = construirePlateau(conf);
-    const programme = [];   // liste d'opérations construite par l'élève
-
-    const zone = el('div', 'labo');
-
-    // Colonne gauche : le plateau
-    const gauche = el('div');
-    gauche.appendChild(el('div', 'palette__titre', 'La salle'));
-    gauche.appendChild(plateau.element);
-    zone.appendChild(gauche);
-
-    // Colonne droite : palette + programme
-    const droite = el('div');
-    droite.appendChild(el('div', 'palette__titre', 'Palette — clique pour ajouter'));
-    const palette = el('div', 'palette');
-    enigme.palette.forEach((p) => {
-      const b = Blocs.creer(p.bloc);
-      b.classList.add('bloc--cliquable');
-      b.setAttribute('role', 'button');
-      b.setAttribute('tabindex', '0');
-      const ajouter = () => {
-        if (programme.length >= enigme.maxBlocs) {
-          ctx.echouer(`⚠ Ton programme ne peut pas dépasser ${enigme.maxBlocs} blocs. Essaie de faire plus court !`);
-          return;
-        }
-        Son.clic();
-        programme.push(p.op === 'avancer' ? { op: 'avancer' } : { op: 'tourner', sens: p.op === 'droite' ? 'd' : 'g' });
-        dessinerProgramme();
-      };
-      b.addEventListener('click', ajouter);
-      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ajouter(); } });
-      palette.appendChild(b);
-    });
-    droite.appendChild(palette);
-
-    droite.appendChild(el('div', 'programme__titre', 'Ton programme'));
-    const zoneProg = el('div', 'programme');
-    droite.appendChild(zoneProg);
-    zone.appendChild(droite);
-    ctx.zoneJeu.appendChild(zone);
-
-    let lignes = [];
-    function dessinerProgramme() {
-      vider(zoneProg);
-      lignes = [];
-      if (!programme.length) {
-        zoneProg.appendChild(el('div', 'programme__vide',
-          'Vide pour l\'instant. Clique sur les blocs de la palette pour construire ton programme.'));
-        return;
-      }
-      programme.forEach((op, i) => {
-        const ligne = el('div', 'ligne-prog');
-        const modele = enigme.palette.find((p) =>
-          (op.op === 'avancer' && p.op === 'avancer') ||
-          (op.op === 'tourner' && p.op === (op.sens === 'd' ? 'droite' : 'gauche')));
-        const b = Blocs.creer(modele.bloc);
-        ligne.appendChild(b);
-        const sup = el('button', 'ligne-prog__supprimer', '✕');
-        sup.title = 'Supprimer ce bloc';
-        sup.addEventListener('click', () => { programme.splice(i, 1); dessinerProgramme(); });
-        ligne.appendChild(sup);
-        lignes.push(b);
-        zoneProg.appendChild(ligne);
-      });
-    }
-    dessinerProgramme();
-
-    const btnLancer = el('button', 'btn btn--vert', '▶ Lancer le programme');
-    const btnVider  = el('button', 'btn btn--fantome', '🗑 Tout effacer');
-
-    btnVider.addEventListener('click', () => { programme.length = 0; dessinerProgramme(); plateau.reinit(); });
-
-    btnLancer.addEventListener('click', () => {
-      if (!programme.length) { ctx.echouer('🧩 Ton programme est vide : ajoute d\'abord des blocs.'); return; }
-      btnLancer.disabled = true; btnVider.disabled = true;
-      vider(ctx.zoneRetour);
-      executer(plateau, programme, (reussi, raison) => {
-        btnLancer.disabled = false; btnVider.disabled = false;
-        lignes.forEach((b) => b.classList.remove('bloc--surligne'));
-        if (reussi) ctx.reussir();
-        else if (raison === 'mur') ctx.echouer('💥 Aïe ! Scratchy s\'est cogné contre un mur. Vérifie dans quelle direction il regarde avant chaque « avancer ».');
-        else ctx.echouer('🤔 Le programme s\'est terminé, mais Scratchy n\'est pas sur la porte 🚪. Compte bien les cases !');
-      }, (i) => {
-        lignes.forEach((b, j) => b.classList.toggle('bloc--surligne', i === j));
-      });
-    });
-
-    ctx.actions.appendChild(btnLancer);
-    ctx.actions.appendChild(btnVider);
-  }
-
-  /* --------------------------------------------------------- TROUS */
-  function construireTrous(enigme, ctx) {
-    const valeurs = enigme.trous.map(() => null);
-
-    const zone = enigme.grille ? el('div', 'labo') : el('div');
-    let plateau = null;
-
-    if (enigme.grille) {
-      plateau = construirePlateau(enigme.grille);
-      const g = el('div');
-      g.appendChild(el('div', 'palette__titre', 'La salle'));
-      g.appendChild(plateau.element);
-      zone.appendChild(g);
-    }
-
-    const droite = el('div');
-    droite.appendChild(el('div', 'programme__titre', 'Le script à compléter'));
-    const pile = Blocs.pile(enigme.script);
-    droite.appendChild(pile);
-    const zoneChoix = el('div');
-    zoneChoix.style.marginTop = '14px';
-    droite.appendChild(zoneChoix);
-    zone.appendChild(droite);
-    ctx.zoneJeu.appendChild(zone);
-
-    // Remplissage des emplacements
-    pile.querySelectorAll('.trou').forEach((trou) => {
-      const i = Number(trou.dataset.trou);
-      const def = enigme.trous[i];
-      if (!def) return;
-
-      if (def.type === 'nombre') {
-        trou.textContent = '';
-        trou.classList.add('trou--rempli');
-        const inp = document.createElement('input');
-        inp.type = 'number';
-        inp.min = '0';
-        inp.max = '20';
-        inp.setAttribute('aria-label', `Nombre à compléter n°${i + 1}`);
-        inp.addEventListener('input', () => { valeurs[i] = inp.value === '' ? null : Number(inp.value); });
-        trou.appendChild(inp);
-      } else {
-        trou.addEventListener('click', () => {
-          Son.clic();
-          pile.querySelectorAll('.trou').forEach((t) => t.classList.remove('trou--actif'));
-          trou.classList.add('trou--actif');
-          proposerChoix(i, trou, def);
-        });
-      }
-    });
-
-    function proposerChoix(i, trou, def) {
-      vider(zoneChoix);
-      const carte = el('div', 'carte');
-      carte.style.padding = '14px';
-      carte.appendChild(el('div', 'palette__titre', `Choisis le bloc à placer dans l'emplacement ${i + 1}`));
-      const p = el('div', 'palette');
-      def.choix.forEach((desc, k) => {
-        const b = Blocs.creer(desc);
-        b.classList.add('bloc--cliquable');
-        b.addEventListener('click', () => {
-          Son.clic();
-          valeurs[i] = k;
-          vider(trou);
-          trou.classList.add('trou--rempli');
-          trou.classList.remove('trou--actif');
-          const copie = Blocs.creer(desc);
-          trou.appendChild(copie);
-          vider(zoneChoix);
-        });
-        p.appendChild(b);
-      });
-      carte.appendChild(p);
-      zoneChoix.appendChild(carte);
-    }
-
-    /* --- vérification ------------------------------------------- */
-    const btn = el('button', 'btn btn--vert', enigme.grille ? '▶ Lancer le programme' : '✔ Vérifier le script');
-    btn.addEventListener('click', () => {
-      if (valeurs.some((v) => v === null || v === undefined || Number.isNaN(v))) {
-        ctx.echouer('🧩 Il reste au moins un emplacement en pointillés à compléter.');
-        return;
-      }
-      vider(ctx.zoneRetour);
-
-      if (enigme.grille) {
-        btn.disabled = true;
-        executer(plateau, enigme.programme(valeurs), (reussi, raison) => {
-          btn.disabled = false;
-          if (reussi) ctx.reussir();
-          else if (raison === 'mur') ctx.echouer('💥 Scratchy s\'est cogné : le nombre de répétitions est trop grand.');
-          else ctx.echouer('🤔 Scratchy s\'arrête avant la porte 🚪. Recompte le nombre de cases à parcourir.');
-        });
-      } else {
-        const ok = enigme.trous.every((d, i) => valeurs[i] === d.reponse);
-        if (ok) ctx.reussir();
-        else ctx.echouer('❌ Ce script ne fait pas ce qui est demandé. Relis la consigne et essaie un autre bloc.');
-      }
-    });
-    ctx.actions.appendChild(btn);
   }
 
   /* ================================================== VICTOIRE */
@@ -936,19 +482,26 @@
     const intro = el('div', 'carte centre no-print');
     intro.innerHTML = `
       <div style="display:flex;justify-content:center">${Illus.scratchy(150)}</div>
-      <h1>Scratchy est libre !</h1>
-      <p>Le Labo 404 s'éteint doucement derrière toi. Le Bug est vaincu… et tu connais
-      maintenant les bases de Scratch : les blocs, les coordonnées, les boucles,
+      <h1>Déconnecté.</h1>
+      <p>Il est ${HEURES[HEURES.length - 1]}. L'écran s'éteint pour de bon.
+      Tu sais maintenant lire un programme : les blocs, les coordonnées, les boucles,
       les tests, les variables et les messages.</p>`;
     scene.appendChild(intro);
+
+    // Le parcours réellement suivi, étape par étape
+    const chemin = ETAPES.map((etape) => {
+      const b = Progression.brancheDe(etape.id);
+      return b ? `${etape.icone} ${etape.branches[b].titre}` : null;
+    }).filter(Boolean);
 
     const d = el('div', 'diplome');
     d.innerHTML = `
       <div style="font-size:2.4rem">🏆</div>
-      <h2>Diplôme d'évasion du Labo 404</h2>
-      <p>décerné à</p>
+      <h2>Attestation de déconnexion</h2>
+      <p>délivrée à</p>
       <div class="diplome__nom">${e.pseudo}</div>
-      <p>pour avoir résolu les <b>15 énigmes</b> des 5 salles<br>et maîtrisé les rudiments de la programmation avec Scratch.</p>
+      <p>pour avoir repris le contrôle des <b>5 réglages</b> de LOOP<br>
+      et maîtrisé les rudiments de la programmation avec Scratch.</p>
       <div style="font-size:2rem;letter-spacing:6px">${'⭐'.repeat(etoiles)}${'☆'.repeat(3 - etoiles)}</div>
       <div style="font-weight:800;font-size:1.2rem;color:#7a5600">${Progression.rang()}</div>
       <div class="diplome__stats">
@@ -956,22 +509,32 @@
         <div class="diplome__stat"><b>${e.indices}</b>indice(s)</div>
         <div class="diplome__stat"><b>${e.erreurs}</b>erreur(s)</div>
       </div>
+      <div style="margin:14px 0;font-size:.9rem">
+        <b>Ton parcours :</b><br>${chemin.join(' · ')}
+      </div>
       <div>Fait le ${new Date().toLocaleDateString('fr-FR')}</div>`;
     scene.appendChild(d);
+
+    const note = el('div', 'carte centre no-print');
+    note.style.marginTop = '20px';
+    note.innerHTML = `<p class="muet">Ton voisin n'a pas fait les mêmes exercices que toi :
+      à chaque étape, ton choix décidait de la suite. Rejoue en choisissant l'autre chemin
+      pour découvrir les <b>10 énigmes</b> que tu n'as pas vues.</p>`;
+    scene.appendChild(note);
 
     const actions = el('div', 'actions no-print');
     actions.style.justifyContent = 'center';
     actions.style.marginTop = '24px';
 
-    const imp = el('button', 'btn', '🖨 Imprimer mon diplôme');
+    const imp = el('button', 'btn', '🖨 Imprimer mon attestation');
     imp.addEventListener('click', () => window.print());
 
     const revoir = el('a', 'btn btn--bleu', '📘 Revoir le cahier de cours');
     revoir.href = 'memo.html';
 
-    const rejouer = el('button', 'btn btn--fantome', '🔄 Rejouer depuis le début');
+    const rejouer = el('button', 'btn btn--fantome', '🔄 Rejouer (autre parcours)');
     rejouer.addEventListener('click', () => {
-      if (confirm('Effacer la partie et tout recommencer ?')) {
+      if (confirm('Effacer la partie et recommencer avec d\'autres choix ?')) {
         Progression.reinitialiser();
         location.href = 'index.html';
       }
@@ -984,7 +547,7 @@
   }
 
   function confettis() {
-    const couleurs = ['#4c97ff', '#ffbf00', '#59c059', '#cf63cf', '#ff8c1a', '#9966ff'];
+    const couleurs = ['#4c97ff', '#ffbf00', '#59c059', '#cf63cf', '#ff8c1a', '#c56bff'];
     for (let i = 0; i < 70; i++) {
       const c = el('div', 'confetti');
       c.style.left = Math.random() * 100 + 'vw';

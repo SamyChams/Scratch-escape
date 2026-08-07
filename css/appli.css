@@ -1,0 +1,266 @@
+/* =========================================================
+   appli.css — l'habillage de LOOP
+   ---------------------------------------------------------
+   Le récit se joue dans une colonne étroite qui ressemble à
+   un écran de téléphone ; les énigmes, elles, s'ouvrent en
+   grand dans une fenêtre séparée (elles ont besoin de place).
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   L'écran de l'appli
+   --------------------------------------------------------- */
+.ecran {
+  width: min(600px, 96vw);
+  margin: 0 auto 26px;
+  background: linear-gradient(180deg, #12173a, #0d1130);
+  border: 2px solid var(--bord);
+  border-radius: 30px;
+  box-shadow: var(--ombre), 0 0 60px color-mix(in srgb, var(--accent) 22%, transparent);
+  overflow: hidden;
+}
+
+.ecran__barre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--texte-doux);
+  background: rgba(0, 0, 0, .35);
+  border-bottom: 1px solid var(--bord);
+}
+.ecran__marque {
+  font-weight: 900;
+  letter-spacing: 3px;
+  font-size: .95rem;
+  background: linear-gradient(90deg, #7fe3ff, var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.ecran__vide { flex: 1; }
+.ecran__contenu { padding: 18px clamp(12px, 3vw, 20px) 22px; }
+
+/* ---------------------------------------------------------
+   Un message dans le fil
+   --------------------------------------------------------- */
+.msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  animation: msg-entre .3s ease;
+}
+@keyframes msg-entre {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.msg__avatar {
+  flex: 0 0 auto;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  overflow: hidden;
+  background: #0b0f28;
+  border: 2px solid var(--bord);
+}
+.msg__avatar svg { width: 100%; height: 100%; }
+.msg__avatar--lettre {
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: #0e1330;
+}
+
+.msg__corps { flex: 1; min-width: 0; }
+.msg__tete {
+  display: flex; align-items: baseline; gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.msg__nom { font-weight: 800; font-size: .95rem; }
+.msg__etiquette {
+  font-size: .66rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid currentColor;
+  opacity: .85;
+}
+.msg__heure { font-size: .74rem; color: var(--texte-doux); margin-left: auto; }
+
+.msg__bulle {
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 4px 18px 18px 18px;
+  padding: 11px 16px;
+}
+
+/* --- Nova : l'algorithme -------------------------------- */
+.msg--nova .msg__avatar { border-color: #c56bff; }
+.msg--nova .msg__nom,
+.msg--nova .msg__etiquette { color: #d6a8ff; }
+.msg--nova .msg__bulle {
+  background: linear-gradient(180deg, #33205e, #241543);
+  border-color: #a35cf0;
+  font-style: italic;
+}
+
+/* --- Kaya : la créatrice en live ------------------------ */
+.msg--kaya .msg__avatar { border-color: #ff3b5c; box-shadow: 0 0 0 2px rgba(255, 59, 92, .3); }
+.msg--kaya .msg__nom,
+.msg--kaya .msg__etiquette { color: #ff8fa3; }
+.msg--kaya .msg__bulle { border-color: #ff5f7a; }
+
+/* --- @scratchy : le petit compte ------------------------ */
+.msg--scratchy .msg__avatar { border-color: #ff9a26; }
+.msg--scratchy .msg__nom,
+.msg--scratchy .msg__etiquette { color: #ffb14d; }
+.msg--scratchy .msg__bulle { border-color: #ff9a26; }
+
+/* --- Les copains : messages du groupe ------------------- */
+.msg--ilyes .msg__avatar { background: linear-gradient(135deg, #6fdcf8, #3fc4e8); border-color: #3fc4e8; }
+.msg--nour  .msg__avatar { background: linear-gradient(135deg, #ffd45c, #ffab19); border-color: #ffab19; }
+.msg--ilyes .msg__nom { color: #7fe3ff; }
+.msg--nour  .msg__nom { color: #ffc61a; }
+.msg--ilyes .msg__bulle,
+.msg--nour  .msg__bulle { background: #23306b; border-color: #46589f; }
+
+/* --- La voix du récit ----------------------------------- */
+.msg--recit {
+  display: block;
+  padding: 12px 18px;
+  border-left: 4px solid var(--accent);
+  background: rgba(0, 0, 0, .3);
+  border-radius: 0 12px 12px 0;
+  color: var(--texte-doux);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------
+   Le choix qui fait bifurquer le parcours
+   --------------------------------------------------------- */
+.bifurcation {
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+  padding: 20px;
+  margin-top: 10px;
+}
+.bifurcation__titre {
+  font-size: .74rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.bifurcation__question { font-weight: 800; font-size: 1.1rem; margin-bottom: 14px; }
+.bifurcation__options { display: grid; gap: 12px; }
+
+.option-branche {
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: left;
+  color: var(--texte);
+  background: var(--panneau-2);
+  border: 2px solid var(--bord);
+  border-radius: 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .15s, background .15s;
+}
+.option-branche:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--panneau-2));
+  transform: translateX(5px);
+}
+.option-branche:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.bifurcation__note {
+  margin-top: 14px;
+  font-size: .82rem;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+/* ---------------------------------------------------------
+   Les deux énigmes de l'étape
+   --------------------------------------------------------- */
+.taches { display: grid; gap: 14px; }
+.tache {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  font-family: inherit;
+  color: var(--texte);
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .15s;
+}
+.tache:hover { transform: translateY(-3px); border-color: var(--accent); }
+.tache__icone {
+  flex: 0 0 auto;
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  font-size: 1.7rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.tache__titre { font-weight: 800; }
+.tache__etat { font-size: .85rem; color: var(--texte-doux); }
+.tache--ok { border-color: var(--vert); background: linear-gradient(180deg, #22553c, #1a3b2c); }
+.tache--ok .tache__etat { color: #9df09d; }
+.tache__puce { margin-left: auto; font-size: 1.4rem; }
+
+/* ---------------------------------------------------------
+   Le code de vérification (le « cadenas » de l'appli)
+   --------------------------------------------------------- */
+.verif {
+  margin-top: 20px;
+  text-align: center;
+  border: 2px solid #6b4fa8;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #2a2144, #1a1430);
+  padding: 22px;
+}
+.verif__titre { font-weight: 800; font-size: 1.15rem; margin-bottom: 4px; }
+.verif__sous { color: var(--texte-doux); font-size: .9rem; margin-bottom: 16px; }
+.verif__cases { display: flex; justify-content: center; gap: 14px; margin-bottom: 16px; }
+.verif__case {
+  width: 66px; height: 82px;
+  font-size: 2.2rem; font-weight: 800; text-align: center;
+  font-family: "Courier New", monospace;
+  color: var(--jaune);
+  background: #0b0f24;
+  border: 3px solid #6b4fa8;
+  border-radius: 14px;
+}
+.verif__case:focus { outline: 3px solid var(--jaune); outline-offset: 2px; }
+.verif--secoue { animation: secoue .4s; }
+
+/* ---------------------------------------------------------
+   Le profil que Nova constitue au fil des choix
+   --------------------------------------------------------- */
+.profil {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.profil__etiquette {
+  font-size: .78rem; font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(197, 107, 255, .16);
+  border: 1px solid #a35cf0;
+  color: #d6a8ff;
+}
+
+@media (max-width: 560px) {
+  .msg__avatar { width: 42px; height: 42px; }
+  .verif__case { width: 54px; height: 68px; font-size: 1.8rem; }
+}

@@ -6,11 +6,12 @@
    ========================================================= */
 
 const Progression = (() => {
-  const CLE = 'labo404-partie-v1';
+  const CLE = 'loop-partie-v1';
 
   const vide = () => ({
     pseudo: '',
-    salle: 0,             // index de la salle en cours
+    etape: 0,             // index de l'étape en cours
+    branches: {},         // idEtape -> branche choisie ('a' ou 'b')
     resolues: [],         // identifiants des énigmes réussies
     fragments: {},        // idEnigme -> chiffre obtenu
     indices: 0,           // nombre d'indices demandés
@@ -62,10 +63,17 @@ const Progression = (() => {
       }
     },
 
-    ouvrirSalle(indice) {
-      if (indice > etat.salle) etat.salle = indice;
+    ouvrirEtape(indice) {
+      if (indice > etat.etape) etat.etape = indice;
       sauver();
     },
+
+    /** Mémorise la branche choisie : elle décide des énigmes rencontrées. */
+    choisirBranche(idEtape, branche) {
+      etat.branches[idEtape] = branche;
+      sauver();
+    },
+    brancheDe(idEtape) { return etat.branches[idEtape] || null; },
 
     marquerPrologue() { etat.prologueVu = true; sauver(); },
 

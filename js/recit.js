@@ -101,10 +101,17 @@ const Recit = (() => {
     let enCours = null;
     let termine = false;
 
+    /**
+     * Fabrique le réceptacle d'une réplique et renvoie l'élément à remplir.
+     * L'appelant peut fournir sa propre mise en forme via options.bulle,
+     * du moment qu'elle contient un élément .recit__cible.
+     */
     function bulle(scene) {
       const n = document.createElement('div');
       n.className = 'recit__bulle';
-      if (scene.qui) {
+      if (typeof options.bulle === 'function') {
+        n.innerHTML = options.bulle(scene);
+      } else if (scene.qui) {
         n.innerHTML = Illus.dialogue(scene.qui, '<span class="recit__cible"></span>');
       } else {
         n.innerHTML = '<div class="narration"><span class="recit__cible"></span></div>';
