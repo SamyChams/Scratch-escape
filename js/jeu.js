@@ -292,19 +292,24 @@
     contenu.appendChild(atelier);
 
     const liste = el('div', 'taches');
+    const MEDAILLE_ICONE = { bronze: '🥉', argent: '🥈', or: '🥇' };
     enigmes.forEach((enigme, i) => {
       const fait = Progression.estResolue(enigme.id);
+      const medaille = Progression.medailleEnigme(enigme.id);
       const t = el('button', 'tache' + (fait ? ' tache--ok' : ''));
       t.type = 'button';
+      let etatTexte = 'Appuie pour ouvrir';
+      if (fait) {
+        etatTexte = `Réparé · chiffre obtenu : <b>${enigme.fragment}</b>`;
+        if (medaille) etatTexte += ` · ${MEDAILLE_ICONE[medaille]} ${medaille}${medaille !== 'or' ? ' — rejouable pour mieux' : ''}`;
+      }
       t.innerHTML = `
         <div class="tache__icone">${enigme.icone}</div>
         <div>
           <div class="tache__titre">${i + 1}. ${enigme.titre}</div>
-          <div class="tache__etat">${fait
-            ? `Réparé · chiffre obtenu : <b>${enigme.fragment}</b>`
-            : 'Appuie pour ouvrir'}</div>
+          <div class="tache__etat">${etatTexte}</div>
         </div>
-        <div class="tache__puce">${fait ? '✅' : '🔒'}</div>`;
+        <div class="tache__puce">${fait ? (medaille ? MEDAILLE_ICONE[medaille] : '✅') : '🔒'}</div>`;
       t.addEventListener('click', () => { Son.clic(); ouvrirEnigme(etape, branche, enigme); });
       liste.appendChild(t);
     });
@@ -615,20 +620,40 @@
     const btnCours = el('button', 'btn btn--fantome', '📘 Revoir le cours');
     btnCours.addEventListener('click', () => { fermerModale(); ouvrirMemo(etape.memo); });
 
-    function reussir() {
+    const MEDAILLE_ICONE = { bronze: '🥉', argent: '🥈', or: '🥇' };
+
+    function reussir(bonus) {
       Son.bon();
+      const dejaFait = Progression.estResolue(idCredite);
       const fragment = remplace
         ? enigmesDe(etape, branche).find((x) => x.id === remplace).fragment
         : enigme.fragment;
       Progression.resoudre(idCredite, fragment);
+
+      let blocMedaille = '';
+      if (bonus && bonus.medaille) {
+        const r = Progression.noterMedaille(enigme.id, bonus.medaille);
+        const icone = MEDAILLE_ICONE[bonus.medaille];
+        const meilleure = MEDAILLE_ICONE[r.apres];
+        blocMedaille = `
+          <div style="margin-top:14px;text-align:center">
+            <div class="petit">${bonus.blocs} bloc${bonus.blocs > 1 ? 's' : ''} — médaille ${icone} ${bonus.medaille}</div>
+            ${r.amelioree
+              ? `<div class="petit" style="color:var(--vert)">Nouveau record : ${meilleure} c'est ta meilleure médaille sur cette énigme !</div>`
+              : r.avant ? `<div class="petit muet">Ta meilleure reste ${meilleure} ${r.avant}.</div>` : ''}
+          </div>`;
+      }
+
       vider(zoneRetour);
       vider(actions);
       zoneRetour.appendChild(el('div', 'retour retour--ok', `
-        🎉 <b>Réglage réparé !</b> ${enigme.explication}
+        🎉 <b>${dejaFait ? 'Réglage revérifié !' : 'Réglage réparé !'}</b> ${enigme.explication}
+        ${dejaFait ? '' : `
         <div style="margin-top:14px;text-align:center">
           <div class="muet petit">Chiffre du code obtenu</div>
           <div style="font-size:2.6rem;font-weight:800;color:var(--jaune)">${fragment}</div>
-        </div>`));
+        </div>`}
+        ${blocMedaille}`));
       const btn = el('button', 'btn btn--vert btn--grand', '✔ Continuer');
       btn.addEventListener('click', () => { fermerModale(); afficherTaches(etape, branche, idCredite); });
       actions.appendChild(btn);
@@ -673,8 +698,12 @@
     actions.appendChild(btnCours);
 
     if (Progression.estResolue(enigme.id)) {
+      const medaille = Progression.medailleEnigme(enigme.id);
       zoneRetour.appendChild(el('div', 'retour retour--ok',
-        `✅ Déjà réparé. Le chiffre obtenu est <b>${enigme.fragment}</b>.`));
+        `✅ Déjà réparé. Le chiffre obtenu est <b>${enigme.fragment}</b>.`
+        + (medaille && medaille !== 'or'
+          ? ` Ta meilleure médaille est ${MEDAILLE_ICONE[medaille]} ${medaille} — retente en moins de blocs pour l'or !`
+          : medaille === 'or' ? ' 🥇 Médaille d\'or déjà en poche, bravo.' : '')));
     }
   }
 

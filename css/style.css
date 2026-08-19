@@ -560,6 +560,56 @@ a  { color: var(--bleu); }
 }
 .bloc--surligne { outline: 3px solid #fff; outline-offset: 2px; }
 
+/* Le bloc « répéter » posé dans le programme : sa zone d'accueil,
+   son champ nombre modifiable, et le bouton pour la refermer. */
+.prog-boucle { margin: 2px 0; }
+.prog-boucle .bloc-c__haut { display: flex; align-items: center; gap: 6px; }
+.prog-boucle .ligne-prog__supprimer { margin-left: auto; }
+.prog-boucle__n {
+  width: 3em;
+  border: none;
+  text-align: center;
+  font: inherit;
+  -moz-appearance: textfield;
+}
+.prog-boucle__n::-webkit-outer-spin-button,
+.prog-boucle__n::-webkit-inner-spin-button { margin: 0; }
+.prog-zone {
+  min-height: 44px;
+  border-radius: 10px;
+  padding: 6px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+.prog-zone .programme__vide { padding: 8px 6px; font-size: .82rem; }
+.prog-zone--active { outline: 2px dashed #fff; outline-offset: -4px; }
+.prog-boucle__fermer {
+  background: rgba(255,255,255,.12);
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.prog-boucle__fermer:hover { background: rgba(255,255,255,.22); }
+
+/* Le compteur de blocs / la cible de médaille, sous le programme */
+.prog-compteur {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,.22);
+  border-radius: var(--rayon-s);
+  font-size: .85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.prog-compteur__cible { color: var(--texte-doux); }
+
 /* ---------------------------------------------------------
    Fiches de cours (mémo)
    --------------------------------------------------------- */

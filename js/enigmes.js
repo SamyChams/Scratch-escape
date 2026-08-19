@@ -321,7 +321,12 @@ const Enigmes = (() => {
     return sortie;
   }
 
-  /** Anime le programme sur le plateau puis appelle fin(reussi, raison). */
+  /**
+   * Anime le programme sur le plateau puis appelle fin(reussi, raison).
+   * surligner reçoit le bloc en cours d'exécution : comme une boucle
+   * réexécute les mêmes blocs, c'est le bloc lui-même qu'on éclaire,
+   * pas son rang dans la liste déroulée.
+   */
   function executer(plateau, programme, fin, surligner) {
     const ops = aplatir(programme);
     plateau.reinit();
@@ -332,7 +337,7 @@ const Enigmes = (() => {
         fin(plateau.arrive(), plateau.arrive() ? 'ok' : 'raté');
         return;
       }
-      if (surligner) surligner(i);
+      if (surligner) surligner(ops[i]);
       const ok = plateau.appliquer(ops[i]);
       if (!ok) { fin(false, 'mur'); return; }
       if (plateau.arrive() && i === ops.length - 1) { fin(true, 'ok'); return; }
@@ -341,11 +346,40 @@ const Enigmes = (() => {
     })();
   }
 
+  /* ------------------------------------------- OPTIMISATION
+     On ne note pas seulement « ça marche » : on note aussi la
+     longueur du programme. Une boucle compte pour un bloc, plus
+     ce qu'elle contient — c'est ce qui rend la boucle payante.   */
+
+  /** Nombre de blocs posés, boucles comprises. */
+  function compterBlocs(liste) {
+    return liste.reduce((n, x) => n + 1 + (x.op === 'repeter' ? compterBlocs(x.corps) : 0), 0);
+  }
+
+  /** Médaille d'optimisation, ou null si l'énigme n'en décerne pas. */
+  function medailleDe(blocs, objectifs) {
+    if (!objectifs) return null;
+    if (blocs <= objectifs.or) return 'or';
+    if (blocs <= objectifs.argent) return 'argent';
+    return 'bronze';
+  }
+
+  const MEDAILLES = {
+    or:     { icone: '🥇', nom: 'or' },
+    argent: { icone: '🥈', nom: 'argent' },
+    bronze: { icone: '🥉', nom: 'bronze' }
+  };
+
   /* -------------------------------------------------------- GRILLE */
   function construireGrille(enigme, ctx) {
     const conf = enigme.grille;
     const plateau = construirePlateau(conf);
-    const programme = [];   // liste d'opérations construite par l'élève
+    const programme = [];   // arbre de blocs construit par l'élève
+
+    /* Où atterrissent les blocs qu'on ajoute : le programme principal,
+       ou le corps d'une boucle ouverte. La pile permet de ressortir. */
+    let pile = [programme];
+    const cible = () => pile[pile.length - 1];
 
     const zone = el('div', 'labo');
 
@@ -359,75 +393,205 @@ const Enigmes = (() => {
     const droite = el('div');
     droite.appendChild(el('div', 'palette__titre', 'Palette — clique pour ajouter'));
     const palette = el('div', 'palette');
+
+    function place() {
+      if (compterBlocs(programme) >= enigme.maxBlocs) {
+        ctx.echouer(`⚠ Ton programme ne peut pas dépasser ${enigme.maxBlocs} blocs. Essaie de faire plus court !`);
+        return false;
+      }
+      return true;
+    }
+
     enigme.palette.forEach((p) => {
       const b = Blocs.creer(p.bloc);
       b.classList.add('bloc--cliquable');
       b.setAttribute('role', 'button');
       b.setAttribute('tabindex', '0');
       const ajouter = () => {
-        if (programme.length >= enigme.maxBlocs) {
-          ctx.echouer(`⚠ Ton programme ne peut pas dépasser ${enigme.maxBlocs} blocs. Essaie de faire plus court !`);
-          return;
-        }
+        if (!place()) return;
         Son.clic();
-        programme.push(p.op === 'avancer' ? { op: 'avancer' } : { op: 'tourner', sens: p.op === 'droite' ? 'd' : 'g' });
+        cible().push(p.op === 'avancer'
+          ? { op: 'avancer' }
+          : { op: 'tourner', sens: p.op === 'droite' ? 'd' : 'g' });
         dessinerProgramme();
       };
       b.addEventListener('click', ajouter);
       b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ajouter(); } });
       palette.appendChild(b);
     });
+
+    /* Le bloc « répéter » : c'est lui qui permet de raccourcir le
+       programme, donc de décrocher une meilleure médaille. */
+    if (enigme.boucle) {
+      const bb = Blocs.creer({ cat: 'controle', texte: 'répéter {4} fois', corps: [] });
+      bb.classList.add('bloc--cliquable');
+      bb.setAttribute('role', 'button');
+      bb.setAttribute('tabindex', '0');
+      const ajouter = () => {
+        if (!place()) return;
+        if (pile.length > 2) {
+          ctx.echouer('🌀 Une boucle dans une boucle, c\'est trop pour cette énigme. Ferme d\'abord celle qui est ouverte.');
+          return;
+        }
+        Son.clic();
+        const boucle = { op: 'repeter', n: 4, corps: [] };
+        cible().push(boucle);
+        pile.push(boucle.corps);      // les blocs suivants iront dedans
+        dessinerProgramme();
+      };
+      bb.addEventListener('click', ajouter);
+      bb.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ajouter(); } });
+      palette.appendChild(bb);
+    }
     droite.appendChild(palette);
 
     droite.appendChild(el('div', 'programme__titre', 'Ton programme'));
     const zoneProg = el('div', 'programme');
     droite.appendChild(zoneProg);
+    const compteur = el('div', 'prog-compteur');
+    droite.appendChild(compteur);
     zone.appendChild(droite);
     ctx.zoneJeu.appendChild(zone);
 
-    let lignes = [];
+    // Quel bloc du programme correspond à quel élément affiché.
+    let elements = new Map();
+
+    /** Retire un bloc du programme, où qu'il se trouve. */
+    function supprimer(noeud) {
+      (function chercher(liste) {
+        const i = liste.indexOf(noeud);
+        if (i >= 0) { liste.splice(i, 1); return true; }
+        return liste.some((x) => x.op === 'repeter' && chercher(x.corps));
+      })(programme);
+      // si on supprime la boucle ouverte, on remonte d'un cran
+      if (noeud.op === 'repeter') pile = pile.filter((l) => l !== noeud.corps);
+      dessinerProgramme();
+    }
+
+    function boutonSupprimer(noeud) {
+      const sup = el('button', 'ligne-prog__supprimer', '✕');
+      sup.title = 'Supprimer ce bloc';
+      sup.addEventListener('click', (e) => { e.stopPropagation(); supprimer(noeud); });
+      return sup;
+    }
+
+    function dessinerSimple(noeud) {
+      const ligne = el('div', 'ligne-prog');
+      const modele = enigme.palette.find((p) =>
+        (noeud.op === 'avancer' && p.op === 'avancer') ||
+        (noeud.op === 'tourner' && p.op === (noeud.sens === 'd' ? 'droite' : 'gauche')));
+      const b = Blocs.creer(modele.bloc);
+      ligne.appendChild(b);
+      ligne.appendChild(boutonSupprimer(noeud));
+      elements.set(noeud, b);
+      return ligne;
+    }
+
+    function dessinerBoucle(noeud) {
+      const c = el('div', 'bloc-c bloc-c--controle prog-boucle');
+
+      const haut = el('div', 'bloc-c__haut');
+      haut.appendChild(document.createTextNode('répéter '));
+      const n = document.createElement('input');
+      n.type = 'number'; n.min = '1'; n.max = '20'; n.value = noeud.n;
+      n.className = 'bloc__champ prog-boucle__n';
+      n.setAttribute('aria-label', 'nombre de répétitions');
+      n.addEventListener('input', () => {
+        noeud.n = Math.max(1, Math.min(20, Number(n.value) || 1));
+      });
+      n.addEventListener('blur', () => { n.value = noeud.n; });
+      haut.appendChild(n);
+      haut.appendChild(document.createTextNode(' fois'));
+      haut.appendChild(boutonSupprimer(noeud));
+      c.appendChild(haut);
+
+      const corps = el('div', 'bloc-c__corps prog-zone');
+      dessinerListe(noeud.corps, corps, 'Boucle vide : les prochains blocs viendront ici.');
+      c.appendChild(corps);
+
+      const bas = el('div', 'bloc-c__bas');
+      if (cible() === noeud.corps) {
+        corps.classList.add('prog-zone--active');
+        const fermer = el('button', 'prog-boucle__fermer', '✔ fermer la boucle');
+        fermer.title = 'Les blocs suivants reviendront dans le programme principal';
+        fermer.addEventListener('click', () => { pile.pop(); dessinerProgramme(); });
+        bas.appendChild(fermer);
+      } else {
+        const rouvrir = el('button', 'prog-boucle__fermer', '↳ ajouter dans cette boucle');
+        rouvrir.addEventListener('click', () => {
+          pile = [programme, noeud.corps];
+          dessinerProgramme();
+        });
+        bas.appendChild(rouvrir);
+      }
+      c.appendChild(bas);
+      return c;
+    }
+
+    function dessinerListe(liste, hote, messageVide) {
+      if (!liste.length) { hote.appendChild(el('div', 'programme__vide', messageVide)); return; }
+      liste.forEach((noeud) => {
+        hote.appendChild(noeud.op === 'repeter' ? dessinerBoucle(noeud) : dessinerSimple(noeud));
+      });
+    }
+
     function dessinerProgramme() {
       vider(zoneProg);
-      lignes = [];
-      if (!programme.length) {
-        zoneProg.appendChild(el('div', 'programme__vide',
-          'Vide pour l\'instant. Clique sur les blocs de la palette pour construire ton programme.'));
+      elements = new Map();
+      zoneProg.classList.toggle('prog-zone--active', enigme.boucle && cible() === programme);
+      dessinerListe(programme, zoneProg,
+        'Vide pour l\'instant. Clique sur les blocs de la palette pour construire ton programme.');
+      majCompteur();
+    }
+
+    function majCompteur() {
+      const blocs = compterBlocs(programme);
+      const o = enigme.objectifs;
+      if (!o) {
+        compteur.textContent = `${blocs} bloc${blocs > 1 ? 's' : ''} sur ${enigme.maxBlocs} au maximum.`;
         return;
       }
-      programme.forEach((op, i) => {
-        const ligne = el('div', 'ligne-prog');
-        const modele = enigme.palette.find((p) =>
-          (op.op === 'avancer' && p.op === 'avancer') ||
-          (op.op === 'tourner' && p.op === (op.sens === 'd' ? 'droite' : 'gauche')));
-        const b = Blocs.creer(modele.bloc);
-        ligne.appendChild(b);
-        const sup = el('button', 'ligne-prog__supprimer', '✕');
-        sup.title = 'Supprimer ce bloc';
-        sup.addEventListener('click', () => { programme.splice(i, 1); dessinerProgramme(); });
-        ligne.appendChild(sup);
-        lignes.push(b);
-        zoneProg.appendChild(ligne);
-      });
+      const cle = blocs ? medailleDe(blocs, o) : null;
+      const m = cle ? MEDAILLES[cle] : null;
+      compteur.innerHTML = `<b>${blocs} bloc${blocs > 1 ? 's' : ''}</b>`
+        + (m ? ` — pour l'instant ${m.icone} ${m.nom}` : '')
+        + (cle === 'or'
+          ? `<span class="prog-compteur__cible">🥇 c'est le meilleur score possible !</span>`
+          : `<span class="prog-compteur__cible">🥇 or à partir de ${o.or} blocs</span>`);
     }
     dessinerProgramme();
 
     const btnLancer = el('button', 'btn btn--vert', '▶ Lancer le programme');
     const btnVider  = el('button', 'btn btn--fantome', '🗑 Tout effacer');
 
-    btnVider.addEventListener('click', () => { programme.length = 0; dessinerProgramme(); plateau.reinit(); });
+    btnVider.addEventListener('click', () => {
+      programme.length = 0;
+      pile = [programme];
+      dessinerProgramme();
+      plateau.reinit();
+    });
 
     btnLancer.addEventListener('click', () => {
       if (!programme.length) { ctx.echouer('🧩 Ton programme est vide : ajoute d\'abord des blocs.'); return; }
+      if (!aplatir(programme).length) {
+        ctx.echouer('🌀 Ta boucle est vide : elle ne répète rien. Ajoute des blocs à l\'intérieur.');
+        return;
+      }
       btnLancer.disabled = true; btnVider.disabled = true;
       vider(ctx.zoneRetour);
       executer(plateau, programme, (reussi, raison) => {
         btnLancer.disabled = false; btnVider.disabled = false;
-        lignes.forEach((b) => b.classList.remove('bloc--surligne'));
-        if (reussi) ctx.reussir();
+        elements.forEach((b) => b.classList.remove('bloc--surligne'));
+        if (reussi) {
+          const blocs = compterBlocs(programme);
+          ctx.reussir(enigme.objectifs
+            ? { medaille: medailleDe(blocs, enigme.objectifs), blocs, objectifs: enigme.objectifs }
+            : null);
+        }
         else if (raison === 'mur') ctx.echouer('💥 Aïe ! Scratchy s\'est cogné contre un mur. Vérifie dans quelle direction il regarde avant chaque « avancer ».');
         else ctx.echouer('🤔 Le programme s\'est terminé, mais Scratchy n\'est pas sur la porte 🚪. Compte bien les cases !');
-      }, (i) => {
-        lignes.forEach((b, j) => b.classList.toggle('bloc--surligne', i === j));
+      }, (noeud) => {
+        elements.forEach((b, n) => b.classList.toggle('bloc--surligne', n === noeud));
       });
     });
 

@@ -48,39 +48,11 @@
   </section>
 
   <!-- ------------------------------------------------ Le parcours -->
-  <h2 class="centre">Les 5 réglages à reprendre</h2>
-  <div class="grille-cartes">
-    <div class="carte">
-      <div style="font-size:2rem">🎛</div>
-      <h3>1. L'Éditeur</h3>
-      <p class="petit">Où le code de l'appli est rangé : les blocs, leurs couleurs, et l'ordre dans lequel ils s'exécutent.</p>
-    </div>
-    <div class="carte">
-      <div style="font-size:2rem">🎯</div>
-      <h3>2. Les Filtres</h3>
-      <p class="petit">Placer un élément à l'écran au pixel près : les coordonnées x et y, et les directions.</p>
-    </div>
-    <div class="carte">
-      <div style="font-size:2rem">🔁</div>
-      <h3>3. Le Montage</h3>
-      <p class="petit">Ce qui se répète : les boucles, y compris celle du scroll infini qui te retient depuis deux heures.</p>
-    </div>
-    <div class="carte">
-      <div style="font-size:2rem">🔀</div>
-      <h3>4. La Modération</h3>
-      <p class="petit">Quand l'appli doit choisir : si… alors… sinon, et les conditions qui décident à ta place.</p>
-    </div>
-    <div class="carte">
-      <div style="font-size:2rem">💠</div>
-      <h3>5. L'Algorithme</h3>
-      <p class="petit">Le cœur de Nova : une variable, une boucle, un ordre. Et la façon de le réécrire.</p>
-    </div>
-    <div class="carte" style="border-color:var(--jaune)">
-      <div style="font-size:2rem">🏆</div>
-      <h3>La déconnexion</h3>
-      <p class="petit">Une attestation à ton nom, à imprimer, avec ton temps, tes étoiles et le parcours que tu as suivi.</p>
-    </div>
-  </div>
+  <h2 class="centre">Les 5 étapes de TokTik</h2>
+  <p class="centre muet petit" id="resume-parcours" style="margin-top:-8px">
+    Chaque étape contient trois réglages à réparer.
+  </p>
+  <div class="grille-cartes" id="parcours"></div>
 
   <!-- ------------------------------------------------ Règles -->
   <section class="carte">
@@ -132,6 +104,69 @@
       <p class="petit muet">${texte}</p>
     </div>`).join('');
 
+  /* --- le parcours, avec l'avancement de la partie en cours -------
+     Tant qu'aucune partie n'existe, les cartes restent neutres : on
+     ne montre pas de cadenas à un élève qui n'a encore rien joué. */
+
+  /** Où en est l'élève sur cette étape : 'faite', 'encours' ou 'avenir'. */
+  function avancement(etape, rang) {
+    const branche = Progression.brancheDe(etape.id);
+    if (!branche) {
+      return { cle: rang < Progression.etat.etape ? 'faite' : 'avenir', faits: 0, total: 3 };
+    }
+    const ids = enigmesDe(etape, branche).map((x) => x.id);
+    const faits = ids.filter((id) => Progression.estResolue(id)).length;
+    return { cle: faits >= ids.length ? 'faite' : 'encours', faits, total: ids.length };
+  }
+
+  function dessinerParcours() {
+    const partie = Progression.existe() || Progression.etat.termine;
+    const hote = document.getElementById('parcours');
+    hote.innerHTML = '';
+
+    ETAPES.forEach((etape, rang) => {
+      const a = partie ? avancement(etape, rang) : null;
+      const c = document.createElement('div');
+      c.className = 'carte carte-etape' + (a ? ' carte-etape--' + a.cle : '');
+
+      let etat = '';
+      if (a && a.cle === 'faite') {
+        // en mode chrono, l'éclair dit en plus si le temps cible a été tenu
+        const eclair = Progression.etat.medailles[etape.id] ? ' ⚡' : '';
+        etat = `<div class="carte-etape__etat">✅ Réparée${eclair}</div>`;
+      } else if (a && a.cle === 'encours') {
+        etat = `<div class="carte-etape__etat">▶ En cours — ${a.faits}/${a.total} réglages réparés</div>`;
+      } else if (a) {
+        etat = '<div class="carte-etape__etat">🔒 Pas encore ouverte</div>';
+      }
+
+      c.innerHTML = `<div style="font-size:2rem">${etape.icone}</div>
+        <h3>${etape.numero}. ${etape.titre}</h3>
+        <p class="petit">${etape.pitch}</p>${etat}`;
+      hote.appendChild(c);
+    });
+
+    // la carte finale : l'attestation
+    const fin = document.createElement('div');
+    const gagnee = Progression.etat.termine;
+    fin.className = 'carte carte-etape' + (gagnee ? ' carte-etape--faite' : '');
+    if (!gagnee) fin.style.borderColor = 'var(--jaune)';
+    fin.innerHTML = `<div style="font-size:2rem">🏆</div>
+      <h3>La déconnexion</h3>
+      <p class="petit">Une attestation à ton nom, à imprimer, avec ton temps,
+      tes étoiles et le parcours que tu as suivi.</p>
+      ${gagnee ? '<div class="carte-etape__etat">✅ Obtenue</div>' : ''}`;
+    hote.appendChild(fin);
+
+    if (partie) {
+      const faites = ETAPES.filter((e, r) => avancement(e, r).cle === 'faite').length;
+      document.getElementById('resume-parcours').innerHTML =
+        `Chaque étape contient trois réglages à réparer. `
+        + `<b>${faites} étape${faites > 1 ? 's' : ''} sur ${ETAPES.length}</b> déjà réparée${faites > 1 ? 's' : ''}.`;
+    }
+  }
+  dessinerParcours();
+
   // --- choix du mode de jeu ---------------------------------------
   let mode = 'chill';
   const hoteModes = document.getElementById('modes');
@@ -161,8 +196,10 @@
     champ.value = e.pseudo;
     btnReprise.classList.remove('cache');
     info.classList.remove('cache');
-    info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — étape ${e.etape + 1}/5, `
-                   + `${e.resolues.length} réglage(s) réparé(s).<br>`
+    const total = ETAPES.length * 3;
+    info.innerHTML = `Partie en cours : <b>${e.pseudo}</b> — étape ${e.etape + 1} sur ${ETAPES.length}, `
+                   + `<b>${e.resolues.length} réglage${e.resolues.length > 1 ? 's' : ''} réparé${e.resolues.length > 1 ? 's' : ''}`
+                   + ` sur ${total}</b>.<br>`
                    + `« Entrer dans TokTik » effacera cette partie pour en commencer une nouvelle.`;
     btnReprise.addEventListener('click', () => { location.href = 'jeu.html'; });
   }
