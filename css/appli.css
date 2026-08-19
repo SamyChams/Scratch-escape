@@ -183,6 +183,28 @@
 }
 
 /* ---------------------------------------------------------
+   Les cartes du parcours, sur l'accueil
+   Elles reprennent les mêmes codes couleur que les énigmes
+   en cours de jeu : vert = réparé, bleu = en cours.
+   --------------------------------------------------------- */
+.carte-etape { display: flex; flex-direction: column; }
+.carte-etape__etat {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+.carte-etape--faite {
+  border-color: var(--vert);
+  background: linear-gradient(180deg, #22553c, #1a3b2c);
+}
+.carte-etape--faite .carte-etape__etat { color: #9df09d; }
+.carte-etape--encours { border-color: var(--accent); }
+.carte-etape--encours .carte-etape__etat { color: #9dc8ff; }
+.carte-etape--avenir { opacity: .62; }
+
+/* ---------------------------------------------------------
    Les deux énigmes de l'étape
    --------------------------------------------------------- */
 .taches { display: grid; gap: 14px; }

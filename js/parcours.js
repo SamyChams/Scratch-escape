@@ -193,6 +193,7 @@ const ETAPES = [
   icone: '🎛',
   couleur: '#4c97ff',
   notion: "Interface, catégories de blocs, ordre des instructions",
+  pitch: "Où le code de l'appli est rangé : les blocs, leurs couleurs, et l'ordre dans lequel ils s'exécutent.",
   memo: ['m1'],
 
   intro: [
@@ -351,6 +352,7 @@ const ETAPES = [
   icone: '🎯',
   couleur: '#5cb1d6',
   notion: "Repère (x ; y), direction, déplacements",
+  pitch: "Placer un élément à l'écran au pixel près : les coordonnées x et y, et les directions.",
   memo: ['m2'],
 
   intro: [
@@ -514,6 +516,7 @@ const ETAPES = [
   icone: '🔁',
   couleur: '#ffab19',
   notion: "Boucles bornées et infinies, angles",
+  pitch: "Ce qui se répète : les boucles, y compris celle du scroll infini qui te retient depuis deux heures.",
   memo: ['m3'],
 
   intro: [
@@ -698,6 +701,7 @@ const ETAPES = [
   icone: '🔀',
   couleur: '#59c059',
   notion: "Instructions conditionnelles, conditions booléennes",
+  pitch: "Quand l'appli doit choisir : si… alors… sinon, et les conditions qui décident à ta place.",
   memo: ['m4'],
 
   intro: [
@@ -888,6 +892,7 @@ const ETAPES = [
   icone: '💠',
   couleur: '#c56bff',
   notion: "Variables, initialisation, messages",
+  pitch: "Le cœur de Nova : une variable, une boucle, un ordre. Et la façon de le réécrire.",
   memo: ['m5', 'm6'],
 
   intro: [
