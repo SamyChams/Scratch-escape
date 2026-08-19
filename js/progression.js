@@ -19,6 +19,7 @@ const Progression = (() => {
     branches: {},         // idEtape -> branche choisie ('a' ou 'b')
     resolues: [],         // identifiants des énigmes réussies
     fragments: {},        // idEnigme -> chiffre obtenu
+    medaillesEnigmes: {}, // idEnigme -> 'bronze' | 'argent' | 'or' (énigmes à optimiser, meilleure obtenue)
     indices: 0,           // nombre d'indices demandés
     erreurs: 0,           // nombre de réponses fausses
     debut: null,          // horodatage de départ
@@ -122,6 +123,19 @@ const Progression = (() => {
     },
     medaillesGagnees() { return Object.values(etat.medailles).filter(Boolean).length; },
     brancheDe(idEtape) { return etat.branches[idEtape] || null; },
+
+    /* --- médailles d'optimisation, par énigme (grille à boucles) ---- */
+    medailleEnigme(id) { return etat.medaillesEnigmes[id] || null; },
+    /** Enregistre une médaille si elle est meilleure que celle déjà obtenue. */
+    noterMedaille(id, medaille) {
+      const rang = { bronze: 1, argent: 2, or: 3 };
+      const avant = etat.medaillesEnigmes[id] || null;
+      if (!avant || rang[medaille] > rang[avant]) {
+        etat.medaillesEnigmes[id] = medaille;
+        sauver();
+      }
+      return { avant, apres: etat.medaillesEnigmes[id], amelioree: etat.medaillesEnigmes[id] !== avant };
+    },
 
     marquerPrologue() { etat.prologueVu = true; sauver(); },
 

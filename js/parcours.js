@@ -397,7 +397,7 @@ const ETAPES = [
           id: 'e2a2', type: 'grille', icone: '🐈',
           titre: "Ramener le sticker",
           histoire: { qui: 'scratchy', texte: "le sticker est bloqué en bas à gauche, et nova a posé des zones mortes en travers. je peux le téléguider, mais <b>seulement avec des blocs</b>. et souviens-toi : il avance là où il <i>regarde</i>." },
-          consigne: "Construis un programme pour amener le sticker jusqu'à sa place 🚪. Clique sur les blocs pour les empiler, puis lance.",
+          consigne: "Construis un programme pour amener le sticker jusqu'à sa place 🚪. Clique sur les blocs pour les empiler, puis lance. Le bloc « répéter » compte moins que la même suite écrite plusieurs fois : vise l'or !",
           grille: {
             largeur: 5, hauteur: 4,
             depart: { x: 0, y: 3, dir: 'E' },
@@ -409,6 +409,8 @@ const ETAPES = [
             { op: 'droite',  bloc: { cat: 'mouvement', texte: 'tourner ↻ de {90} degrés' } },
             { op: 'gauche',  bloc: { cat: 'mouvement', texte: 'tourner ↺ de {90} degrés' } }
           ],
+          boucle: true,
+          objectifs: { or: 6, argent: 8 },
           maxBlocs: 16,
           fragment: '9',
           explication: "« avancer » déplace dans la direction où l'élément <b>regarde</b> : il faut donc tourner avant d'avancer. C'est exactement le bloc « avancer de 10 pas » de Scratch.",
@@ -460,7 +462,7 @@ const ETAPES = [
           id: 'e2b2', type: 'grille', icone: '🐈',
           titre: "Le chemin du sous-titre",
           histoire: { qui: 'scratchy', texte: "maintenant faut le faire remonter jusqu'à sa ligne. nova a semé des zones mortes en escalier. programme-lui le trajet." },
-          consigne: "Construis un programme pour amener le sous-titre jusqu'à sa place 🚪, puis lance-le.",
+          consigne: "Construis un programme pour amener le sous-titre jusqu'à sa place 🚪, puis lance-le. Le bloc « répéter » compte moins que la même suite écrite plusieurs fois : vise l'or !",
           grille: {
             largeur: 5, hauteur: 4,
             depart: { x: 0, y: 0, dir: 'S' },
@@ -472,6 +474,8 @@ const ETAPES = [
             { op: 'droite',  bloc: { cat: 'mouvement', texte: 'tourner ↻ de {90} degrés' } },
             { op: 'gauche',  bloc: { cat: 'mouvement', texte: 'tourner ↺ de {90} degrés' } }
           ],
+          boucle: true,
+          objectifs: { or: 5, argent: 7 },
           maxBlocs: 16,
           fragment: '8',
           explication: "Le sous-titre partait vers le <b>bas</b> : la même suite de blocs donne un trajet complètement différent selon la direction de départ.",
